@@ -6,10 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
+    public function up()
     {
         Schema::create('events', function (Blueprint $table) {
             $table->id();
@@ -19,18 +16,14 @@ return new class extends Migration
             $table->dateTime('end_date');
             $table->string('location');
             $table->integer('capacity')->nullable();
-            $table->decimal('price', 10, 2)->default(0);
-            $table->string('image_url')->nullable();
-            $table->enum('status', ['draft', 'published', 'cancelled'])->default('draft');
-            $table->foreignId('organizer_id')->constrained('users');
+            $table->decimal('price', 10, 2)->nullable();
+            $table->string('status')->default('active');
+            $table->foreignId('created_by')->constrained('users');
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('events');
     }
