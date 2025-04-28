@@ -20,7 +20,7 @@
                 </ul>
                 <div class="d-flex">
                     <router-link to="/login" class="btn btn-outline-light me-2">Login</router-link>
-                    <router-link to="/register" class="btn btn-light">Register</router-link>
+                    <router-link to="/signup" class="btn btn-light">Register</router-link>
                 </div>
             </div>
         </div>
