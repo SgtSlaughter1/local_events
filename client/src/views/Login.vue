@@ -67,6 +67,9 @@
 </template>
 
 <script>
+import { useAuthStore } from '@/stores/auth'
+import { useToast } from 'vue-toastification'
+
 export default {
     name: 'Login',
     data() {
@@ -124,18 +127,25 @@ export default {
                 this.loading.email = true
                 this.error = null
 
-                // Replace this with your actual API call
-                await new Promise(resolve => setTimeout(resolve, 1500)) // Simulate API call
+                const auth = useAuthStore()
+                const toast = useToast()
 
-                // Simulated API response
-                const response = { success: true }
+                const result = await auth.login({
+                    email: this.email,
+                    password: this.password
+                })
 
-                if (response.success) {
-                    // Handle successful login
+                if (result.success) {
+                    toast.success('Login successful!')
                     this.$router.push('/dashboard')
+                } else {
+                    this.error = result.error
+                    toast.error(result.error)
                 }
             } catch (error) {
                 this.error = 'Invalid email or password'
+                const toast = useToast()
+                toast.error(this.error)
             } finally {
                 this.loading.email = false
             }
@@ -144,13 +154,17 @@ export default {
             try {
                 this.loading.google = true
                 this.error = null
+                const toast = useToast()
 
                 // Implement Google login logic here
                 await new Promise(resolve => setTimeout(resolve, 1500)) // Simulate API call
 
+                toast.success('Google login successful!')
                 this.$router.push('/dashboard')
             } catch (error) {
                 this.error = 'Google login failed. Please try again.'
+                const toast = useToast()
+                toast.error(this.error)
             } finally {
                 this.loading.google = false
             }
@@ -159,13 +173,17 @@ export default {
             try {
                 this.loading.facebook = true
                 this.error = null
+                const toast = useToast()
 
                 // Implement Facebook login logic here
                 await new Promise(resolve => setTimeout(resolve, 1500)) // Simulate API call
 
+                toast.success('Facebook login successful!')
                 this.$router.push('/dashboard')
             } catch (error) {
                 this.error = 'Facebook login failed. Please try again.'
+                const toast = useToast()
+                toast.error(this.error)
             } finally {
                 this.loading.facebook = false
             }

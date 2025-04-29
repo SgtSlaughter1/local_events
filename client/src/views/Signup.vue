@@ -73,6 +73,9 @@
 </template>
 
 <script>
+import { useAuthStore } from '@/stores/auth'
+import { useToast } from 'vue-toastification'
+
 export default {
     name: 'Signup',
     data() {
@@ -144,18 +147,29 @@ export default {
                 this.loading.email = true
                 this.error = null
 
-                // Replace this with your actual API call
-                await new Promise(resolve => setTimeout(resolve, 1500)) // Simulate API call
+                const auth = useAuthStore()
+                const toast = useToast()
 
-                // Simulated API response
-                const response = { success: true }
+                const result = await auth.register({
+                    name: this.name,
+                    email: this.email,
+                    password: this.password,
+                    user_type_id: 3, // Default to Attendee
+                    phone: '',
+                    address: ''
+                })
 
-                if (response.success) {
-                    // Handle successful signup
-                    this.$router.push('/dashboard')
+                if (result.success) {
+                    toast.success('Registration successful! Please login to continue.')
+                    this.$router.push('/login')
+                } else {
+                    this.error = result.error
+                    toast.error(result.error)
                 }
             } catch (error) {
                 this.error = 'Registration failed. Please try again.'
+                const toast = useToast()
+                toast.error(this.error)
             } finally {
                 this.loading.email = false
             }
@@ -164,13 +178,17 @@ export default {
             try {
                 this.loading.google = true
                 this.error = null
+                const toast = useToast()
 
                 // Implement Google signup logic here
                 await new Promise(resolve => setTimeout(resolve, 1500)) // Simulate API call
 
+                toast.success('Google signup successful!')
                 this.$router.push('/dashboard')
             } catch (error) {
                 this.error = 'Google signup failed. Please try again.'
+                const toast = useToast()
+                toast.error(this.error)
             } finally {
                 this.loading.google = false
             }
@@ -179,13 +197,17 @@ export default {
             try {
                 this.loading.facebook = true
                 this.error = null
+                const toast = useToast()
 
                 // Implement Facebook signup logic here
                 await new Promise(resolve => setTimeout(resolve, 1500)) // Simulate API call
 
+                toast.success('Facebook signup successful!')
                 this.$router.push('/dashboard')
             } catch (error) {
                 this.error = 'Facebook signup failed. Please try again.'
+                const toast = useToast()
+                toast.error(this.error)
             } finally {
                 this.loading.facebook = false
             }
