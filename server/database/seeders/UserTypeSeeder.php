@@ -7,21 +7,25 @@ use App\Models\UserType;
 
 class UserTypeSeeder extends Seeder
 {
+    /**
+     * Run the database seeds.
+     */
     public function run(): void
     {
         $userTypes = [
             [
                 'name' => 'Admin',
-                'description' => 'System administrator with full access to all features'
+                'description' => 'Administrator with full system access'
             ],
             [
                 'name' => 'Organizer',
-                'description' => 'Event organizer who can create and manage events'
+                'description' => 'Event organizer with event management capabilities'
             ],
             [
                 'name' => 'Attendee',
-                'description' => 'Regular user who can register for events'
+                'description' => 'Regular user who can attend events'
             ]
+
         ];
 
         foreach ($userTypes as $userType) {
