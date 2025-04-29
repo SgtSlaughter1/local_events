@@ -3,7 +3,7 @@ import api from '@/services/api'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    user: null,
+    user: JSON.parse(localStorage.getItem('user')) || null,
     token: localStorage.getItem('token') || null,
     loading: false,
     error: null
@@ -13,7 +13,11 @@ export const useAuthStore = defineStore('auth', {
     isAuthenticated: (state) => !!state.token,
     getUser: (state) => state.user,
     getError: (state) => state.error,
-    isLoading: (state) => state.loading
+    isLoading: (state) => state.loading,
+    isAdmin: (state) => state.user?.user_type_id === 1,
+    isOrganizer: (state) => state.user?.user_type_id === 2,
+    isAttendee: (state) => state.user?.user_type_id === 3,
+    isVendor: (state) => state.user?.user_type_id === 4
   },
 
   actions: {
@@ -24,7 +28,11 @@ export const useAuthStore = defineStore('auth', {
         const response = await api.post('/api/login', credentials)
         this.token = response.data.token
         this.user = response.data.user
+        
+        // Store in localStorage
         localStorage.setItem('token', this.token)
+        localStorage.setItem('user', JSON.stringify(this.user))
+        
         return { success: true, data: response.data }
       } catch (error) {
         this.error = error.response?.data?.message || 'An error occurred during login'
@@ -53,9 +61,12 @@ export const useAuthStore = defineStore('auth', {
       this.error = null
       try {
         await api.post('/api/logout')
+        // Clear state
         this.token = null
         this.user = null
+        // Clear localStorage
         localStorage.removeItem('token')
+        localStorage.removeItem('user')
         return { success: true }
       } catch (error) {
         this.error = error.response?.data?.message || 'An error occurred during logout'
@@ -71,6 +82,8 @@ export const useAuthStore = defineStore('auth', {
       try {
         const response = await api.get('/api/user')
         this.user = response.data
+        // Update localStorage
+        localStorage.setItem('user', JSON.stringify(this.user))
         return { success: true, data: response.data }
       } catch (error) {
         this.error = error.response?.data?.message || 'An error occurred while fetching user data'
@@ -78,6 +91,22 @@ export const useAuthStore = defineStore('auth', {
       } finally {
         this.loading = false
       }
+    },
+
+    // Helper method to check if user has required role
+    hasRole(role) {
+      const roleMap = {
+        'admin': 1,
+        'organizer': 2,
+        'attendee': 3,
+        'vendor': 4
+      }
+      return this.user?.user_type_id === roleMap[role]
+    },
+
+    // Helper method to check if user has any of the required roles
+    hasAnyRole(roles) {
+      return roles.some(role => this.hasRole(role))
     }
   }
 })
