@@ -98,8 +98,7 @@ export const useAuthStore = defineStore('auth', {
       const roleMap = {
         'admin': 1,
         'organizer': 2,
-        'attendee': 3,
-        'vendor': 4
+        'attendee': 3
       }
       return this.user?.user_type_id === roleMap[role]
     },
