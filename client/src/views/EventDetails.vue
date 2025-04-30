@@ -1,0 +1,396 @@
+<template>
+    <div class="event-details-page">
+        <div v-if="!event" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+
+        <template v-else>
+            <!-- Back Navigation -->
+            <div class="back-nav">
+                <div class="container">
+                    <router-link to="/events" class="btn btn-link text-white">
+                        <i class="fas fa-arrow-left"></i> Back to Events
+                    </router-link>
+                </div>
+            </div>
+
+            <!-- Event Header Image -->
+            <div class="event-header">
+                <img :src="event.image || '/images/bg.jpg'" :alt="event.title" class="header-image">
+            </div>
+
+            <!-- Event Content -->
+            <div class="container">
+                <div class="event-content">
+                    <div class="row">
+                        <!-- Main Content -->
+                        <div class="col-lg-8">
+                            <h1 class="event-title">{{ event.title }}</h1>
+
+                            <!-- Host Information -->
+                            <div class="host-section" v-if="event.creator">
+                                <div class="host-info">
+                                    <img :src="event.creator.avatar || '/images/sport.png'" :alt="event.creator.name" class="host-logo">
+                                    <div class="host-details">
+                                        <h6 class="host-name">{{ event.creator.name }}</h6>
+                                        <button class="btn btn-outline-dark btn-sm">Follow</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Category -->
+                            <div class="category-badge mb-4" v-if="event.category">
+                                <span class="badge bg-primary">{{ event.category.name }}</span>
+                            </div>
+
+                            <!-- Event Description -->
+                            <div class="description-section">
+                                <h5>Event Description</h5>
+                                <div class="description-content">{{ event.description }}</div>
+
+                                <!-- Capacity -->
+                                <div v-if="event.capacity" class="capacity-info mt-4">
+                                    <h6>Event Capacity</h6>
+                                    <p><i class="fas fa-users me-2"></i>{{ event.capacity }} attendees</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sidebar -->
+                        <div class="col-lg-4">
+                            <div class="event-info-card">
+                                <!-- Date and Time -->
+                                <div class="info-section">
+                                    <h5>Date and Time</h5>
+                                    <div class="info-content">
+                                        <i class="far fa-calendar"></i>
+                                        <div>
+                                            <div class="date">{{ formatDate(event.start_date) }}</div>
+                                            <div class="time">{{ formatTime(event.start_date) }} - {{ formatTime(event.end_date) }}</div>
+                                            <div class="text-muted small">
+                                                Duration: {{ calculateDuration(event.start_date, event.end_date) }}
+                                            </div>
+                                            <a href="#" class="add-calendar-link">+ Add to Calendar</a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Location -->
+                                <div class="info-section">
+                                    <h5>Location</h5>
+                                    <div class="info-content">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        <div>
+                                            <div class="venue">{{ event.location }}</div>
+                                            <div v-if="event.is_online" class="online-badge">
+                                                <i class="fas fa-video me-1"></i> Online Event
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Ticket Information -->
+                                <div class="info-section">
+                                    <h5>Ticket Information</h5>
+                                    <div class="ticket-type">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span>Standard Ticket:</span>
+                                            <span class="ticket-price">{{ formatPrice(event.price) }}</span>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-primary btn-lg w-100" @click="handleBuyTickets">
+                                        Buy Tickets
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+</template>
+
+<script setup>
+import { ref, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import { useEventStore } from '../stores/event'
+
+const route = useRoute()
+const eventStore = useEventStore()
+const event = ref(null)
+
+onMounted(async () => {
+    try {
+        console.log('Route params:', route.params)
+        const eventId = route.params.id
+        const fetchedEvent = await eventStore.fetchEvent(eventId)
+        console.log('Fetched event:', fetchedEvent)
+        event.value = fetchedEvent
+    } catch (error) {
+        console.error('Error fetching event:', error)
+    }
+})
+
+const formatDate = (dateString) => {
+    if (!dateString) return ''
+    return new Date(dateString).toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    })
+}
+
+const formatTime = (dateString) => {
+    if (!dateString) return ''
+    return new Date(dateString).toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+    })
+}
+
+const calculateDuration = (start, end) => {
+    if (!start || !end) return ''
+    const startDate = new Date(start)
+    const endDate = new Date(end)
+    const diff = endDate - startDate
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+    
+    if (days > 0) {
+        return `${days} day${days > 1 ? 's' : ''}`
+    }
+    return `${hours} hour${hours > 1 ? 's' : ''}`
+}
+
+const formatPrice = (price) => {
+    if (!price || price === '0.00') return 'Free'
+    return new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR'
+    }).format(price)
+}
+
+const handleBuyTickets = () => {
+    console.log('Buy tickets clicked for event:', event.value?.id)
+}
+</script>
+
+<style scoped>
+.event-details-page {
+    min-height: 100vh;
+    background-color: #f8f9fa;
+}
+
+.back-nav {
+    background: rgba(0, 0, 0, 0.5);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    padding: 1rem 0;
+}
+
+.back-nav .btn-link {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.event-header {
+    height: 500px;
+    position: relative;
+    overflow: hidden;
+}
+
+.header-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.event-content {
+    background: white;
+    border-radius: 1rem 1rem 0 0;
+    margin-top: -4rem;
+    position: relative;
+    padding: 2rem;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.event-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 2rem;
+}
+
+.host-section {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 0.5rem;
+}
+
+.host-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.host-logo {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.host-name {
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.description-section {
+    margin-bottom: 2rem;
+}
+
+.description-section h5 {
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.description-content {
+    line-height: 1.8;
+    color: #4a4a4a;
+    white-space: pre-line;
+}
+
+.reasons-section {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #eee;
+}
+
+.reasons-list {
+    padding-left: 1.5rem;
+    margin-top: 1rem;
+}
+
+.reasons-list li {
+    margin-bottom: 0.5rem;
+    color: #4a4a4a;
+}
+
+.event-info-card {
+    background: white;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 2rem;
+}
+
+.info-section {
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid #eee;
+}
+
+.info-section:last-child {
+    padding-bottom: 0;
+    margin-bottom: 0;
+    border-bottom: none;
+}
+
+.info-section h5 {
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+.info-content {
+    display: flex;
+    gap: 1rem;
+    color: #4a4a4a;
+}
+
+.info-content i {
+    color: #666;
+    margin-top: 0.25rem;
+}
+
+.date {
+    font-weight: 500;
+}
+
+.time {
+    color: #666;
+    margin-bottom: 0.5rem;
+}
+
+.add-calendar-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.venue {
+    font-weight: 500;
+}
+
+.address, .city {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.map-container {
+    height: 200px;
+    background: #eee;
+    border-radius: 0.5rem;
+}
+
+.ticket-price {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.btn-primary {
+    margin-top: 1rem;
+    padding: 0.75rem;
+}
+
+.category-badge {
+    margin-top: -1rem;
+}
+
+.capacity-info {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 0.5rem;
+}
+
+.capacity-info i {
+    color: var(--primary-color);
+}
+
+.online-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    background: #e8f5e9;
+    color: #2e7d32;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+}
+
+.badge {
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+</style> 

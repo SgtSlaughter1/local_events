@@ -2,6 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import LandingPage from '../views/LandingPage.vue'
 import Login from '../views/Login.vue'
 import Signup from '../views/Signup.vue'
+import Events from '../views/Events.vue'
+import EventDetails from '../views/EventDetails.vue'
 
 const routes = [
   {
@@ -22,7 +24,13 @@ const routes = [
   {
     path: '/events',
     name: 'events',
-    component: () => import('@/views/Events.vue')
+    component: Events
+  },
+  {
+    path: '/events/:id',
+    name: 'EventDetails',
+    component: EventDetails,
+    props: true
   },
   // {
   //   path: '/events/:id',
@@ -34,6 +42,9 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
+  scrollBehavior() {
+    return { top: 0 }
+  }
 })
 
 export default router
