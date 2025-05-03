@@ -17,26 +17,17 @@
                     <!-- Admin Navigation -->
                     <template v-if="auth.isAdmin">
                         <li class="nav-item">
-                            <router-link class="nav-link" to="/admin/dashboard">Admin Dashboard</router-link>
-                        </li>
-                        <li class="nav-item">
                             <router-link class="nav-link" to="/admin/users">Manage Users</router-link>
                         </li>
                     </template>
                     <!-- Organizer Navigation -->
                     <template v-if="auth.isOrganizer">
                         <li class="nav-item">
-                            <router-link class="nav-link" to="/organizer/dashboard">Organizer Dashboard</router-link>
-                        </li>
-                        <li class="nav-item">
                             <router-link class="nav-link" to="/organizer/events">My Events</router-link>
                         </li>
                     </template> 
                     <!-- Attendee Navigation -->
                     <template v-if="auth.isAttendee">
-                        <li class="nav-item">
-                            <router-link class="nav-link" to="/attendee/dashboard">My Dashboard</router-link>
-                        </li>
                         <li class="nav-item">
                             <router-link class="nav-link" to="/attendee/bookings">My Bookings</router-link>
                         </li>
@@ -51,6 +42,11 @@
                                 {{ auth.user?.name }}
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+                                <li>
+                                    <router-link class="dropdown-item" to="/dashboard">
+                                        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                                    </router-link>
+                                </li>
                                 <li>
                                     <router-link class="dropdown-item" to="/profile">
                                         <i class="fas fa-user me-2"></i>Profile

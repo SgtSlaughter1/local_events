@@ -3,9 +3,9 @@
         <div class="settings-sidebar">
             <h3>Account Settings</h3>
             <ul class="settings-menu">
-                <li :class="{active: activeTab === 'info'}" @click="activeTab = 'info'">Account Info</li>
-                <li :class="{active: activeTab === 'email'}" @click="activeTab = 'email'">Change Email</li>
-                <li :class="{active: activeTab === 'password'}" @click="activeTab = 'password'">Password</li>
+                <li :class="{ active: activeTab === 'info' }" @click="activeTab = 'info'">Account Info</li>
+                <li :class="{ active: activeTab === 'email' }" @click="activeTab = 'email'">Change Email</li>
+                <li :class="{ active: activeTab === 'password' }" @click="activeTab = 'password'">Password</li>
             </ul>
         </div>
         <div class="settings-content">
@@ -14,7 +14,8 @@
                 <hr />
                 <div class="profile-photo-section">
                     <div class="profile-photo-wrapper">
-                        <img :src="user.avatar || '/images/default-avatar.png'" alt="Profile Photo" class="profile-photo" />
+                        <img :src="user.avatar || '/images/default-avatar.png'" alt="Profile Photo"
+                            class="profile-photo" />
                         <label class="photo-upload-label">
                             <input type="file" accept="image/*" @change="onPhotoChange" hidden />
                             <span class="photo-upload-btn"><i class="fas fa-camera"></i></span>
@@ -44,7 +45,8 @@
                         </div>
                     </div>
                     <h4>Contact Details</h4>
-                    <p class="contact-note">These details are private and only used to contact you for ticketing or prizes.</p>
+                    <p class="contact-note">These details are private and only used to contact you for ticketing or
+                        prizes.</p>
                     <div class="form-row">
                         <div class="form-group">
                             <label>Phone Number:</label>
@@ -151,4 +153,4 @@ export default {
 
 <style scoped>
 
-</style> 
+</style>
