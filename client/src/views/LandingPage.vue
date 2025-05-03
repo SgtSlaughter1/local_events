@@ -70,7 +70,7 @@
                     <div class="row g-4">
                         <div v-for="event in upcomingEvents" :key="event.id" class="col-md-6 col-lg-4">
                             <div class="event-card card h-100">
-                                <img :src="event.image" :alt="event.title" class="card-img-top" />
+                                <img :src="event.image_url || '/images/tech-conference.jpg'" :alt="event.title" class="card-img-top" />
                                 <div class="card-body">
                                     <h5 class="card-title">{{ event.title }}</h5>
                                     <p class="card-text">

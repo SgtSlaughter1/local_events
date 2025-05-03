@@ -3,7 +3,7 @@
         <!-- Preview Mode -->
         <div v-if="!isDetailed">
             <div class="position-relative">
-                <img :src="event.image || '/default-event-image.jpg'" :alt="event.title" class="card-img-top">
+                <img :src="event.image_url || '/default-event-image.jpg'" :alt="event.title" class="card-img-top">
                 <div class="position-absolute top-0 end-0 m-2">
                     <span class="badge" :class="statusClass">{{ event.status }}</span>
                 </div>
@@ -45,7 +45,7 @@
 
             <!-- Header Image -->
             <div class="event-header">
-                <img :src="event.image || '/default-event-image.jpg'" :alt="event.title" class="header-image">
+                <img :src="event.image_url || '/default-event-image.jpg'" :alt="event.title" class="header-image">
             </div>
 
             <!-- Event Content -->

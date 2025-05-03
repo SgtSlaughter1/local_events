@@ -36,6 +36,11 @@ class EventController extends BaseController
 
         $events = $query->latest()->paginate(12);
 
+        // Append image_url to each event
+        $events->through(function ($event) {
+            return $event->append('image_url');
+        });
+
         return response()->json([
             'events' => $events,
             'categories' => Category::active()->get()
@@ -71,14 +76,14 @@ class EventController extends BaseController
 
         return response()->json([
             'message' => 'Event created successfully',
-            'event' => $event->load('category', 'creator')
+            'event' => $event->load('category', 'creator')->append('image_url')
         ], 201);
     }
 
     public function show(Event $event)
     {
         return response()->json([
-            'event' => $event->load(['category', 'creator', 'reviews.user'])
+            'event' => $event->load(['category', 'creator', 'reviews.user'])->append('image_url')
         ]);
     }
 
@@ -112,7 +117,7 @@ class EventController extends BaseController
 
         return response()->json([
             'message' => 'Event updated successfully',
-            'event' => $event->load('category', 'creator')
+            'event' => $event->load('category', 'creator')->append('image_url')
         ]);
     }
 
@@ -173,7 +178,10 @@ class EventController extends BaseController
         $createdEvents = Event::where('created_by', Auth::id())
             ->with('category')
             ->latest()
-            ->get();
+            ->get()
+            ->each(function ($event) {
+                $event->append('image_url');
+            });
 
         $registeredEvents = Event::whereHas('registrations', function ($query) {
             $query->where('user_id', Auth::id());
@@ -182,7 +190,10 @@ class EventController extends BaseController
             $query->where('user_id', Auth::id());
         }])
         ->latest()
-        ->get();
+        ->get()
+        ->each(function ($event) {
+            $event->append('image_url');
+        });
 
         return response()->json([
             'created_events' => $createdEvents,

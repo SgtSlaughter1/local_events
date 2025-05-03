@@ -18,7 +18,7 @@
 
             <!-- Event Header Image -->
             <div class="event-header">
-                <img :src="event.image || '/images/bg.jpg'" :alt="event.title" class="header-image">
+                <img :src="event.image_url || '/images/bg.jpg'" :alt="event.title" class="header-image">
             </div>
 
             <!-- Event Content -->

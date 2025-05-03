@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 class Event extends Model
 {
@@ -91,5 +92,20 @@ class Event extends Model
     public function getAverageRating()
     {
         return $this->reviews()->avg('rating') ?? 0;
+    }
+
+    public function getImageUrlAttribute()
+    {
+        if (!$this->image) {
+            return null;
+        }
+
+        $fullPath = 'events/' . $this->image;
+
+        if (!Storage::disk('public')->exists($fullPath)) {
+            return null;
+        }
+
+        return asset('storage/' . $fullPath);
     }
 }
