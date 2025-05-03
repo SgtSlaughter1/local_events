@@ -6,6 +6,7 @@ use App\Http\Controllers\ReviewController;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\OrganizerController;
 
 /*
 |--------------------------------------------------------------------------
@@ -57,3 +58,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/events/{event}/reviews/{review}', [ReviewController::class, 'destroy']);
 });
 
+Route::middleware(['auth:sanctum', 'organizer'])->prefix('organizer')->group(function () {
+    Route::get('events', [OrganizerController::class, 'index']);
+    Route::post('events', [OrganizerController::class, 'store']);
+    Route::get('events/{id}', [OrganizerController::class, 'show']);
+    Route::put('events/{id}', [OrganizerController::class, 'update']);
+    Route::delete('events/{id}', [OrganizerController::class, 'destroy']);
+    Route::get('events/{id}/registrations', [OrganizerController::class, 'registrations']);
+    Route::put('registrations/{registration_id}', [OrganizerController::class, 'updateRegistration']);
+    Route::get('events/{id}/stats', [OrganizerController::class, 'stats']);
+});
