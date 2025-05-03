@@ -6,7 +6,7 @@ export const useAuthStore = defineStore('auth', {
     user: JSON.parse(localStorage.getItem('user')) || null,
     token: localStorage.getItem('token') || null,
     loading: false,
-    error: null
+    error: null,
   }),
 
   getters: {
@@ -17,7 +17,7 @@ export const useAuthStore = defineStore('auth', {
     isAdmin: (state) => state.user?.user_type_id === 1,
     isOrganizer: (state) => state.user?.user_type_id === 2,
     isAttendee: (state) => state.user?.user_type_id === 3,
-    isVendor: (state) => state.user?.user_type_id === 4
+    isVendor: (state) => state.user?.user_type_id === 4,
   },
 
   actions: {
@@ -28,11 +28,11 @@ export const useAuthStore = defineStore('auth', {
         const response = await api.post('/api/login', credentials)
         this.token = response.data.token
         this.user = response.data.user
-        
+
         // Store in localStorage
         localStorage.setItem('token', this.token)
         localStorage.setItem('user', JSON.stringify(this.user))
-        
+
         return { success: true, data: response.data }
       } catch (error) {
         this.error = error.response?.data?.message || 'An error occurred during login'
@@ -96,16 +96,16 @@ export const useAuthStore = defineStore('auth', {
     // Helper method to check if user has required role
     hasRole(role) {
       const roleMap = {
-        'admin': 1,
-        'organizer': 2,
-        'attendee': 3
+        admin: 1,
+        organizer: 2,
+        attendee: 3,
       }
       return this.user?.user_type_id === roleMap[role]
     },
 
     // Helper method to check if user has any of the required roles
     hasAnyRole(roles) {
-      return roles.some(role => this.hasRole(role))
+      return roles.some((role) => this.hasRole(role))
     },
 
     async updateProfile(profileData) {
@@ -123,6 +123,6 @@ export const useAuthStore = defineStore('auth', {
       } finally {
         this.loading = false
       }
-    }
-  }
+    },
+  },
 })

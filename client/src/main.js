@@ -23,7 +23,7 @@ const toastOptions = {
   hideProgressBar: false,
   closeButton: 'button',
   icon: true,
-  rtl: false
+  rtl: false,
 }
 
 app.use(createPinia())

@@ -12,7 +12,7 @@ export const useEventStore = defineStore('event', {
       current_page: 1,
       last_page: 1,
       per_page: 10,
-      total: 0
+      total: 0,
     },
     filters: {
       price: [],
@@ -114,7 +114,7 @@ export const useEventStore = defineStore('event', {
           current_page: response.data.events.current_page,
           last_page: response.data.events.last_page,
           per_page: response.data.events.per_page,
-          total: response.data.events.total
+          total: response.data.events.total,
         }
       } catch (error) {
         this.error = error.response?.data?.message || 'Error fetching events'
@@ -211,7 +211,8 @@ export const useEventStore = defineStore('event', {
         const response = await api.get('/api/user/registrations')
         return { success: true, data: response.data }
       } catch (error) {
-        this.error = error.response?.data?.message || 'An error occurred while fetching user registrations'
+        this.error =
+          error.response?.data?.message || 'An error occurred while fetching user registrations'
         return { success: false, error: this.error }
       } finally {
         this.loading = false

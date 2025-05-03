@@ -26,26 +26,26 @@ const routes = [
   {
     path: '/events',
     name: 'events',
-    component: Events
+    component: Events,
   },
   {
     path: '/events/:id',
     name: 'EventDetails',
     component: EventDetails,
-    props: true
+    props: true,
   },
   {
     path: '/profile',
     name: 'profile',
     component: Profile,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true },
   },
   {
     path: '/dashboard',
     name: 'dashboard',
     component: Dashboard,
-    meta: { requiresAuth: true }
-  }
+    meta: { requiresAuth: true },
+  },
 ]
 
 const router = createRouter({
@@ -53,7 +53,7 @@ const router = createRouter({
   routes,
   scrollBehavior() {
     return { top: 0 }
-  }
+  },
 })
 
 export default router

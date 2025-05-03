@@ -1,16 +1,27 @@
 :root {
-  --primary-color: #2B293D;
-  --secondary-color: #2D2C3C;
-  --accent-color: #FFE047;
-  --light-color: #EEEEEE;
-  --text-color: #5A5A5A;
-  --white-color: #FFFFFF;
-  --dark-color: #2B293D;
+  --primary-color: #2b293d;
+  --secondary-color: #2d2c3c;
+  --accent-color: #ffe047;
+  --light-color: #eeeeee;
+  --text-color: #5a5a5a;
+  --white-color: #ffffff;
+  --dark-color: #2b293d;
 }
 
 /* Global Styles */
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    Oxygen,
+    Ubuntu,
+    Cantarell,
+    'Open Sans',
+    'Helvetica Neue',
+    sans-serif;
   color: var(--text-color);
   line-height: 1.6;
   min-height: 100vh;
@@ -167,7 +178,8 @@ footer hr {
   color: var(--primary-color);
 }
 
-.popular-events, .online-events {
+.popular-events,
+.online-events {
   margin: 2rem 0;
   text-align: center;
 }
@@ -200,7 +212,8 @@ footer hr {
   margin-bottom: 0.5rem;
 }
 
-.event-card .event-date, .event-card .event-location {
+.event-card .event-date,
+.event-card .event-location {
   font-size: 0.9rem;
   color: #666;
   margin-bottom: 0.5rem;
@@ -210,7 +223,7 @@ footer hr {
   margin-top: 1rem;
 }
 
-.curated{
+.curated {
   background: linear-gradient(135deg, var(--accent-color) 100%, var(--primary-color) 40%);
   /* color: var(--white-color); */
   padding: 6rem 2rem;
@@ -284,7 +297,9 @@ footer hr {
 .feature-card {
   background: var(--white-color);
   border-radius: 1rem;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
   height: 100%;
 }
 
@@ -339,7 +354,9 @@ footer hr {
   border: none;
   border-radius: 1rem;
   overflow: hidden;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
   height: 100%;
 }
 
@@ -470,7 +487,8 @@ footer hr {
     flex-direction: column;
   }
 
-  .feature-grid, .events-grid {
+  .feature-grid,
+  .events-grid {
     grid-template-columns: 1fr;
   }
 
@@ -723,7 +741,7 @@ footer hr {
 
 .submit-btn.loading::after,
 .social-btn.loading::after {
-  content: "";
+  content: '';
   position: absolute;
   width: 1rem;
   height: 1rem;
@@ -946,7 +964,8 @@ footer hr {
   font-weight: 500;
 }
 
-.address, .city {
+.address,
+.city {
   color: #666;
   font-size: 0.9rem;
 }
@@ -999,175 +1018,178 @@ footer hr {
 
 /* Pagination Styles */
 .pagination {
-    margin: 0;
+  margin: 0;
 }
 
 .page-item {
-    margin: 0 0.25rem;
+  margin: 0 0.25rem;
 }
 
 .page-link {
-    color: var(--primary-color);
-    border: 1px solid var(--light-color);
-    padding: 0.5rem 1rem;
-    border-radius: 0.25rem;
-    transition: all 0.3s ease;
+  color: var(--primary-color);
+  border: 1px solid var(--light-color);
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  transition: all 0.3s ease;
 }
 
 .page-link:hover {
-    background-color: var(--light-color);
-    border-color: var(--primary-color);
-    color: var(--primary-color);
+  background-color: var(--light-color);
+  border-color: var(--primary-color);
+  color: var(--primary-color);
 }
 
 .page-item.active .page-link {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
-    color: var(--white-color);
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: var(--white-color);
 }
 
 .page-item.disabled .page-link {
-    color: var(--text-color);
-    pointer-events: none;
-    background-color: var(--light-color);
-    border-color: var(--light-color);
+  color: var(--text-color);
+  pointer-events: none;
+  background-color: var(--light-color);
+  border-color: var(--light-color);
 }
 
 /* Profile Page Styles */
 .profile-settings-container {
-    display: flex;
-    min-height: 100vh;
-    background: #fafbfc;
+  display: flex;
+  min-height: 100vh;
+  background: #fafbfc;
 }
 .settings-sidebar {
-    width: 240px;
-    background: #f4f4f4;
-    padding: 32px 0 0 0;
-    border-right: 1px solid #e0e0e0;
-    position: sticky;
-    top: 50px;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
+  width: 240px;
+  background: #f4f4f4;
+  padding: 32px 0 0 0;
+  border-right: 1px solid #e0e0e0;
+  position: sticky;
+  top: 50px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .settings-sidebar h3 {
-    font-size: 1.2rem;
-    font-weight: 700;
-    margin-left: 32px;
-    margin-bottom: 24px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-left: 32px;
+  margin-bottom: 24px;
 }
 .settings-menu {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 .settings-menu li {
-    padding: 14px 32px;
-    cursor: pointer;
-    color: #333;
-    border-left: 4px solid transparent;
-    transition: background 0.2s, border-color 0.2s;
+  padding: 14px 32px;
+  cursor: pointer;
+  color: #333;
+  border-left: 4px solid transparent;
+  transition:
+    background 0.2s,
+    border-color 0.2s;
 }
-.settings-menu li.active, .settings-menu li:hover {
-    background: #fff;
-    border-left: 4px solid #3f51b5;
-    color: #3f51b5;
+.settings-menu li.active,
+.settings-menu li:hover {
+  background: #fff;
+  border-left: 4px solid #3f51b5;
+  color: #3f51b5;
 }
 .settings-content {
-    flex: 1;
-    padding: 40px 48px;
+  flex: 1;
+  padding: 40px 48px;
 }
 .settings-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 24px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 24px;
 }
 .profile-photo-section {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 32px;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 32px;
 }
 .profile-photo-wrapper {
-    position: relative;
-    width: 110px;
-    height: 110px;
+  position: relative;
+  width: 110px;
+  height: 110px;
 }
 .profile-photo {
-    width: 110px;
-    height: 110px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid #e0e0e0;
-    background: #fff;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e0e0e0;
+  background: #fff;
 }
 .photo-upload-label {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    background: #fff;
-    border-radius: 50%;
-    border: 1px solid #e0e0e0;
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: #fff;
+  border-radius: 50%;
+  border: 1px solid #e0e0e0;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
 }
 .photo-upload-btn {
-    color: #3f51b5;
-    font-size: 1.2rem;
+  color: #3f51b5;
+  font-size: 1.2rem;
 }
 .profile-form {
-    max-width: 600px;
-    margin: 0 auto;
+  max-width: 600px;
+  margin: 0 auto;
 }
 .profile-form h4 {
-    margin-top: 24px;
-    margin-bottom: 12px;
-    font-size: 1.1rem;
-    font-weight: 600;
+  margin-top: 24px;
+  margin-bottom: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
 }
 .form-row {
-    display: flex;
-    gap: 24px;
-    margin-bottom: 18px;
+  display: flex;
+  gap: 24px;
+  margin-bottom: 18px;
 }
 .form-group {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 .form-group label {
-    font-size: 0.98rem;
-    margin-bottom: 6px;
-    color: #222;
+  font-size: 0.98rem;
+  margin-bottom: 6px;
+  color: #222;
 }
 .form-group input {
-    padding: 8px 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 1rem;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
 }
 .contact-note {
-    font-size: 0.95rem;
-    color: #888;
-    margin-bottom: 10px;
+  font-size: 0.95rem;
+  color: #888;
+  margin-bottom: 10px;
 }
 .save-btn {
-    margin-top: 24px;
-    background: #3f51b5;
-    color: #fff;
-    border: none;
-    padding: 12px 32px;
-    border-radius: 6px;
-    font-size: 1.1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s;
+  margin-top: 24px;
+  background: #3f51b5;
+  color: #fff;
+  border: none;
+  padding: 12px 32px;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
 }
 .save-btn:hover {
-    background: #2c387e;
+  background: #2c387e;
 }
