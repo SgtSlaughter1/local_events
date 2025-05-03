@@ -171,7 +171,7 @@ const formatPrice = (price) => {
     if (!price || price === '0.00') return 'Free'
     return new Intl.NumberFormat('en-IN', {
         style: 'currency',
-        currency: 'INR'
+        currency: 'NGN'
     }).format(price)
 }
 

@@ -117,6 +117,9 @@ watch(filters, (newFilters) => {
     width: 280px;
     background: white;
     padding: 1.5rem;
+    position: sticky;
+    top: 4rem;
+    z-index: 100;
 }
 
 .filters-title {
