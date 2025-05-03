@@ -69,6 +69,27 @@
                                 />
                             </div>
                         </div>
+ 
+                        <!-- Pagination -->
+                        <div v-if="!selectedEventId && eventStore.pagination.last_page > 1" class="d-flex justify-content-center mt-4">
+                            <nav aria-label="Event pagination">
+                                <ul class="pagination">
+                                    <li class="page-item" :class="{ disabled: eventStore.pagination.current_page === 1 }">
+                                        <button class="page-link" @click="changePage(eventStore.pagination.current_page - 1)" :disabled="eventStore.pagination.current_page === 1">
+                                            Previous
+                                        </button>
+                                    </li>
+                                    <li v-for="page in eventStore.pagination.last_page" :key="page" class="page-item" :class="{ active: page === eventStore.pagination.current_page }">
+                                        <button class="page-link" @click="changePage(page)">{{ page }}</button>
+                                    </li>
+                                    <li class="page-item" :class="{ disabled: eventStore.pagination.current_page === eventStore.pagination.last_page }">
+                                        <button class="page-link" @click="changePage(eventStore.pagination.current_page + 1)" :disabled="eventStore.pagination.current_page === eventStore.pagination.last_page">
+                                            Next
+                                        </button>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
                     </div>
 
                     <!-- Detailed Event View -->
@@ -101,7 +122,7 @@ const selectedEventId = ref(null)
 // Add onMounted hook to fetch events
 onMounted(async () => {
     try {
-        await eventStore.fetchEvents()
+        await eventStore.fetchEvents(1)
         console.log('Fetched events:', eventStore.getEvents)
     } catch (error) {
         console.error('Error fetching events:', error)
@@ -158,6 +179,16 @@ const closeEventDetails = () => {
 const handleEventRegistration = (eventId) => {
     console.log('Register for event:', eventId)
     // TODO: Implement registration logic
+}
+
+const changePage = async (page) => {
+    if (page < 1 || page > eventStore.pagination.last_page) return
+    try {
+        await eventStore.fetchEvents(page)
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+    } catch (error) {
+        console.error('Error changing page:', error)
+    }
 }
 </script>
 

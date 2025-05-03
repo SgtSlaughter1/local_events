@@ -8,6 +8,12 @@ export const useEventStore = defineStore('event', {
     loading: false,
     error: null,
     currentEvent: null,
+    pagination: {
+      current_page: 1,
+      last_page: 1,
+      per_page: 10,
+      total: 0
+    },
     filters: {
       price: [],
       date: [],
@@ -97,13 +103,19 @@ export const useEventStore = defineStore('event', {
     },
 
     // Fetch all events
-    async fetchEvents() {
+    async fetchEvents(page = 1) {
       this.loading = true
       this.error = null
       try {
-        const response = await api.get('/api/events')
+        const response = await api.get(`/api/events?page=${page}`)
         this.events = response.data.events.data
         this.categories = response.data.categories
+        this.pagination = {
+          current_page: response.data.events.current_page,
+          last_page: response.data.events.last_page,
+          per_page: response.data.events.per_page,
+          total: response.data.events.total
+        }
       } catch (error) {
         this.error = error.response?.data?.message || 'Error fetching events'
         throw error
