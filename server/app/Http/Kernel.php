@@ -13,7 +13,4 @@ class Kernel extends HttpKernel
      *
      * @var array<string, class-string|string>
      */
-    protected $routeMiddleware = [
-        'organizer' => \App\Http\Middleware\OrganizerMiddleware::class,
-    ];
 }
