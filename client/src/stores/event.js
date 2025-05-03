@@ -189,5 +189,33 @@ export const useEventStore = defineStore('event', {
         this.loading = false
       }
     },
+
+    async fetchUserEvents() {
+      this.loading = true
+      this.error = null
+      try {
+        const response = await api.get('/api/user/events')
+        return { success: true, data: response.data }
+      } catch (error) {
+        this.error = error.response?.data?.message || 'An error occurred while fetching user events'
+        return { success: false, error: this.error }
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async fetchUserRegistrations() {
+      this.loading = true
+      this.error = null
+      try {
+        const response = await api.get('/api/user/registrations')
+        return { success: true, data: response.data }
+      } catch (error) {
+        this.error = error.response?.data?.message || 'An error occurred while fetching user registrations'
+        return { success: false, error: this.error }
+      } finally {
+        this.loading = false
+      }
+    },
   },
 })

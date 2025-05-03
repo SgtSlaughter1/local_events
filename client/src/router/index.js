@@ -4,6 +4,7 @@ import Login from '../views/Login.vue'
 import Signup from '../views/Signup.vue'
 import Events from '../views/Events.vue'
 import EventDetails from '../views/EventDetails.vue'
+import Profile from '../views/Profile.vue'
 
 const routes = [
   {
@@ -32,11 +33,12 @@ const routes = [
     component: EventDetails,
     props: true
   },
-  // {
-  //   path: '/events/:id',
-  //   name: 'event-details',
-  //   component: () => import('@/views/EventDetails.vue')
-  // }
+  {
+    path: '/profile',
+    name: 'profile',
+    component: Profile,
+    meta: { requiresAuth: true }
+  }
 ]
 
 const router = createRouter({

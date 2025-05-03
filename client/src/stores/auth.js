@@ -106,6 +106,23 @@ export const useAuthStore = defineStore('auth', {
     // Helper method to check if user has any of the required roles
     hasAnyRole(roles) {
       return roles.some(role => this.hasRole(role))
+    },
+
+    async updateProfile(profileData) {
+      this.loading = true
+      this.error = null
+      try {
+        const response = await api.put('/api/profile', profileData)
+        this.user = response.data
+        // Update localStorage
+        localStorage.setItem('user', JSON.stringify(this.user))
+        return { success: true, data: response.data }
+      } catch (error) {
+        this.error = error.response?.data?.message || 'An error occurred while updating profile'
+        return { success: false, error: this.error }
+      } finally {
+        this.loading = false
+      }
     }
   }
 })
