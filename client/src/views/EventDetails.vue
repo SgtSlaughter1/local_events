@@ -97,6 +97,35 @@
                   </div>
                 </div>
 
+                <!-- Weather Forecast -->
+                <div v-if="!event.is_online" class="info-section">
+                  <h5>Weather Forecast</h5>
+                  <div class="info-content">
+                    <div v-if="loading" class="text-center py-3">
+                      <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                      </div>
+                    </div>
+                    <div v-else-if="error" class="alert alert-warning">
+                      {{ error }}
+                    </div>
+                    <div v-else-if="weather" class="weather-forecast">
+                      <div class="d-flex align-items-center mb-2">
+                        <i class="fas fa-temperature-high me-2"></i>
+                        <span>High: {{ weather.daily?.temperature_2m_max?.[0] || 'N/A' }}°C</span>
+                      </div>
+                      <div class="d-flex align-items-center mb-2">
+                        <i class="fas fa-temperature-low me-2"></i>
+                        <span>Low: {{ weather.daily?.temperature_2m_min?.[0] || 'N/A' }}°C</span>
+                      </div>
+                      <div class="d-flex align-items-center">
+                        <i class="fas fa-cloud-rain me-2"></i>
+                        <span>Precipitation: {{ weather.daily?.precipitation_probability_max?.[0] || 'N/A' }}%</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <!-- Ticket Information -->
                 <div class="info-section">
                   <h5>Ticket Information</h5>
@@ -123,10 +152,13 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useEventStore } from '../stores/event'
+import useWeather from '../composables/useWeather'
 
 const route = useRoute()
 const eventStore = useEventStore()
 const event = ref(null)
+
+const { weather, loading, error, fetchWeather } = useWeather(event)
 
 onMounted(async () => {
   try {
@@ -135,6 +167,7 @@ onMounted(async () => {
     const fetchedEvent = await eventStore.fetchEvent(eventId)
     console.log('Fetched event:', fetchedEvent)
     event.value = fetchedEvent
+    await fetchWeather()
   } catch (error) {
     console.error('Error fetching event:', error)
   }
@@ -186,4 +219,20 @@ const handleBuyTickets = () => {
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+.weather-forecast {
+  padding: 0.5rem;
+  background-color: #f8f9fa;
+  border-radius: 0.5rem;
+}
+
+.weather-forecast i {
+  color: var(--primary-color);
+  width: 1.5rem;
+}
+
+.spinner-border {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+</style>

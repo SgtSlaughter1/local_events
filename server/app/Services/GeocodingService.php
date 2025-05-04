@@ -17,15 +17,17 @@ class GeocodingService
      * @param string $address
      * @return array|null
      */
-    public function geocodeAddress(string $address)
+    public function geocodeAddress(string $address): ?array
     {
         try {
-            return Cache::remember("geocode:{$address}", now()->addDays(30), function () use ($address) {
+            $cacheKey = "geocode:" . md5($address);
+
+            return Cache::remember($cacheKey, now()->addDays(30), function () use ($address) {
                 $response = Http::withOptions([
                     'verify' => false
                 ])->withHeaders([
                     'User-Agent' => 'EventManagementApp/1.0'
-                ])->get($this->baseUrl, [
+                ])->get('https://nominatim.openstreetmap.org/search', [
                     'q' => $address,
                     'format' => 'json',
                     'limit' => 1
@@ -33,18 +35,25 @@ class GeocodingService
 
                 if ($response->successful()) {
                     $data = $response->json();
-                    if (!empty($data)) {
-                        return [
-                            'latitude' => $data[0]['lat'],
-                            'longitude' => $data[0]['lon']
-                        ];
+
+                    if (empty($data)) {
+                        return null;
                     }
+
+                    $result = $data[0];
+                    return [
+                        'latitude' => (float) $result['lat'],
+                        'longitude' => (float) $result['lon']
+                    ];
                 }
 
                 return null;
             });
         } catch (\Exception $e) {
-            Log::error('Geocoding error: ' . $e->getMessage());
+            Log::error('Geocoding error', [
+                'message' => $e->getMessage()
+            ]);
+
             return null;
         }
     }
