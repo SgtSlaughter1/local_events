@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\OrganizerController;
 use App\Http\Middleware\OrganizerMiddleware;
+use App\Http\Controllers\WeatherController;
 
 /*
 |--------------------------------------------------------------------------
@@ -69,3 +70,5 @@ Route::middleware(['auth:sanctum', OrganizerMiddleware::class])->prefix('organiz
     Route::put('registrations/{registration_id}', [OrganizerController::class, 'updateRegistration']);
     Route::get('events/{id}/stats', [OrganizerController::class, 'stats']);
 });
+
+Route::get('/weather/forecast', [WeatherController::class, 'getForecast']);

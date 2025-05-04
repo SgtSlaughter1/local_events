@@ -6,9 +6,17 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Event;
 use App\Models\EventRegistration;
+use App\Services\GeocodingService;
 
 class OrganizerController extends Controller
 {
+    protected $geocodingService;
+
+    public function __construct(GeocodingService $geocodingService)
+    {
+        $this->geocodingService = $geocodingService;
+    }
+
     // 1. List My Events
     public function index(Request $request)
     {
@@ -52,6 +60,7 @@ class OrganizerController extends Controller
     {
         $user = Auth::user();
         $event = Event::where('id', $id)->where('created_by', $user->id)->firstOrFail();
+
         $validated = $request->validate([
             'title' => 'sometimes|required|string|max:255',
             'description' => 'sometimes|required|string',
@@ -65,6 +74,19 @@ class OrganizerController extends Controller
             'is_online' => 'boolean',
             'online_link' => 'nullable|string',
         ]);
+
+        // Geocode the address if it's not an online event and location has changed
+        if (!$request->is_online && $request->location && $request->location !== $event->getOriginal('location')) {
+            $coordinates = $this->geocodingService->geocodeAddress($request->location);
+            if ($coordinates) {
+                $event->latitude = $coordinates['latitude'];
+                $event->longitude = $coordinates['longitude'];
+            } else {
+                $event->latitude = null;
+                $event->longitude = null;
+            }
+        }
+
         $event->update($validated);
         return response()->json(['event' => $event]);
     }

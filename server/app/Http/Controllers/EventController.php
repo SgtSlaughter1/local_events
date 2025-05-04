@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Event;
 use App\Models\Category;
+use App\Services\GeocodingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
@@ -11,10 +12,18 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
+use Illuminate\Support\Facades\Log;
 
 class EventController extends BaseController
 {
     use AuthorizesRequests, ValidatesRequests;
+
+    protected $geocodingService;
+
+    public function __construct(GeocodingService $geocodingService)
+    {
+        $this->geocodingService = $geocodingService;
+    }
 
     public function index(Request $request)
     {
@@ -67,6 +76,15 @@ class EventController extends BaseController
         $event->slug = Str::slug($request->title);
         $event->created_by = Auth::id();
 
+        // Geocode the address if it's not an online event
+        if (!$request->is_online && $request->location) {
+            $coordinates = $this->geocodingService->geocodeAddress($request->location);
+            if ($coordinates) {
+                $event->latitude = $coordinates['latitude'];
+                $event->longitude = $coordinates['longitude'];
+            }
+        }
+
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('events', 'public');
             $event->image = $path;
@@ -105,6 +123,7 @@ class EventController extends BaseController
             'online_link' => 'required_if:is_online,true|nullable|url'
         ]);
 
+        // Handle image update if present
         if ($request->hasFile('image')) {
             if ($event->image) {
                 Storage::disk('public')->delete($event->image);

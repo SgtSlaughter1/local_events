@@ -25,7 +25,9 @@ class Event extends Model
         'created_by',
         'image',
         'is_online',
-        'online_link'
+        'online_link',
+        'latitude',
+        'longitude'
     ];
 
     protected $casts = [
@@ -34,6 +36,8 @@ class Event extends Model
         'price' => 'decimal:2',
         'capacity' => 'integer',
         'is_online' => 'boolean',
+        'latitude' => 'decimal:8',
+        'longitude' => 'decimal:8'
     ];
 
     // Relationships
