@@ -116,7 +116,7 @@
 <script>
 import { useAuthStore } from '@/stores/auth'
 import { useToast } from 'vue-toastification'
-import BaseButton from '@/components/BaseButton.vue'
+import BaseButton from '@/components/Base/BaseButton.vue'
 
 export default {
   name: 'Signup',

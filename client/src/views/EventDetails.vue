@@ -167,7 +167,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useEventStore } from '../stores/event'
 import useWeather from '../composables/useWeather'
-import BaseButton from '../components/BaseButton.vue'
+import BaseButton from '../components/Base/BaseButton.vue'
 
 const route = useRoute()
 const eventStore = useEventStore()

@@ -6,7 +6,7 @@ import Events from '../views/Events.vue'
 import EventDetails from '../views/EventDetails.vue'
 import Profile from '../views/Profile.vue'
 import Dashboard from '../views/Dashboard.vue'
-
+import CreateEvent from '../views/CreateEvent.vue'
 const routes = [
   {
     path: '/',
@@ -44,6 +44,12 @@ const routes = [
     path: '/dashboard',
     name: 'dashboard',
     component: Dashboard,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/create-event',
+    name: 'createEvent',
+    component: CreateEvent,
     meta: { requiresAuth: true },
   },
 ]

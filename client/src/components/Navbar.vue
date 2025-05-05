@@ -32,6 +32,9 @@
             <li class="nav-item">
               <router-link class="nav-link" to="/organizer/events">My Events</router-link>
             </li>
+            <li class="nav-item">
+              <router-link class="nav-link" to="/create-event">Create Event</router-link>
+            </li>
           </template>
           <!-- Attendee Navigation -->
           <template v-if="auth.isAttendee">

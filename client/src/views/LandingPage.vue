@@ -154,7 +154,7 @@
 </template>
 
 <script>
-import BaseButton from '@/components/BaseButton.vue'
+import BaseButton from '@/components/Base/BaseButton.vue'
 
 export default {
   name: 'LandingPage',

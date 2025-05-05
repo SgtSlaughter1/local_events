@@ -154,7 +154,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useEventStore } from '../stores/event'
 import EventCard from '../components/EventCard.vue'
 import EventFilterSidebar from '../components/EventFilterSidebar.vue'
-import BaseButton from '../components/BaseButton.vue'
+import BaseButton from '../components/Base/BaseButton.vue'
 
 const eventStore = useEventStore()
 const searchQuery = ref('')
