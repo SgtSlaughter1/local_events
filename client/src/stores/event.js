@@ -229,5 +229,16 @@ export const useEventStore = defineStore('event', {
         return []
       }
     },
+
+    async fetchMyEvents() {
+      try {
+        const res = await api.get('/api/my-events')
+        // Returns { created_events: [...], registered_events: [...] }
+        return res.data.created_events || []
+      } catch (e) {
+        console.error('Failed to fetch my events:', e)
+        return []
+      }
+    },
   },
 })
