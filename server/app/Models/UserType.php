@@ -18,4 +18,10 @@ class UserType extends Model
     {
         return $this->hasMany(User::class);
     }
+
+    // Scope to exclude admin
+    public function scopeWithoutAdmin($query)
+    {
+        return $query->whereRaw('LOWER(name) != ?', ['admin']);
+    }
 }

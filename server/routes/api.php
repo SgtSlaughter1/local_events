@@ -10,6 +10,8 @@ use App\Http\Controllers\OrganizerController;
 use App\Http\Middleware\OrganizerMiddleware;
 use App\Http\Controllers\WeatherController;
 
+
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -42,6 +44,7 @@ Route::get('/categories', function () {
     return response()->json(['categories' => Category::active()->get()]);
 });
 
+Route::get('/user-types', [AuthController::class, 'userTypes']);
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
     // Auth routes

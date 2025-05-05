@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
-
+use App\Models\UserType;
 class AuthController extends Controller
 {
     /**
@@ -96,6 +96,12 @@ class AuthController extends Controller
         ]);
     }
 
+    public function userTypes()
+{
+    // Exclude 'admin' using the scope
+    $usertypes = UserType::withoutAdmin()->get(['id', 'name']);
+    return response()->json(['usertypes' => $usertypes]);
+}
     /**
      * Get authenticated user details
      */
