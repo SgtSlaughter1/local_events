@@ -16,24 +16,28 @@
               {{ error }}
             </div>
             <div class="social-buttons">
-              <button
+              <BaseButton
+                variant="secondary"
+                size="large"
                 class="social-btn google"
-                :class="{ loading: loading.google }"
-                @click="handleGoogleSignup"
+                :loading="loading.google"
                 :disabled="loading.google || loading.facebook || loading.email"
+                @click="handleGoogleSignup"
               >
                 <img src="@/assets/google.svg" alt="Google" />
                 Sign up with Google
-              </button>
-              <button
+              </BaseButton>
+              <BaseButton
+                variant="secondary"
+                size="large"
                 class="social-btn facebook"
-                :class="{ loading: loading.facebook }"
-                @click="handleFacebookSignup"
+                :loading="loading.facebook"
                 :disabled="loading.google || loading.facebook || loading.email"
+                @click="handleFacebookSignup"
               >
                 <img src="@/assets/facebook.svg" alt="Facebook" />
                 Sign up with Facebook
-              </button>
+              </BaseButton>
             </div>
             <div class="divider">
               <span>OR</span>
@@ -77,24 +81,27 @@
                     @input="validatePassword"
                     required
                   />
-                  <button
-                    type="button"
+                  <BaseButton
+                    variant="secondary"
+                    size="small"
                     class="toggle-password"
                     @click="showPassword = !showPassword"
                   >
                     <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
-                  </button>
+                  </BaseButton>
                 </div>
                 <span v-if="errors.password" class="error-message">{{ errors.password }}</span>
               </div>
-              <button
+              <BaseButton
                 type="submit"
+                variant="primary"
+                size="large"
                 class="submit-btn"
-                :class="{ loading: loading.email }"
+                :loading="loading.email"
                 :disabled="loading.google || loading.facebook || loading.email || !isValid"
               >
                 Create Account
-              </button>
+              </BaseButton>
             </form>
             <p class="auth-switch">
               Already have an account? <router-link to="/login">Sign in</router-link>
@@ -109,9 +116,13 @@
 <script>
 import { useAuthStore } from '@/stores/auth'
 import { useToast } from 'vue-toastification'
+import BaseButton from '@/components/BaseButton.vue'
 
 export default {
   name: 'Signup',
+  components: {
+    BaseButton
+  },
   data() {
     return {
       name: '',
@@ -251,3 +262,173 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--light-color);
+  padding: 2rem;
+}
+
+.auth-card {
+  background: var(--white-color);
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 1000px;
+  overflow: hidden;
+}
+
+.auth-content {
+  display: flex;
+  min-height: 600px;
+}
+
+.auth-left {
+  flex: 1;
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+  color: var(--white-color);
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.auth-right {
+  flex: 1;
+  padding: 3rem;
+}
+
+.auth-form {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.social-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.social-btn img {
+  width: 24px;
+  height: 24px;
+}
+
+.social-btn.google {
+  background-color: var(--white-color);
+  color: var(--text-color);
+  border: 1px solid #e0e0e0;
+}
+
+.social-btn.facebook {
+  background-color: #1877f2;
+  color: var(--white-color);
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 1.5rem 0;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.divider span {
+  padding: 0 1rem;
+  color: #666;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(255, 224, 71, 0.25);
+}
+
+.form-group input.error {
+  border-color: #dc3545;
+}
+
+.error-message {
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.password-input {
+  position: relative;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+}
+
+.submit-btn {
+  width: 100%;
+  margin-top: 1.5rem;
+}
+
+.auth-switch {
+  text-align: center;
+  margin-top: 1.5rem;
+  color: #666;
+}
+
+.auth-switch a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.auth-switch a:hover {
+  text-decoration: underline;
+}
+</style>

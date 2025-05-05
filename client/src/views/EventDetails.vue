@@ -10,9 +10,13 @@
       <!-- Back Navigation -->
       <div class="back-nav">
         <div class="container">
-          <router-link to="/events" class="btn btn-link text-white">
+          <BaseButton
+            variant="secondary"
+            size="small"
+            @click="$router.push('/events')"
+          >
             <i class="fas fa-arrow-left"></i> Back to Events
-          </router-link>
+          </BaseButton>
         </div>
       </div>
 
@@ -39,7 +43,12 @@
                   />
                   <div class="host-details">
                     <h6 class="host-name">{{ event.creator.name }}</h6>
-                    <button class="btn btn-outline-dark btn-sm">Follow</button>
+                    <BaseButton
+                      variant="secondary"
+                      size="small"
+                    >
+                      Follow
+                    </BaseButton>
                   </div>
                 </div>
               </div>
@@ -135,9 +144,14 @@
                       <span class="ticket-price">{{ formatPrice(event.price) }}</span>
                     </div>
                   </div>
-                  <button class="btn btn-primary btn-lg w-100" @click="handleBuyTickets">
+                  <BaseButton
+                    variant="primary"
+                    size="large"
+                    class="w-100"
+                    @click="handleBuyTickets"
+                  >
                     Buy Tickets
-                  </button>
+                  </BaseButton>
                 </div>
               </div>
             </div>
@@ -153,6 +167,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useEventStore } from '../stores/event'
 import useWeather from '../composables/useWeather'
+import BaseButton from '../components/BaseButton.vue'
 
 const route = useRoute()
 const eventStore = useEventStore()

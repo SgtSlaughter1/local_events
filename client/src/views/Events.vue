@@ -17,9 +17,13 @@
                   @input="handleSearch"
                 />
                 <input type="text" class="form-control form-control-lg" placeholder="Location" />
-                <button class="btn btn-primary btn-lg" type="button">
+                <BaseButton
+                  variant="primary"
+                  size="large"
+                  type="button"
+                >
                   <i class="fas fa-search"></i>
-                </button>
+                </BaseButton>
               </div>
             </div>
           </div>
@@ -81,13 +85,15 @@
                     class="page-item"
                     :class="{ disabled: eventStore.pagination.current_page === 1 }"
                   >
-                    <button
+                    <BaseButton
+                      variant="secondary"
+                      size="small"
                       class="page-link"
-                      @click="changePage(eventStore.pagination.current_page - 1)"
                       :disabled="eventStore.pagination.current_page === 1"
+                      @click="changePage(eventStore.pagination.current_page - 1)"
                     >
                       Previous
-                    </button>
+                    </BaseButton>
                   </li>
                   <li
                     v-for="page in eventStore.pagination.last_page"
@@ -95,7 +101,15 @@
                     class="page-item"
                     :class="{ active: page === eventStore.pagination.current_page }"
                   >
-                    <button class="page-link" @click="changePage(page)">{{ page }}</button>
+                    <BaseButton
+                      variant="secondary"
+                      size="small"
+                      class="page-link"
+                      :class="{ active: page === eventStore.pagination.current_page }"
+                      @click="changePage(page)"
+                    >
+                      {{ page }}
+                    </BaseButton>
                   </li>
                   <li
                     class="page-item"
@@ -104,15 +118,15 @@
                         eventStore.pagination.current_page === eventStore.pagination.last_page,
                     }"
                   >
-                    <button
+                    <BaseButton
+                      variant="secondary"
+                      size="small"
                       class="page-link"
+                      :disabled="eventStore.pagination.current_page === eventStore.pagination.last_page"
                       @click="changePage(eventStore.pagination.current_page + 1)"
-                      :disabled="
-                        eventStore.pagination.current_page === eventStore.pagination.last_page
-                      "
                     >
                       Next
-                    </button>
+                    </BaseButton>
                   </li>
                 </ul>
               </nav>
@@ -140,6 +154,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useEventStore } from '../stores/event'
 import EventCard from '../components/EventCard.vue'
 import EventFilterSidebar from '../components/EventFilterSidebar.vue'
+import BaseButton from '../components/BaseButton.vue'
 
 const eventStore = useEventStore()
 const searchQuery = ref('')
@@ -253,5 +268,35 @@ const changePage = async (page) => {
 .results-count {
   color: var(--gray-600);
   font-weight: 500;
+}
+
+/* Pagination styles */
+.pagination {
+  display: flex;
+  gap: 0.5rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.page-item {
+  margin: 0;
+}
+
+.page-link {
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  text-decoration: none;
+}
+
+.page-item.active .page-link {
+  background-color: var(--accent-color);
+  color: var(--primary-color);
+  border: none;
+}
+
+.page-item.disabled .page-link {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 </style>

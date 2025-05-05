@@ -31,9 +31,13 @@
           <span class="text-primary fw-bold">
             {{ event.price ? formatPrice(event.price) : 'Free' }}
           </span>
-          <router-link :to="'/events/' + event.id" class="btn btn-primary">
+          <BaseButton
+            variant="primary"
+            size="medium"
+            @click="$router.push('/events/' + event.id)"
+          >
             View Details
-          </router-link>
+          </BaseButton>
         </div>
       </div>
     </div>
@@ -42,9 +46,13 @@
     <div v-else class="event-details">
       <!-- Back Button -->
       <div class="back-button">
-        <button @click="$emit('close-details')" class="btn btn-link">
+        <BaseButton
+          variant="secondary"
+          size="small"
+          @click="$emit('close-details')"
+        >
           <i class="fas fa-arrow-left"></i> Back to Events
-        </button>
+        </BaseButton>
       </div>
 
       <!-- Header Image -->
@@ -75,7 +83,13 @@
                 </div>
                 <div class="ms-3">
                   <h6 class="mb-0">{{ event.organizer.name }}</h6>
-                  <button class="btn btn-link p-0" v-if="event.organizer.contact">Contact</button>
+                  <BaseButton
+                    variant="secondary"
+                    size="small"
+                    v-if="event.organizer.contact"
+                  >
+                    Contact
+                  </BaseButton>
                 </div>
               </div>
             </div>
@@ -126,9 +140,14 @@
                     event.price ? formatPrice(event.price) : 'Free'
                   }}</span>
                 </div>
-                <button @click="$emit('register', event.id)" class="btn btn-primary w-100">
+                <BaseButton
+                  variant="primary"
+                  size="large"
+                  class="w-100"
+                  @click="$emit('register', event.id)"
+                >
                   Buy Tickets
-                </button>
+                </BaseButton>
               </div>
             </div>
           </div>
@@ -140,6 +159,7 @@
 
 <script setup>
 import { computed } from 'vue'
+import BaseButton from './BaseButton.vue'
 
 const props = defineProps({
   event: {

@@ -16,24 +16,28 @@
               {{ error }}
             </div>
             <div class="social-buttons">
-              <button
-                class="social-btn google"
-                :class="{ loading: loading.google }"
-                @click="handleGoogleLogin"
+              <BaseButton
+                variant="secondary"
+                size="large"
+                :loading="loading.google"
                 :disabled="loading.google || loading.facebook || loading.email"
+                @click="handleGoogleLogin"
+                class="social-btn google"
               >
                 <img src="@/assets/google.svg" alt="Google" />
                 Sign in with Google
-              </button>
-              <button
-                class="social-btn facebook"
-                :class="{ loading: loading.facebook }"
-                @click="handleFacebookLogin"
+              </BaseButton>
+              <BaseButton
+                variant="secondary"
+                size="large"
+                :loading="loading.facebook"
                 :disabled="loading.google || loading.facebook || loading.email"
+                @click="handleFacebookLogin"
+                class="social-btn facebook"
               >
                 <img src="@/assets/facebook.svg" alt="Facebook" />
                 Sign in with Facebook
-              </button>
+              </BaseButton>
             </div>
             <div class="divider">
               <span>OR</span>
@@ -64,24 +68,28 @@
                     @input="validatePassword"
                     required
                   />
-                  <button
+                  <BaseButton
                     type="button"
+                    variant="secondary"
+                    size="small"
                     class="toggle-password"
                     @click="showPassword = !showPassword"
                   >
                     <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
-                  </button>
+                  </BaseButton>
                 </div>
                 <span v-if="errors.password" class="error-message">{{ errors.password }}</span>
               </div>
-              <button
+              <BaseButton
                 type="submit"
-                class="submit-btn"
-                :class="{ loading: loading.email }"
+                variant="primary"
+                size="large"
+                :loading="loading.email"
                 :disabled="loading.google || loading.facebook || loading.email || !isValid"
+                class="submit-btn"
               >
                 Login
-              </button>
+              </BaseButton>
             </form>
             <p class="auth-switch">
               Don't have an account? <router-link to="/signup">Sign up</router-link>
@@ -96,9 +104,13 @@
 <script>
 import { useAuthStore } from '@/stores/auth'
 import { useToast } from 'vue-toastification'
+import BaseButton from '@/components/BaseButton.vue'
 
 export default {
   name: 'Login',
+  components: {
+    BaseButton
+  },
   data() {
     return {
       email: '',

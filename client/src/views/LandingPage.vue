@@ -8,12 +8,21 @@
             <h1 class="display-1 fw-bold mb-4">Welcome to Event Management</h1>
             <p class="lead fs-2 mb-5">Your one-stop platform for managing and attending events</p>
             <div class="cta-buttons">
-              <button class="btn btn-primary btn-lg me-3 px-5 py-3" @click="navigateToEvents">
+              <BaseButton
+                variant="primary"
+                size="large"
+                class="me-3"
+                @click="navigateToEvents"
+              >
                 Browse Events
-              </button>
-              <button class="btn btn-outline-primary btn-lg px-5 py-3" @click="navigateToRegister">
+              </BaseButton>
+              <BaseButton
+                variant="secondary"
+                size="large"
+                @click="navigateToRegister"
+              >
                 Register Now
-              </button>
+              </BaseButton>
             </div>
           </div>
         </div>
@@ -89,9 +98,13 @@
                     <i class="fas fa-calendar me-2"></i>{{ formatDate(event.start_date) }}<br />
                     <i class="fas fa-map-marker-alt me-2"></i>{{ event.location }}
                   </p>
-                  <button class="btn btn-outline-primary" @click="viewEvent(event.id)">
+                  <BaseButton
+                    variant="secondary"
+                    size="medium"
+                    @click="viewEvent(event.id)"
+                  >
                     Learn More
-                  </button>
+                  </BaseButton>
                 </div>
               </div>
             </div>
@@ -110,7 +123,12 @@
                   <p class="card-text">
                     <i class="fas fa-calendar me-2"></i>{{ formatDate(event.date) }}
                   </p>
-                  <button class="btn btn-outline-primary">See More</button>
+                  <BaseButton
+                    variant="secondary"
+                    size="medium"
+                  >
+                    See More
+                  </BaseButton>
                 </div>
               </div>
             </div>
@@ -124,15 +142,25 @@
       <div class="container">
         <h3 class="fw-bold mb-3">Events specially curated for you!</h3>
         <p class="lead mb-4">Event suggestions exclusively picked for your interests</p>
-        <button class="btn btn-primary btn-lg">Get Started</button>
+        <BaseButton
+          variant="primary"
+          size="large"
+        >
+          Get Started
+        </BaseButton>
       </div>
     </section>
   </div>
 </template>
 
 <script>
+import BaseButton from '@/components/BaseButton.vue'
+
 export default {
   name: 'LandingPage',
+  components: {
+    BaseButton
+  },
   data() {
     return {
       upcomingEvents: [
