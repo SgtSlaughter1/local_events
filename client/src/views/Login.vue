@@ -6,12 +6,12 @@
           <div class="brand">
             <!-- <img src="@/assets/logo.png" alt="Eventify" class="logo"> -->
           </div>
-          <h2>Discover tailored events.</h2>
-          <p>Sign in for personalized recommendations today!</p>
+          <h2>Welcome back!</h2>
+          <p>Sign in to access your personalized events.</p>
         </div>
         <div class="auth-right">
           <div class="auth-form">
-            <h3>Login</h3>
+            <h3>Sign In</h3>
             <div v-if="error" class="alert alert-danger">
               {{ error }}
             </div>
@@ -19,10 +19,10 @@
               <BaseButton
                 variant="secondary"
                 size="large"
+                class="social-btn google"
                 :loading="loading.google"
                 :disabled="loading.google || loading.facebook || loading.email"
                 @click="handleGoogleLogin"
-                class="social-btn google"
               >
                 <img src="@/assets/google.svg" alt="Google" />
                 Sign in with Google
@@ -30,10 +30,10 @@
               <BaseButton
                 variant="secondary"
                 size="large"
+                class="social-btn facebook"
                 :loading="loading.facebook"
                 :disabled="loading.google || loading.facebook || loading.email"
                 @click="handleFacebookLogin"
-                class="social-btn facebook"
               >
                 <img src="@/assets/facebook.svg" alt="Facebook" />
                 Sign in with Facebook
@@ -44,51 +44,48 @@
             </div>
             <form @submit.prevent="handleSubmit">
               <div class="form-group">
-                <label for="email">Email Address</label>
-                <input
-                  type="email"
-                  id="email"
+                <BaseInput
                   v-model="email"
-                  :class="{ error: errors.email }"
+                  label="Email Address"
                   placeholder="Enter your email"
+                  type="email"
+                  :error="errors.email"
                   @input="validateEmail"
                   required
                 />
-                <span v-if="errors.email" class="error-message">{{ errors.email }}</span>
               </div>
               <div class="form-group">
-                <label for="password">Password</label>
-                <div class="password-input">
-                  <input
-                    :type="showPassword ? 'text' : 'password'"
-                    id="password"
-                    v-model="password"
-                    :class="{ error: errors.password }"
-                    placeholder="Enter your password"
-                    @input="validatePassword"
-                    required
-                  />
-                  <BaseButton
-                    type="button"
-                    variant="secondary"
-                    size="small"
-                    class="toggle-password"
-                    @click="showPassword = !showPassword"
-                  >
-                    <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
-                  </BaseButton>
-                </div>
-                <span v-if="errors.password" class="error-message">{{ errors.password }}</span>
+                <BaseInput
+                  v-model="password"
+                  :type="showPassword ? 'text' : 'password'"
+                  label="Password"
+                  placeholder="Enter your password"
+                  :error="errors.password"
+                  @input="validatePassword"
+                  required
+                >
+                  <template #append>
+                    <BaseButton
+                      variant="secondary"
+                      size="small"
+                      class="toggle-password"
+                      @click="showPassword = !showPassword"
+                      type="button"
+                    >
+                      <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                    </BaseButton>
+                  </template>
+                </BaseInput>
               </div>
               <BaseButton
                 type="submit"
                 variant="primary"
                 size="large"
+                class="submit-btn"
                 :loading="loading.email"
                 :disabled="loading.google || loading.facebook || loading.email || !isValid"
-                class="submit-btn"
               >
-                Login
+                Sign In
               </BaseButton>
             </form>
             <p class="auth-switch">
@@ -102,128 +99,116 @@
 </template>
 
 <script>
+import { ref, reactive, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useToast } from 'vue-toastification'
 import BaseButton from '@/components/Base/BaseButton.vue'
+import BaseInput from '@/components/Base/BaseInput.vue'
 
 export default {
   name: 'Login',
   components: {
-    BaseButton
+    BaseButton,
+    BaseInput
   },
-  data() {
-    return {
+  setup() {
+    const email = ref('')
+    const password = ref('')
+    const showPassword = ref(false)
+    const loading = reactive({
+      google: false,
+      facebook: false,
+      email: false,
+    })
+    const errors = reactive({
       email: '',
       password: '',
-      showPassword: false,
-      loading: {
-        google: false,
-        facebook: false,
-        email: false,
-      },
-      errors: {
-        email: '',
-        password: '',
-      },
-      error: null,
-    }
-  },
-  computed: {
-    isValid() {
-      return this.email && this.password && !this.errors.email && !this.errors.password
-    },
-  },
-  methods: {
-    validateEmail() {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-      if (!this.email) {
-        this.errors.email = 'Email is required'
-      } else if (!emailRegex.test(this.email)) {
-        this.errors.email = 'Please enter a valid email address'
-      } else {
-        this.errors.email = ''
-      }
-    },
-    validatePassword() {
-      if (!this.password) {
-        this.errors.password = 'Password is required'
-      } else if (this.password.length < 6) {
-        this.errors.password = 'Password must be at least 6 characters'
-      } else {
-        this.errors.password = ''
-      }
-    },
-    async handleSubmit() {
-      this.validateEmail()
-      this.validatePassword()
+    })
+    const error = ref(null)
 
-      if (!this.isValid) return
+    const isValid = computed(() =>
+      email.value &&
+      password.value &&
+      !errors.email &&
+      !errors.password
+    )
+
+    const validateEmail = () => {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!email.value) {
+        errors.email = 'Email is required'
+      } else if (!emailRegex.test(email.value)) {
+        errors.email = 'Please enter a valid email address'
+      } else {
+        errors.email = ''
+      }
+    }
+    const validatePassword = () => {
+      if (!password.value) {
+        errors.password = 'Password is required'
+      } else if (password.value.length < 6) {
+        errors.password = 'Password must be at least 6 characters'
+      } else {
+        errors.password = ''
+      }
+    }
+
+    const handleSubmit = async () => {
+      validateEmail()
+      validatePassword()
+      if (!isValid.value) return
 
       try {
-        this.loading.email = true
-        this.error = null
+        loading.email = true
+        error.value = null
 
         const auth = useAuthStore()
         const toast = useToast()
 
         const result = await auth.login({
-          email: this.email,
-          password: this.password,
+          email: email.value,
+          password: password.value,
         })
 
         if (result.success) {
           toast.success('Login successful!')
-          this.$router.push('/dashboard')
+          window.location.href = '/dashboard'
         } else {
-          this.error = result.error
+          error.value = result.error
           toast.error(result.error)
         }
-      } catch (error) {
-        this.error = 'Invalid email or password'
+      } catch (err) {
+        error.value = 'Login failed. Please try again.'
         const toast = useToast()
-        toast.error(this.error)
+        toast.error(error.value)
       } finally {
-        this.loading.email = false
+        loading.email = false
       }
-    },
-    async handleGoogleLogin() {
-      try {
-        this.loading.google = true
-        this.error = null
-        const toast = useToast()
+    }
 
-        // Implement Google login logic here
-        await new Promise((resolve) => setTimeout(resolve, 1500)) // Simulate API call
+    const handleGoogleLogin = async () => {
+      const toast = useToast()
+      toast.info('Coming soon!')
+    }
+    const handleFacebookLogin = async () => {
+      const toast = useToast()
+      toast.info('Coming soon!')
+    }
 
-        toast.success('Google login successful!')
-        this.$router.push('/dashboard')
-      } catch (error) {
-        this.error = 'Google login failed. Please try again.'
-        const toast = useToast()
-        toast.error(this.error)
-      } finally {
-        this.loading.google = false
-      }
-    },
-    async handleFacebookLogin() {
-      try {
-        this.loading.facebook = true
-        this.error = null
-        const toast = useToast()
-
-        // Implement Facebook login logic here
-        await new Promise((resolve) => setTimeout(resolve, 1500)) // Simulate API call
-
-        toast.success('Facebook login successful!')
-        this.$router.push('/dashboard')
-      } catch (error) {
-        this.error = 'Facebook login failed. Please try again.'
-        const toast = useToast()
-        toast.error(this.error)
-      } finally {
-        this.loading.facebook = false
-      }
-    },
-  },
+    return {
+      email,
+      password,
+      showPassword,
+      loading,
+      errors,
+      error,
+      isValid,
+      validateEmail,
+      validatePassword,
+      handleSubmit,
+      handleGoogleLogin,
+      handleFacebookLogin,
+    }
+  }
 }
 </script>
