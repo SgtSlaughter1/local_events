@@ -73,7 +73,6 @@ class EventController extends BaseController
         ]);
 
         $event = new Event($request->except('image'));
-        $event->slug = Str::slug($request->title);
         $event->created_by = Auth::id();
 
         // Geocode the address if it's not an online event

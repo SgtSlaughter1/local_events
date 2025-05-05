@@ -37,17 +37,98 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, watch, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useEventStore } from '../stores/event'
+import api from '../services/api'
 import BaseButton from '../components/Base/BaseButton.vue'
 import EventDetails from '../components/create-event/EventDetails.vue'
 import EventBanner from '../components/create-event/EventBanner.vue'
 import EventTicketing from '../components/create-event/EventTicketing.vue'
 import EventReview from '../components/create-event/EventReview.vue'
 
-const formData = ref({})
+const router = useRouter()
+const eventStore = useEventStore()
+
+const user = ref({ name: '' })
+onMounted(() => {
+    // Fetch user from localStorage
+    const userStr = localStorage.getItem('user')
+    if (userStr) {
+        try {
+            user.value = JSON.parse(userStr)
+        } catch (e) {
+            user.value = { name: '' }
+        }
+    }
+})
+
+const categories = ref([])
+onMounted(async () => {
+    try {
+        const res = await api.get('/api/categories')
+        categories.value = res.data.categories
+        console.log('Fetched categories:', categories.value)
+    } catch (e) {
+        categories.value = []
+    }
+})
+
+const formData = ref({
+    // Event Details
+    title: '',
+    category: '',
+    description: '',
+    start_date: '',
+    end_date: '',
+    location: '',
+    capacity: '',
+    is_online: false,
+    online_link: '',
+
+    // Banner
+    bannerUrl: '',
+    bannerAlt: '',
+
+    // Ticketing
+    eventType: 'ticketed',
+    tickets: [{ name: '', price: '' }]
+})
+
+const stepKeys = [
+    // Step 0: Details
+    ['title', 'category', 'description', 'start_date', 'end_date', 'location', 'capacity', 'is_online', 'online_link'],
+    // Step 1: Banner
+    ['bannerUrl', 'bannerAlt'],
+    // Step 2: Ticketing
+    ['eventType', 'tickets'],
+    // Step 3: Review (no new fields, but keep for completeness)
+    []
+]
+
+const saveStepDraft = (step) => {
+    const stepData = {}
+    stepKeys[step].forEach(key => {
+        stepData[key] = formData.value[key]
+    })
+    localStorage.setItem(`eventDraft-step-${step}`, JSON.stringify(stepData))
+}
+
+const mergeAllStepDrafts = () => {
+    stepKeys.forEach((keys, idx) => {
+        const saved = localStorage.getItem(`eventDraft-step-${idx}`)
+        if (saved) {
+            Object.assign(formData.value, JSON.parse(saved))
+        }
+    })
+}
+
+onMounted(() => {
+    mergeAllStepDrafts()
+})
 
 const steps = [
-    { key: 'edit', label: 'Edit', component: EventDetails },
+    { key: 'details', label: 'Details', component: EventDetails },
     { key: 'banner', label: 'Banner', component: EventBanner },
     { key: 'ticketing', label: 'Ticketing', component: EventTicketing },
     { key: 'review', label: 'Review', component: EventReview },
@@ -56,15 +137,73 @@ const steps = [
 const currentStep = ref(0)
 
 const nextStep = () => {
-    if (currentStep.value < steps.length - 1) currentStep.value++
+    // Validate current step before proceeding
+    if (currentStep.value === 0) {
+        // Validate Event Details
+        if (!formData.value.title || !formData.value.category || !formData.value.description || 
+            !formData.value.start_date || !formData.value.end_date) {
+            alert('Please fill in all required fields')
+            return
+        }
+    }
+    if (currentStep.value < steps.length - 1) {
+        saveStepDraft(currentStep.value)
+        // If moving to review step, merge all drafts
+        if (currentStep.value + 1 === steps.length - 1) {
+            mergeAllStepDrafts()
+        }
+        currentStep.value++
+    }
 }
+
 const prevStep = () => {
-    if (currentStep.value > 0) currentStep.value--
+    if (currentStep.value > 0) {
+        saveStepDraft(currentStep.value)
+        currentStep.value--
+    }
 }
-const submitEvent = () => {
-    // TODO: Implement event submission logic
-    alert('Event submitted!')
-    console.log('Submitted data:', formData.value)
+
+const submitEvent = async () => {
+    try {
+        // Transform the form data to match the backend API requirements
+        const eventData = {
+            title: formData.value.title,
+            description: formData.value.description,
+            category_id: formData.value.category,
+            start_date: formData.value.start_date ? new Date(formData.value.start_date).toISOString() : null,
+            end_date: formData.value.end_date ? new Date(formData.value.end_date).toISOString() : null,
+            location: formData.value.location || null,
+            capacity: formData.value.capacity ? parseInt(formData.value.capacity) : null,
+            price: formData.value.eventType === 'ticketed' ? parseFloat(formData.value.tickets[0]?.price || 0) : 0,
+            image: formData.value.bannerUrl || null,
+            is_online: formData.value.is_online || false,
+            online_link: formData.value.online_link || null
+        }
+
+        // Call the event store to create the event
+        const createdEvent = await eventStore.createEvent(eventData)
+        
+        // Remove all step drafts after successful publish
+        clearAllStepDrafts()
+        
+        // Show success message and redirect to the event details page
+        alert('Event created successfully!')
+        router.push(`/events/${createdEvent.id}`)
+    } catch (error) {
+        console.error('Error creating event:', error)
+        if (error.response?.data?.errors) {
+            const errorMessages = Object.values(error.response.data.errors).flat().join('\n')
+            alert(`Validation errors:\n${errorMessages}`)
+        } else {
+            alert(error.message || 'Failed to create event. Please try again.')
+        }
+    }
+}
+
+const clearAllStepDrafts = () => {
+    stepKeys.forEach((keys, idx) => {
+        localStorage.removeItem(`eventDraft-step-${idx}`)
+    })
 }
 </script>
 

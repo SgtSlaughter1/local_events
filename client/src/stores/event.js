@@ -218,5 +218,16 @@ export const useEventStore = defineStore('event', {
         this.loading = false
       }
     },
+
+    async fetchCategories() {
+      try {
+        const res = await api.get('/api/categories')
+        console.log('Fetched categories:', res.data.categories)
+        return res.data.categories
+      } catch (e) {
+        console.error('Failed to fetch categories:', e)
+        return []
+      }
+    },
   },
 })
