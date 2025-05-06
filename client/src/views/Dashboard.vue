@@ -10,6 +10,8 @@
     <!-- Organizer Dashboard -->
     <template v-else-if="auth.isOrganizer">
       <OrganizerDashboard v-if="currentView === 'dashboard'" />
+      <MyEvents v-else-if="currentView === 'my-events'" />
+      <CreateEvent v-else-if="currentView === 'create-event'" />
       <Profile v-else-if="currentView === 'profile'" />
       <Settings v-else-if="currentView === 'settings'" />
     </template>
@@ -37,6 +39,8 @@ import { useAuthStore } from '@/stores/auth'
 import DashboardLayout from '@/components/Dashboard/DashboardLayout.vue'
 import AdminDashboard from '@/components/Dashboard/AdminDashboard.vue'
 import OrganizerDashboard from '@/components/Dashboard/OrganizerDashboard.vue'
+import MyEvents from '../views/MyEvents.vue'
+import CreateEvent from '../views/CreateEvent.vue'
 import Profile from '@/views/Profile.vue'
 import Settings from '@/views/Settings.vue'
 
@@ -46,6 +50,8 @@ const auth = useAuthStore()
 const currentView = computed(() => {
   const path = route.path
   if (path === '/dashboard') return 'dashboard'
+  if (path === '/dashboard/my-events') return 'my-events'
+  if (path === '/dashboard/create-event') return 'create-event'
   if (path === '/dashboard/profile') return 'profile'
   if (path === '/dashboard/settings') return 'settings'
   return ''
@@ -53,6 +59,10 @@ const currentView = computed(() => {
 
 const currentPageTitle = computed(() => {
   switch (currentView.value) {
+    case 'my-events':
+      return 'My Events'
+    case 'create-event':
+      return 'Create Event'
     case 'profile':
       return 'Profile'
     case 'settings':
