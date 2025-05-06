@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Event;
 use App\Models\Category;
+use App\Models\EventRegistration;
 use App\Services\GeocodingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -193,15 +194,63 @@ class EventController extends BaseController
 
     public function myEvents()
     {
-        $createdEvents = Event::where('created_by', Auth::id())
+        $createdEvents = $this->getCreatedEvents();
+        $registeredEvents = $this->getRegisteredEvents();
+
+        return response()->json([
+            'created_events' => $createdEvents,
+            'registered_events' => $registeredEvents
+        ]);
+    }
+
+    // Organizer specific methods
+    public function organizerEvents()
+    {
+        $events = $this->getOrganizerEvents();
+        return response()->json(['events' => $events]);
+    }
+
+    public function eventRegistrations(Event $event)
+    {
+        $this->authorize('view', $event);
+        $registrations = $this->getEventRegistrations($event);
+        return response()->json(['registrations' => $registrations]);
+    }
+
+    public function updateRegistration(Request $request, EventRegistration $registration)
+    {
+        $this->authorize('update', $registration->event);
+        $this->validateRegistrationStatus($request);
+        $registration = $this->updateRegistrationStatus($registration, $request->status);
+
+        return response()->json([
+            'message' => 'Registration updated successfully',
+            'registration' => $registration
+        ]);
+    }
+
+    public function eventStats(Event $event)
+    {
+        $this->authorize('view', $event);
+        $stats = $this->calculateEventStats($event);
+        return response()->json(['stats' => $stats]);
+    }
+
+    // Private helper methods
+    private function getCreatedEvents()
+    {
+        return Event::where('created_by', Auth::id())
             ->with('category')
             ->latest()
             ->get()
             ->each(function ($event) {
                 $event->append('image_url');
             });
+    }
 
-        $registeredEvents = Event::whereHas('registrations', function ($query) {
+    private function getRegisteredEvents()
+    {
+        return Event::whereHas('registrations', function ($query) {
             $query->where('user_id', Auth::id());
         })
         ->with(['category', 'registrations' => function ($query) {
@@ -212,10 +261,49 @@ class EventController extends BaseController
         ->each(function ($event) {
             $event->append('image_url');
         });
+    }
 
-        return response()->json([
-            'created_events' => $createdEvents,
-            'registered_events' => $registeredEvents
+    private function getOrganizerEvents()
+    {
+        return Event::where('created_by', Auth::id())
+            ->with(['category', 'registrations'])
+            ->latest()
+            ->get()
+            ->each(function ($event) {
+                $event->append('image_url');
+            });
+    }
+
+    private function getEventRegistrations(Event $event)
+    {
+        return $event->registrations()
+            ->with('user')
+            ->latest()
+            ->get();
+    }
+
+    private function validateRegistrationStatus(Request $request)
+    {
+        return $request->validate([
+            'status' => 'required|in:pending,confirmed,cancelled',
         ]);
+    }
+
+    private function updateRegistrationStatus(EventRegistration $registration, string $status)
+    {
+        $registration->update(['status' => $status]);
+        return $registration;
+    }
+
+    private function calculateEventStats(Event $event)
+    {
+        return [
+            'registrations_count' => $event->registrations()->count(),
+            'reviews_count' => $event->reviews()->count(),
+            'average_rating' => $event->reviews()->avg('rating'),
+            'confirmed_registrations' => $event->registrations()->where('status', 'confirmed')->count(),
+            'pending_registrations' => $event->registrations()->where('status', 'pending')->count(),
+            'cancelled_registrations' => $event->registrations()->where('status', 'cancelled')->count(),
+        ];
     }
 }

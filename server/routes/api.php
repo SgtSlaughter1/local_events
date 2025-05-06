@@ -45,6 +45,7 @@ Route::get('/categories', function () {
 });
 
 Route::get('/user-types', [AuthController::class, 'userTypes']);
+
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
     // Auth routes
@@ -61,17 +62,14 @@ Route::middleware('auth:sanctum')->group(function () {
     // Reviews
     Route::post('/events/{event}/reviews', [ReviewController::class, 'store']);
     Route::delete('/events/{event}/reviews/{review}', [ReviewController::class, 'destroy']);
-});
 
-Route::middleware(['auth:sanctum', OrganizerMiddleware::class])->prefix('organizer')->group(function () {
-    Route::get('events', [OrganizerController::class, 'index']);
-    Route::post('events', [OrganizerController::class, 'store']);
-    Route::get('events/{id}', [OrganizerController::class, 'show']);
-    Route::put('events/{id}', [OrganizerController::class, 'update']);
-    Route::delete('events/{id}', [OrganizerController::class, 'destroy']);
-    Route::get('events/{id}/registrations', [OrganizerController::class, 'registrations']);
-    Route::put('registrations/{registration_id}', [OrganizerController::class, 'updateRegistration']);
-    Route::get('events/{id}/stats', [OrganizerController::class, 'stats']);
+    // Organizer specific routes
+    Route::middleware([OrganizerMiddleware::class])->prefix('organizer')->group(function () {
+        Route::get('events', [EventController::class, 'organizerEvents']);
+        Route::get('events/{event}/registrations', [EventController::class, 'eventRegistrations']);
+        Route::put('registrations/{registration}', [EventController::class, 'updateRegistration']);
+        Route::get('events/{event}/stats', [EventController::class, 'eventStats']);
+    });
 });
 
 Route::get('/weather/forecast', [WeatherController::class, 'getForecast']);
