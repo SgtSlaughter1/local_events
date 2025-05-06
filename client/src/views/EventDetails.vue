@@ -164,12 +164,13 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useEventStore } from '../stores/event'
 import useWeather from '../composables/useWeather'
 import BaseButton from '../components/Base/BaseButton.vue'
 
 const route = useRoute()
+const router = useRouter()
 const eventStore = useEventStore()
 const event = ref(null)
 
@@ -230,7 +231,10 @@ const formatPrice = (price) => {
 }
 
 const handleBuyTickets = () => {
-  console.log('Buy tickets clicked for event:', event.value?.id)
+  router.push({
+    name: 'ticket-booking',
+    params: { id: event.value.id }
+  })
 }
 </script>
 

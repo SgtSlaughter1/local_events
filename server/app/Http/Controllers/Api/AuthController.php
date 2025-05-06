@@ -97,11 +97,11 @@ class AuthController extends Controller
     }
 
     public function userTypes()
-{
-    // Exclude 'admin' using the scope
-    $usertypes = UserType::withoutAdmin()->get(['id', 'name']);
-    return response()->json(['usertypes' => $usertypes]);
-}
+    {
+        $usertypes = UserType::withoutAdmin()->get(['id', 'name']);
+        return response()->json(['usertypes' => $usertypes]);
+    }
+
     /**
      * Get authenticated user details
      */

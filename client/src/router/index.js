@@ -7,6 +7,10 @@ import EventDetails from '../views/EventDetails.vue'
 import Profile from '../views/Profile.vue'
 import Dashboard from '../views/Dashboard.vue'
 import CreateEvent from '../views/CreateEvent.vue'
+import TicketBooking from '../components/TicketBooking.vue'
+import Checkout from '../components/Checkout.vue'
+import PaymentSuccess from '../components/PaymentSuccess.vue'
+
 const routes = [
   {
     path: '/',
@@ -33,6 +37,26 @@ const routes = [
     name: 'EventDetails',
     component: EventDetails,
     props: true,
+  },
+  {
+    path: '/events/:id/book',
+    name: 'ticket-booking',
+    component: TicketBooking,
+    props: true,
+  },
+  {
+    path: '/events/:id/checkout',
+    name: 'checkout',
+    component: Checkout,
+    props: true,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/events/:id/payment-success',
+    name: 'payment-success',
+    component: PaymentSuccess,
+    props: true,
+    meta: { requiresAuth: true },
   },
   {
     path: '/profile',

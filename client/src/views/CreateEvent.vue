@@ -68,7 +68,7 @@ onMounted(async () => {
     try {
         const res = await api.get('/api/categories')
         categories.value = res.data.categories
-        console.log('Fetched categories:', categories.value)
+        // console.log('Fetched categories:', categories.value)
     } catch (e) {
         categories.value = []
     }

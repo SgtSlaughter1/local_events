@@ -59,18 +59,18 @@ class EventController extends BaseController
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
-            'start_date' => 'required|date|after:now',
+            'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
-            'location' => 'required_if:is_online,false|string|max:255',
+            'location' => 'required|string|max:255',
             'capacity' => 'nullable|integer|min:1',
             'price' => 'nullable|numeric|min:0',
             'category_id' => 'required|exists:categories,id',
             'image' => 'nullable|image|max:2048',
             'is_online' => 'boolean',
-            'online_link' => 'required_if:is_online,true|nullable|url'
+            'online_link' => 'required_if:is_online,true|url|nullable'
         ]);
 
         $event = new Event($request->except('image'));
@@ -155,7 +155,7 @@ class EventController extends BaseController
         ]);
     }
 
-    public function register(Event $event)
+    public function register(Request $request, Event $event)
     {
         $request = request();
         $request->validate([
