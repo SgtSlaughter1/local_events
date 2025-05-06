@@ -168,10 +168,6 @@ const deleteEvent = async (id) => {
 </script>
 
 <style scoped>
-.my-events-page {
-    padding: 1rem;
-}
-
 .page-header {
     display: flex;
     justify-content: space-between;
@@ -189,6 +185,7 @@ const deleteEvent = async (id) => {
     display: flex;
     flex-direction: column;
     height: 100%;
+    align-items: center;
 }
 
 .event-actions {

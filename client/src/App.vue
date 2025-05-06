@@ -1,36 +1,34 @@
 <template>
   <div class="app">
     <Navbar v-if="!isDashboardRoute" />
-    <main class="page-container">
+    <main class="main-content">
       <router-view />
     </main>
     <Footer v-if="!isDashboardRoute" />
   </div>
 </template>
 
-<script>
-import Navbar from './components/Navbar.vue'
-import Footer from './components/Footer.vue'
+<script setup>
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
+import Navbar from '@/components/Navbar.vue'
+import Footer from '@/components/Footer.vue'
 
-export default {
-  name: 'App',
-  components: {
-    Navbar,
-    Footer,
-  },
-  setup() {
-    const route = useRoute()
-    const isDashboardRoute = computed(() => route.name === 'dashboard')
+const route = useRoute()
 
-    return {
-      isDashboardRoute
-    }
-  }
-}
+const isDashboardRoute = computed(() => {
+  return route.path.startsWith('/dashboard')
+})
 </script>
 
 <style>
-@import './assets/main.css';
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex: 1;
+}
 </style>

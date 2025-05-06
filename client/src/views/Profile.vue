@@ -21,8 +21,8 @@
           <h2 class="profile-name">{{ user.name }}</h2>
           <p class="profile-role">{{ userRole }}</p>
           <p class="profile-email">{{ user.email }}</p>
-        </div>
-      </div>
+            </div>
+            </div>
 
       <div class="profile-stats">
         <div class="stat-item">
@@ -31,14 +31,14 @@
             <span class="stat-value">{{ stats.totalEvents }}</span>
             <span class="stat-label">Total Events</span>
           </div>
-        </div>
+            </div>
         <div class="stat-item">
           <i class="fas fa-ticket-alt"></i>
           <div class="stat-info">
             <span class="stat-value">{{ stats.totalBookings }}</span>
             <span class="stat-label">Total Bookings</span>
           </div>
-        </div>
+            </div>
         <div class="stat-item">
           <i class="fas fa-star"></i>
           <div class="stat-info">
@@ -52,7 +52,7 @@
         <router-link to="/dashboard/settings" class="btn btn-primary">
           <i class="fas fa-cog"></i> Edit Settings
         </router-link>
-      </div>
+            </div>
 
       <!-- Recent Activity -->
       <div class="profile-section">
@@ -67,7 +67,7 @@
               <span class="activity-time">{{ activity.time }}</span>
             </div>
           </div>
-        </div>
+      </div>
       </div>
     </div>
   </div>
@@ -78,7 +78,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import axios from 'axios'
 
-const auth = useAuthStore()
+    const auth = useAuthStore()
 const user = computed(() => auth.user)
 
 const userAvatar = computed(() => user.value?.avatar || '/default-avatar.png')
@@ -106,7 +106,7 @@ onMounted(async () => {
     // Fetch recent activity
     const activityResponse = await axios.get('/api/user/activity')
     recentActivity.value = activityResponse.data
-  } catch (error) {
+      } catch (error) {
     console.error('Error loading profile data:', error)
   }
 })

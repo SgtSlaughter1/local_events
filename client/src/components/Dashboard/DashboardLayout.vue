@@ -389,11 +389,7 @@ export default {
         width: 250px;
     }
 
-    .dashboard-content {
-        margin-top: 70px;
-    }
-
-    .username {
+       .username {
         display: none;
     }
 }
