@@ -86,9 +86,9 @@ const formData = ref({
     is_online: false,
     online_link: '',
 
-    // Banner
-    bannerUrl: '',
-    bannerAlt: '',
+    // Image
+    image: '',
+    image_alt: '',
 
     // Ticketing
     eventType: 'ticketed',
@@ -98,8 +98,8 @@ const formData = ref({
 const stepKeys = [
     // Step 0: Details
     ['title', 'category', 'description', 'start_date', 'end_date', 'location', 'capacity', 'is_online', 'online_link'],
-    // Step 1: Banner
-    ['bannerUrl', 'bannerAlt'],
+    // Step 1: Image
+    ['image', 'image_alt'],
     // Step 2: Ticketing
     ['eventType', 'tickets'],
     // Step 3: Review (no new fields, but keep for completeness)
@@ -175,13 +175,18 @@ const submitEvent = async () => {
             location: formData.value.location || null,
             capacity: formData.value.capacity ? parseInt(formData.value.capacity) : null,
             price: formData.value.eventType === 'ticketed' ? parseFloat(formData.value.tickets[0]?.price || 0) : 0,
-            image: formData.value.bannerUrl || null,
+            image: formData.value.image || null,
+            image_alt: formData.value.image_alt || null,
             is_online: formData.value.is_online || false,
             online_link: formData.value.online_link || null
         }
 
         // Call the event store to create the event
         const createdEvent = await eventStore.createEvent(eventData)
+        
+        if (!createdEvent || !createdEvent.id) {
+            throw new Error('Failed to create event: Invalid response from server')
+        }
         
         // Remove all step drafts after successful publish
         clearAllStepDrafts()
@@ -194,6 +199,8 @@ const submitEvent = async () => {
         if (error.response?.data?.errors) {
             const errorMessages = Object.values(error.response.data.errors).flat().join('\n')
             alert(`Validation errors:\n${errorMessages}`)
+        } else if (error.response?.data?.message) {
+            alert(error.response.data.message)
         } else {
             alert(error.message || 'Failed to create event. Please try again.')
         }

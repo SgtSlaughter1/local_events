@@ -146,10 +146,18 @@ export const useEventStore = defineStore('event', {
       this.error = null
       try {
         const response = await api.post('/api/events', eventData)
-        this.events.push(response.data.data)
-        return response.data.data
+        
+        // Check if we have a valid event in the response
+        if (!response.data || !response.data.event) {
+          throw new Error('Invalid response structure from server')
+        }
+
+        const newEvent = response.data.event
+        // Add the new event to the store
+        this.events.push(newEvent)
+        return newEvent
       } catch (error) {
-        this.error = error.response?.data?.message || 'Error creating event'
+        this.error = error.response?.data?.message || error.message || 'Error creating event'
         throw error
       } finally {
         this.loading = false

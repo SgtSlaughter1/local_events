@@ -60,6 +60,21 @@ class Event extends Model
         return $this->hasMany(Review::class);
     }
 
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function tickets()
+    {
+        return $this->hasMany(Ticket::class);
+    }
+
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class);
+    }
+
     // Scopes
     public function scopeUpcoming($query)
     {
@@ -103,8 +118,13 @@ class Event extends Model
             return null;
         }
 
-        $fullPath = 'events/' . $this->image;
+        // If the image is already a full URL, return it
+        if (filter_var($this->image, FILTER_VALIDATE_URL)) {
+            return $this->image;
+        }
 
+        // If it's a relative path, construct the full URL
+        $fullPath = 'events/' . $this->image;
         if (!Storage::disk('public')->exists($fullPath)) {
             return null;
         }

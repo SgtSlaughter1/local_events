@@ -38,6 +38,7 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::get('/events', [EventController::class, 'index']);
 Route::get('/events/{event}', [EventController::class, 'show']);
 Route::get('/events/{event}/reviews', [ReviewController::class, 'index']);
+Route::post('/events/upload-image', [EventController::class, 'uploadImage']);
 
 // Category routes (public)
 Route::get('/categories', function () {
@@ -50,12 +51,20 @@ Route::get('/user-types', [AuthController::class, 'userTypes']);
 Route::middleware('auth:sanctum')->group(function () {
     // Auth routes
     Route::post('/logout', [AuthController::class, 'logout']);
-    Route::get('/user', [AuthController::class, 'user']);
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
+
+    // Event routes
+    Route::prefix('events')->group(function () {
+        Route::post('/', [EventController::class, 'store']);
+        Route::get('/', [EventController::class, 'index']);
+        Route::get('/{event}', [EventController::class, 'show']);
+        Route::put('/{event}', [EventController::class, 'update']);
+        Route::delete('/{event}', [EventController::class, 'destroy']);
+    });
 
     // Event management
-    Route::post('/events', [EventController::class, 'store']);
-    Route::put('/events/{event}', [EventController::class, 'update']);
-    Route::delete('/events/{event}', [EventController::class, 'destroy']);
     Route::post('/events/{event}/register', [EventController::class, 'register']);
     Route::get('/my-events', [EventController::class, 'myEvents']);
 

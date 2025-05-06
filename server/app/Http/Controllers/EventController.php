@@ -68,9 +68,10 @@ class EventController extends BaseController
             'capacity' => 'nullable|integer|min:1',
             'price' => 'nullable|numeric|min:0',
             'category_id' => 'required|exists:categories,id',
-            'image' => 'nullable|image|max:2048',
+            'image' => 'nullable|string|max:255',
+            'image_alt' => 'nullable|string|max:255',
             'is_online' => 'boolean',
-            'online_link' => 'required_if:is_online,true|url|nullable'
+            'online_link' => 'required_if:is_online,true|url|nullable',
         ]);
 
         $event = new Event($request->except('image'));
@@ -85,16 +86,20 @@ class EventController extends BaseController
             }
         }
 
-        if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('events', 'public');
-            $event->image = $path;
+        // Handle image URL
+        if ($request->has('image') && $request->image) {
+            $event->image = $request->image;
         }
 
         $event->save();
 
+        // Load relationships and append image_url
+        $event->load('category', 'creator');
+        $event->append('image_url');
+
         return response()->json([
             'message' => 'Event created successfully',
-            'event' => $event->load('category', 'creator')->append('image_url')
+            'event' => $event
         ], 201);
     }
 
@@ -120,7 +125,9 @@ class EventController extends BaseController
             'category_id' => 'sometimes|required|exists:categories,id',
             'image' => 'nullable|image|max:2048',
             'is_online' => 'boolean',
-            'online_link' => 'required_if:is_online,true|nullable|url'
+            'online_link' => 'required_if:is_online,true|nullable|url',
+            'banner_url' => 'nullable|string',
+            'banner_alt' => 'nullable|string|max:255',
         ]);
 
         // Handle image update if present
@@ -234,6 +241,34 @@ class EventController extends BaseController
         $this->authorize('view', $event);
         $stats = $this->calculateEventStats($event);
         return response()->json(['stats' => $stats]);
+    }
+
+    public function uploadImage(Request $request)
+    {
+        $request->validate([
+            'image' => 'required|image|mimes:jpeg,png,jpg|max:2048' // 2MB max
+        ]);
+
+        try {
+            if ($request->hasFile('image')) {
+                $path = $request->file('image')->store('events', 'public');
+                $url = asset('storage/' . $path);
+
+                return response()->json([
+                    'message' => 'Image uploaded successfully',
+                    'url' => $url
+                ]);
+            }
+
+            return response()->json([
+                'message' => 'No image file provided'
+            ], 400);
+        } catch (\Exception $e) {
+            Log::error('Image upload failed: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Failed to upload image'
+            ], 500);
+        }
     }
 
     // Private helper methods
