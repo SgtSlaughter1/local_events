@@ -74,20 +74,6 @@ const formatDate = (date) => {
         minute: '2-digit'
     })
 }
-
-const categoryOptions = [
-    { value: 'music', label: 'Music' },
-    { value: 'sports', label: 'Sports' },
-    { value: 'conference', label: 'Conference' },
-    { value: 'workshop', label: 'Workshop' },
-    { value: 'meetup', label: 'Meetup' },
-    { value: 'other', label: 'Other' },
-]
-
-const categoryLabel = computed(() => {
-    const found = categoryOptions.find(opt => opt.value === data.value.category)
-    return found ? found.label : data.value.category || '-'
-})
 </script>
 
 <style scoped>

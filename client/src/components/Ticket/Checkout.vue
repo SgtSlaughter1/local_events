@@ -98,13 +98,7 @@ const isProcessing = ref(false)
 const processPayment = async () => {
     try {
         isProcessing.value = true
-
-        // Here you would typically:
-        // 1. Validate the payment details
-        // 2. Call your payment processing API
-        // 3. Create the order in your backend
-        // 4. Send confirmation emails
-
+        
         // Mock API call
         await new Promise(resolve => setTimeout(resolve, 2000))
 

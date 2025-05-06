@@ -42,12 +42,6 @@ const totalAmount = computed(() => {
     }, 0)
 })
 
-const downloadTickets = () => {
-    // Here you would typically:
-    // 1. Generate PDF tickets
-    // 2. Allow user to download them
-    console.log('Downloading tickets...')
-}
 </script>
 
 <style scoped>

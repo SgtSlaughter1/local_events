@@ -8,8 +8,8 @@
 
 <script>
 import { useAuthStore } from '@/stores/auth'
-import AdminDashboard from '@/components/AdminDashboard.vue'
-import OrganizerDashboard from '@/components/OrganizerDashboard.vue'
+import AdminDashboard from '@/components/Dashboard/AdminDashboard.vue'
+import OrganizerDashboard from '@/components/Dashboard/OrganizerDashboard.vue'
 
 export default {
   name: 'Dashboard',

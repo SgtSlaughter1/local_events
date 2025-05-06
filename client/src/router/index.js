@@ -7,9 +7,9 @@ import EventDetails from '../views/EventDetails.vue'
 import Profile from '../views/Profile.vue'
 import Dashboard from '../views/Dashboard.vue'
 import CreateEvent from '../views/CreateEvent.vue'
-import TicketBooking from '../components/TicketBooking.vue'
-import Checkout from '../components/Checkout.vue'
-import PaymentSuccess from '../components/PaymentSuccess.vue'
+import TicketBooking from '../components/Ticket/TicketBooking.vue'
+import Checkout from '../components/Ticket/Checkout.vue'
+import PaymentSuccess from '../components/Ticket/PaymentSuccess.vue'
 
 const routes = [
   {

@@ -181,7 +181,7 @@ onMounted(async () => {
     console.log('Route params:', route.params)
     const eventId = route.params.id
     const fetchedEvent = await eventStore.fetchEvent(eventId)
-    console.log('Fetched event:', fetchedEvent)
+    // console.log('Fetched event:', fetchedEvent)
     event.value = fetchedEvent
     await fetchWeather()
   } catch (error) {
