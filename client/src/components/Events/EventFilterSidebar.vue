@@ -92,7 +92,7 @@
 
 <script setup>
 import { ref, watch } from 'vue'
-import { useEventStore } from '../stores/event'
+import { useEventStore } from '../../stores/event'
 
 const eventStore = useEventStore()
 const categories = ref([])

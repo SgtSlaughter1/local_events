@@ -152,8 +152,8 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useEventStore } from '../stores/event'
-import EventCard from '../components/EventCard.vue'
-import EventFilterSidebar from '../components/EventFilterSidebar.vue'
+import EventCard from '../components/Events/EventCard.vue'
+import EventFilterSidebar from '../components/Events/EventFilterSidebar.vue'
 import BaseButton from '../components/Base/BaseButton.vue'
 
 const eventStore = useEventStore()

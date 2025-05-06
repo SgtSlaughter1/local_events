@@ -95,9 +95,9 @@
 
                 <!-- Attendee Navigation -->
                 <template v-if="auth.isAttendee">
-                    <router-link to="/dashboard/my-bookings" class="nav-item" :class="{ active: currentView === 'my-bookings' }">
-                        <i class="fas fa-ticket-alt"></i>
-                        <span>My Bookings</span>
+                    <router-link to="/dashboard" class="nav-item" :class="{ active: currentView === 'dashboard' }">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
                     </router-link>
                 </template>
 

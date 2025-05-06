@@ -159,7 +159,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import BaseButton from './Base/BaseButton.vue'
+import BaseButton from '../Base/BaseButton.vue'
 
 const props = defineProps({
   event: {

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\OrganizerController;
 use App\Http\Middleware\OrganizerMiddleware;
 use App\Http\Controllers\WeatherController;
+use App\Http\Controllers\Api\AttendeeController;
 
 
 
@@ -78,6 +79,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('events/{event}/registrations', [EventController::class, 'eventRegistrations']);
         Route::put('registrations/{registration}', [EventController::class, 'updateRegistration']);
         Route::get('events/{event}/stats', [EventController::class, 'eventStats']);
+    });
+
+    // Attendee Routes
+    Route::middleware(['auth:sanctum', 'role:attendee'])->group(function () {
+        Route::get('/attendee/dashboard', [AttendeeController::class, 'getDashboardData']);
+        Route::get('/attendee/tickets/{ticketId}/download', [AttendeeController::class, 'downloadTicket']);
     });
 });
 

@@ -18,7 +18,8 @@
 
     <!-- Attendee Dashboard -->
     <template v-else-if="auth.isAttendee">
-      <Profile v-if="currentView === 'profile'" />
+      <AttendeeDashboard v-if="currentView === 'dashboard'" />
+      <Profile v-else-if="currentView === 'profile'" />
       <Settings v-else-if="currentView === 'settings'" />
     </template>
 
@@ -39,10 +40,11 @@ import { useAuthStore } from '@/stores/auth'
 import DashboardLayout from '@/components/Dashboard/DashboardLayout.vue'
 import AdminDashboard from '@/components/Dashboard/AdminDashboard.vue'
 import OrganizerDashboard from '@/components/Dashboard/OrganizerDashboard.vue'
-import MyEvents from '../views/MyEvents.vue'
+import AttendeeDashboard from '@/components/Dashboard/AttendeeDashboard.vue'
+import MyEvents from '../components/Dashboard/MyEvents.vue'
 import CreateEvent from '../views/CreateEvent.vue'
-import Profile from '@/views/Profile.vue'
-import Settings from '@/views/Settings.vue'
+import Profile from '@/components/Dashboard/Profile.vue'
+import Settings from '@/components/Dashboard/Settings.vue'
 
 const route = useRoute()
 const auth = useAuthStore()
