@@ -22,23 +22,23 @@
             <router-link class="nav-link" to="/events">Events</router-link>
           </li>
           <!-- Admin Navigation -->
-          <template v-if="auth.isAdmin">
+          <!-- <template v-if="auth.isAdmin">
             <li class="nav-item">
               <router-link class="nav-link" to="/admin/users">Manage Users</router-link>
             </li>
-          </template>
+          </template> -->
           <!-- Organizer Navigation -->
-          <template v-if="auth.isOrganizer">
+          <!-- <template v-if="auth.isOrganizer">
             <li class="nav-item">
               <router-link class="nav-link" to="/dashboard">Dashboard</router-link>
             </li>
-          </template>
+          </template> -->
           <!-- Attendee Navigation -->
-          <template v-if="auth.isAttendee">
+          <!-- <template v-if="auth.isAttendee">
             <li class="nav-item">
               <router-link class="nav-link" to="/attendee/bookings">My Bookings</router-link>
             </li>
-          </template>
+          </template> -->
         </ul>
         <div class="d-flex align-items-center">
           <!-- Authenticated User Menu -->

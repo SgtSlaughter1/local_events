@@ -47,51 +47,69 @@
             </div> -->
 
             <nav class="sidebar-nav">
-                <router-link to="/dashboard" class="nav-item" active-class="active">
-                    <i class="fas fa-tachometer-alt"></i>
-                    <span :class="{ 'collapsed': isSidebarCollapsed }">Dashboard</span>
+                <!-- Home Link -->
+                <router-link to="/" class="nav-item" :class="{ active: currentView === 'home' }">
+                    <i class="fas fa-home"></i>
+                    <span>Home</span>
                 </router-link>
 
                 <!-- Admin Navigation -->
-                <template v-if="auth?.isAdmin">
-                    <router-link to="/dashboard/users" class="nav-item" active-class="active">
+                <template v-if="auth.isAdmin">
+                    <router-link to="/dashboard" class="nav-item" :class="{ active: currentView === 'dashboard' }">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </router-link>
+                    <router-link to="/dashboard/users" class="nav-item" :class="{ active: currentView === 'users' }">
                         <i class="fas fa-users"></i>
-                        <span :class="{ 'collapsed': isSidebarCollapsed }">Manage Users</span>
+                        <span>Manage Users</span>
                     </router-link>
-                    <router-link to="/dashboard/categories" class="nav-item" active-class="active">
+                    <router-link to="/dashboard/categories" class="nav-item" :class="{ active: currentView === 'categories' }">
                         <i class="fas fa-tags"></i>
-                        <span :class="{ 'collapsed': isSidebarCollapsed }">Categories</span>
+                        <span>Categories</span>
                     </router-link>
-                    <router-link to="/dashboard/analytics" class="nav-item" active-class="active">
+                    <router-link to="/dashboard/analytics" class="nav-item" :class="{ active: currentView === 'analytics' }">
                         <i class="fas fa-chart-bar"></i>
-                        <span :class="{ 'collapsed': isSidebarCollapsed }">Analytics</span>
+                        <span>Analytics</span>
                     </router-link>
                 </template>
 
                 <!-- Organizer Navigation -->
-                <template v-if="auth?.isOrganizer">
-                    <router-link to="/dashboard/my-events" class="nav-item" active-class="active">
+                <template v-if="auth.isOrganizer">
+                    <router-link to="/dashboard" class="nav-item" :class="{ active: currentView === 'dashboard' }">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </router-link>
+                    <router-link to="/dashboard/my-events" class="nav-item" :class="{ active: currentView === 'my-events' }">
                         <i class="fas fa-calendar-alt"></i>
-                        <span :class="{ 'collapsed': isSidebarCollapsed }">My Events</span>
+                        <span>My Events</span>
                     </router-link>
-                    <router-link to="/dashboard/create-event" class="nav-item" active-class="active">
+                    <router-link to="/dashboard/create-event" class="nav-item" :class="{ active: currentView === 'create-event' }">
                         <i class="fas fa-plus-circle"></i>
-                        <span :class="{ 'collapsed': isSidebarCollapsed }">Create Event</span>
+                        <span>Create Event</span>
                     </router-link>
-                    <!-- <router-link to="/dashboard/bookings" class="nav-item" active-class="active">
+                    <router-link to="/dashboard/bookings" class="nav-item" :class="{ active: currentView === 'bookings' }">
                         <i class="fas fa-ticket-alt"></i>
-                        <span :class="{ 'collapsed': isSidebarCollapsed }">Bookings</span>
-                    </router-link> -->
+                        <span>Bookings</span>
+                    </router-link>
                 </template>
 
-                <!-- Common Navigation -->
-                <router-link to="/dashboard/profile" class="nav-item" active-class="active">
+                <!-- Attendee Navigation -->
+                <template v-if="auth.isAttendee">
+                    <router-link to="/dashboard/my-bookings" class="nav-item" :class="{ active: currentView === 'my-bookings' }">
+                        <i class="fas fa-ticket-alt"></i>
+                        <span>My Bookings</span>
+                    </router-link>
+                </template>
+
+                <!-- Common Navigation Items -->
+                <div class="nav-divider"></div>
+                <router-link to="/dashboard/profile" class="nav-item" :class="{ active: currentView === 'profile' }">
                     <i class="fas fa-user"></i>
-                    <span :class="{ 'collapsed': isSidebarCollapsed }">Profile</span>
+                    <span>Profile</span>
                 </router-link>
-                <router-link to="/dashboard/settings" class="nav-item" active-class="active">
+                <router-link to="/dashboard/settings" class="nav-item" :class="{ active: currentView === 'settings' }">
                     <i class="fas fa-cog"></i>
-                    <span :class="{ 'collapsed': isSidebarCollapsed }">Settings</span>
+                    <span>Settings</span>
                 </router-link>
             </nav>
         </div>
@@ -106,7 +124,7 @@
 <script>
 import { ref, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 
 export default {
     name: 'DashboardLayout',
@@ -119,8 +137,25 @@ export default {
     setup() {
         const auth = useAuthStore()
         const router = useRouter()
+        const route = useRoute()
         const isSidebarCollapsed = ref(false)
         const showUserMenu = ref(false)
+
+        const currentView = computed(() => {
+            const path = route.path
+            if (path === '/') return 'home'
+            if (path === '/dashboard') return 'dashboard'
+            if (path === '/dashboard/profile') return 'profile'
+            if (path === '/dashboard/settings') return 'settings'
+            if (path === '/dashboard/my-events') return 'my-events'
+            if (path === '/dashboard/create-event') return 'create-event'
+            if (path === '/dashboard/bookings') return 'bookings'
+            if (path === '/dashboard/my-bookings') return 'my-bookings'
+            if (path === '/dashboard/users') return 'users'
+            if (path === '/dashboard/categories') return 'categories'
+            if (path === '/dashboard/analytics') return 'analytics'
+            return ''
+        })
 
         const userAvatar = computed(() => auth.user?.avatar || '/default-avatar.png')
         const userName = computed(() => auth.user?.name || 'User')
@@ -155,6 +190,7 @@ export default {
             userAvatar,
             userName,
             userRole,
+            currentView,
             toggleSidebar,
             toggleUserMenu,
             handleLogout
@@ -356,7 +392,7 @@ export default {
 }
 
 .dashboard-content.expanded {
-    margin-left: 0;
+    margin-left: 80px;
 }
 
 /* Collapsed Sidebar Styles */
@@ -370,8 +406,13 @@ export default {
     padding: 0.75rem;
 }
 
+.dashboard-sidebar.collapsed .nav-item span {
+    display: none;
+}
+
 .dashboard-sidebar.collapsed .nav-item i {
     margin: 0;
+    font-size: 1.25rem;
 }
 
 /* Responsive Styles */
@@ -389,7 +430,15 @@ export default {
         width: 250px;
     }
 
-       .username {
+    .dashboard-content {
+        margin-left: 0;
+    }
+
+    .dashboard-content.expanded {
+        margin-left: 0;
+    }
+
+    .username {
         display: none;
     }
 }
@@ -436,5 +485,21 @@ export default {
 .sidebar-user-role {
     font-size: 0.875rem;
     color: rgba(255, 255, 255, 0.7);
+}
+
+/* Add styles for home link */
+.nav-item i.fa-home {
+    font-size: 1.25rem;
+}
+
+/* Update active state for home link */
+.nav-item.active {
+    background-color: var(--accent-color);
+    color: var(--primary-color);
+}
+
+/* Ensure home link is visible in collapsed state */
+.dashboard-sidebar.collapsed .nav-item i.fa-home {
+    margin: 0;
 }
 </style>

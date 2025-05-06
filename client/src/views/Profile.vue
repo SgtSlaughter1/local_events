@@ -98,7 +98,7 @@ const stats = ref({
 const recentActivity = ref([])
 
 onMounted(async () => {
-  try {
+      try {
     // Fetch user stats
     const statsResponse = await axios.get('/api/user/stats')
     stats.value = statsResponse.data
@@ -108,7 +108,7 @@ onMounted(async () => {
     recentActivity.value = activityResponse.data
       } catch (error) {
     console.error('Error loading profile data:', error)
-  }
+      }
 })
 
 const handleAvatarUpload = async (event) => {
