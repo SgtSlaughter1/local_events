@@ -1,14 +1,25 @@
 <template>
     <div class="my-events-page">
-        <h2>My Events</h2>
+        <div class="page-header">
+            <h2>My Events</h2>
+            <BaseButton variant="primary" @click="$router.push('/dashboard/create-event')">
+                <i class="fas fa-plus"></i> Create New Event
+            </BaseButton>
+        </div>
         <div v-if="loading" class="text-center py-5">
             <div class="spinner-border text-primary" role="status">
                 <span class="visually-hidden">Loading...</span>
             </div>
         </div>
         <div v-else>
-            <div v-if="createdEvents.length === 0">No events found.</div>
-            <div class="event-list">
+            <div v-if="createdEvents.length === 0" class="empty-state">
+                <i class="fas fa-calendar-times fa-3x mb-3"></i>
+                <p class="lead">No events found.</p>
+                <BaseButton variant="primary" @click="$router.push('/dashboard/create-event')">
+                    Create Your First Event
+                </BaseButton>
+            </div>
+            <div v-else class="event-list">
                 <div v-for="event in createdEvents" :key="event.id" class="event-card-wrapper">
                     <EventCard :event="event" />
                     <div class="event-actions">
@@ -158,9 +169,14 @@ const deleteEvent = async (id) => {
 
 <style scoped>
 .my-events-page {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem 1rem;
+    padding: 1rem;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
 }
 
 .event-list {
@@ -180,6 +196,19 @@ const deleteEvent = async (id) => {
     gap: 1rem;
     margin-top: 0.5rem;
     justify-content: center;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin: 2rem 0;
+}
+
+.empty-state i {
+    color: #6c757d;
+    margin-bottom: 1rem;
 }
 
 .delete-confirmation {

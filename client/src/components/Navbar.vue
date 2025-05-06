@@ -30,10 +30,7 @@
           <!-- Organizer Navigation -->
           <template v-if="auth.isOrganizer">
             <li class="nav-item">
-              <router-link class="nav-link" to="/my-events">My Events</router-link>
-            </li>
-            <li class="nav-item">
-              <router-link class="nav-link" to="/create-event">Create Event</router-link>
+              <router-link class="nav-link" to="/dashboard">Dashboard</router-link>
             </li>
           </template>
           <!-- Attendee Navigation -->

@@ -71,15 +71,27 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
-    path: '/my-events',
-    name: 'MyEvents',
-    component: () => import('@/views/MyEvents.vue'),
+    path: '/dashboard/my-events',
+    name: 'dashboard-my-events',
+    component: Dashboard,
     meta: { requiresAuth: true }
   },
   {
-    path: '/create-event',
-    name: 'createEvent',
-    component: CreateEvent,
+    path: '/dashboard/create-event',
+    name: 'dashboard-create-event',
+    component: Dashboard,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/dashboard/profile',
+    name: 'dashboard-profile',
+    component: Dashboard,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/dashboard/settings',
+    name: 'dashboard-settings',
+    component: Dashboard,
     meta: { requiresAuth: true },
   },
 ]
