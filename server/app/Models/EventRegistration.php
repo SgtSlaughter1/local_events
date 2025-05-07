@@ -11,28 +11,34 @@ class EventRegistration extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'event_id',
         'user_id',
-        'status', // pending, confirmed, cancelled
-        'payment_status', // pending, paid, refunded
+        'event_id',
+        'number_of_tickets',
         'payment_amount',
         'payment_method',
-        'number_of_tickets'
+        'status',
+        'payment_status',
+        'notes'
     ];
 
     protected $casts = [
-        'payment_amount' => 'decimal:2',
+        'payment_amount' => 'decimal:2'
     ];
 
-    // Relationships
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function event()
     {
         return $this->belongsTo(Event::class);
     }
 
-    public function user()
+    public function tickets()
     {
-        return $this->belongsTo(User::class);
+        return $this->hasMany(Ticket::class, 'event_id', 'event_id')
+            ->where('user_id', $this->user_id);
     }
 
     // Scopes

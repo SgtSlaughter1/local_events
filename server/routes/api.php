@@ -10,6 +10,7 @@ use App\Http\Controllers\OrganizerController;
 use App\Http\Middleware\OrganizerMiddleware;
 use App\Http\Controllers\WeatherController;
 use App\Http\Controllers\Api\AttendeeController;
+use App\Http\Controllers\EventRegistrationController;
 
 
 
@@ -91,6 +92,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
     Route::put('/user/profile', [AuthController::class, 'updateProfile']);
     Route::put('/user/password', [AuthController::class, 'updatePassword']);
+
+    // Event Registration Routes
+    Route::get('/events/{event}/tickets', [EventRegistrationController::class, 'getAvailableTickets']);
+    Route::post('/events/{event}/register', [EventRegistrationController::class, 'register']);
+    Route::get('/user/registrations', [EventRegistrationController::class, 'getUserRegistrations']);
+    Route::get('/registrations/{registration}', [EventRegistrationController::class, 'show']);
+    Route::post('/registrations/{registration}/cancel', [EventRegistrationController::class, 'cancel']);
+    Route::post('/registrations/{registration}/payment', [EventRegistrationController::class, 'processPayment']);
 });
 
 Route::get('/weather/forecast', [WeatherController::class, 'getForecast']);

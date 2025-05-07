@@ -19,8 +19,8 @@ class Ticket extends Model
     ];
 
     protected $casts = [
-        'purchase_date' => 'datetime',
-        'price' => 'decimal:2'
+        'price' => 'decimal:2',
+        'purchase_date' => 'datetime'
     ];
 
     public function user()

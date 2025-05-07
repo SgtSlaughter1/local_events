@@ -32,7 +32,7 @@
                                     :disabled="selectedQuantity === 0"
                                 >
                                     <i class="fas fa-minus"></i>
-                                </button>
+                        </button>
                                 <span class="quantity">{{ selectedQuantity }}</span>
                                 <button 
                                     class="quantity-btn" 
@@ -40,7 +40,7 @@
                                     :disabled="selectedQuantity >= (event?.capacity || 100)"
                                 >
                                     <i class="fas fa-plus"></i>
-                                </button>
+                        </button>
                             </div>
                         </div>
                     </div>
@@ -64,7 +64,7 @@
                         <div class="summary-total">
                             <span>Total</span>
                             <span>{{ formatPrice(ticketPrice * selectedQuantity) }}</span>
-                        </div>
+                </div>
                     </template>
                 </div>
             </div>
@@ -122,7 +122,7 @@ onMounted(async () => {
             // If no saved booking, initialize with event's standard ticket
             ticketPrice.value = event.value.price
             selectedQuantity.value = 0
-        }
+    }
     } catch (err) {
         error.value = 'Failed to load ticket information'
         console.error('Error:', err)
@@ -332,12 +332,12 @@ const proceedToCheckout = () => {
     .ticket-type-card {
         flex-direction: column;
         gap: 1rem;
-        text-align: center;
+    text-align: center;
     }
 
     .booking-actions {
         flex-direction: column;
-    }
+}
 
     .booking-actions .base-button {
         width: 100%;
