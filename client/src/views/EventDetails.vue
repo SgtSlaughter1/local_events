@@ -165,26 +165,8 @@
                       <span class="ticket-price">{{ formatPrice(event.price) }}</span>
                     </div>
                   </div>
-                  <template v-if="auth.hasRole('attendee')">
-                    <div v-if="registrationStatus" class="registration-status mb-3">
-                      <div :class="['status-badge', registrationStatus]">
-                        {{ registrationStatus.charAt(0).toUpperCase() + registrationStatus.slice(1) }}
-                      </div>
-                      <p class="text-muted small mt-2">
-                        You have already registered for this event
-                      </p>
-                    </div>
-                  <BaseButton
-                      v-else
-                    variant="primary"
-                    size="large"
-                    class="w-100"
-                    @click="handleBuyTickets"
-                  >
-                    Buy Tickets
-                  </BaseButton>
-                  </template>
-                  <div v-else class="login-prompt">
+                  <!-- Not logged in -->
+                  <div v-if="!isLoggedIn" class="login-prompt">
                     <p class="text-muted">Please log in to purchase tickets</p>
                     <BaseButton
                       variant="secondary"
@@ -194,6 +176,30 @@
                     >
                       Log In
                     </BaseButton>
+                  </div>
+                  <!-- Logged in as attendee -->
+                  <template v-else-if="isAttendee">
+                    <div v-if="registrationStatus" class="registration-status mb-3">
+                      <div :class="['status-badge', registrationStatus]">
+                        {{ registrationStatus.charAt(0).toUpperCase() + registrationStatus.slice(1) }}
+                      </div>
+                      <p class="text-muted small mt-2">
+                        You have already registered for this event
+                      </p>
+                    </div>
+                    <BaseButton
+                      v-else
+                      variant="primary"
+                      size="large"
+                      class="w-100"
+                      @click="handleBuyTickets"
+                    >
+                      Buy Tickets
+                    </BaseButton>
+                  </template>
+                  <!-- Logged in as other role -->
+                  <div v-else class="login-prompt">
+                    <p class="text-muted">Only attendees can purchase tickets</p>
                   </div>
                 </div>
               </div>
@@ -227,6 +233,20 @@ const registrationStatus = ref(null)
 const coordinates = ref(null)
 
 const { weather, loading, error, fetchWeather } = useWeather(event)
+
+// Add computed property to check if user is logged in
+const isLoggedIn = computed(() => {
+  const userData = localStorage.getItem('user')
+  return !!userData
+})
+
+// Add computed property to check if user is attendee
+const isAttendee = computed(() => {
+  const userData = localStorage.getItem('user')
+  if (!userData) return false
+  const user = JSON.parse(userData)
+  return user.user_type_id === 3
+})
 
 const mapData = computed(() => {
     if (!event.value || !event.value.city || !event.value.country) {
@@ -281,7 +301,7 @@ onMounted(async () => {
     await fetchWeather()
 
     // Check if user is registered for this event
-    if (auth.hasRole('attendee')) {
+    if (isAttendee.value) {
       await registrationStore.fetchUserRegistrations()
       const userRegistration = registrationStore.getUserRegistrations.find(
         reg => reg.event_id === parseInt(eventId)
