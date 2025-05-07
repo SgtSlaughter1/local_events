@@ -144,15 +144,36 @@
                       <span class="ticket-price">{{ formatPrice(event.price) }}</span>
                     </div>
                   </div>
-                  <BaseButton
-                    v-if="auth.hasRole('attendee')"
-                    variant="primary"
-                    size="large"
-                    class="w-100"
-                    @click="handleBuyTickets"
-                  >
-                    Buy Tickets
-                  </BaseButton>
+                  <template v-if="auth.hasRole('attendee')">
+                    <div v-if="registrationStatus" class="registration-status mb-3">
+                      <div :class="['status-badge', registrationStatus]">
+                        {{ registrationStatus.charAt(0).toUpperCase() + registrationStatus.slice(1) }}
+                      </div>
+                      <p class="text-muted small mt-2">
+                        You have already registered for this event
+                      </p>
+                    </div>
+                    <BaseButton
+                      v-else
+                      variant="primary"
+                      size="large"
+                      class="w-100"
+                      @click="handleBuyTickets"
+                    >
+                      Buy Tickets
+                    </BaseButton>
+                  </template>
+                  <div v-else class="login-prompt">
+                    <p class="text-muted">Please log in to purchase tickets</p>
+                    <BaseButton
+                      variant="secondary"
+                      size="large"
+                      class="w-100"
+                      @click="$router.push('/login')"
+                    >
+                      Log In
+                    </BaseButton>
+                  </div>
                 </div>
               </div>
             </div>
@@ -170,13 +191,16 @@ import { useEventStore } from '../stores/event'
 import useWeather from '../composables/useWeather'
 import BaseButton from '../components/Base/BaseButton.vue'
 import { useAuthStore } from '../stores/auth'
+import { useRegistrationStore } from '../stores/registration'
 import { formatDate, formatTime, formatPrice, calculateDuration } from '@/utils/formatters'
 
 const route = useRoute()
 const router = useRouter()
 const eventStore = useEventStore()
 const auth = useAuthStore()
+const registrationStore = useRegistrationStore()
 const event = ref(null)
+const registrationStatus = ref(null)
 
 const { weather, loading, error, fetchWeather } = useWeather(event)
 
@@ -186,6 +210,15 @@ onMounted(async () => {
     const fetchedEvent = await eventStore.fetchEvent(eventId)
     event.value = fetchedEvent
     await fetchWeather()
+
+    // Check if user is registered for this event
+    if (auth.hasRole('attendee')) {
+      await registrationStore.fetchUserRegistrations()
+      const userRegistration = registrationStore.getUserRegistrations.find(
+        reg => reg.event_id === parseInt(eventId)
+      )
+      registrationStatus.value = userRegistration ? userRegistration.status : null
+    }
   } catch (error) {
     console.error('Error fetching event:', error)
   }
@@ -236,5 +269,45 @@ const handleBuyTickets = () => {
 .spinner-border {
   width: 1.5rem;
   height: 1.5rem;
+}
+
+.registration-status {
+  text-align: center;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 0.5rem;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.status-badge.pending {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.status-badge.confirmed {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.status-badge.cancelled {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.login-prompt {
+  text-align: center;
+  padding: 1rem;
+}
+
+.login-prompt p {
+  margin-bottom: 1rem;
 }
 </style>
