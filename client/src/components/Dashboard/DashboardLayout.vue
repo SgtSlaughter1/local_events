@@ -125,6 +125,7 @@
 import { ref, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter, useRoute } from 'vue-router'
+import { useToast } from 'vue-toastification'
 
 export default {
     name: 'DashboardLayout',
@@ -138,6 +139,7 @@ export default {
         const auth = useAuthStore()
         const router = useRouter()
         const route = useRoute()
+        const toast = useToast()
         const isSidebarCollapsed = ref(false)
         const showUserMenu = ref(false)
 
@@ -177,9 +179,11 @@ export default {
         const handleLogout = async () => {
             try {
                 await auth.logout()
+                toast.success('Logged out successfully')
                 router.push('/login')
             } catch (error) {
                 console.error('Logout failed:', error)
+                toast.error('Failed to logout. Please try again.')
             }
         }
 
