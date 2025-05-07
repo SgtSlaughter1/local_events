@@ -145,6 +145,7 @@
                     </div>
                   </div>
                   <BaseButton
+                    v-if="auth.hasRole('attendee')"
                     variant="primary"
                     size="large"
                     class="w-100"
@@ -168,67 +169,27 @@ import { useRoute, useRouter } from 'vue-router'
 import { useEventStore } from '../stores/event'
 import useWeather from '../composables/useWeather'
 import BaseButton from '../components/Base/BaseButton.vue'
+import { useAuthStore } from '../stores/auth'
+import { formatDate, formatTime, formatPrice, calculateDuration } from '@/utils/formatters'
 
 const route = useRoute()
 const router = useRouter()
 const eventStore = useEventStore()
+const auth = useAuthStore()
 const event = ref(null)
 
 const { weather, loading, error, fetchWeather } = useWeather(event)
 
 onMounted(async () => {
   try {
-    console.log('Route params:', route.params)
     const eventId = route.params.id
     const fetchedEvent = await eventStore.fetchEvent(eventId)
-    // console.log('Fetched event:', fetchedEvent)
     event.value = fetchedEvent
     await fetchWeather()
   } catch (error) {
     console.error('Error fetching event:', error)
   }
 })
-
-const formatDate = (dateString) => {
-  if (!dateString) return ''
-  return new Date(dateString).toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
-}
-
-const formatTime = (dateString) => {
-  if (!dateString) return ''
-  return new Date(dateString).toLocaleTimeString('en-US', {
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true,
-  })
-}
-
-const calculateDuration = (start, end) => {
-  if (!start || !end) return ''
-  const startDate = new Date(start)
-  const endDate = new Date(end)
-  const diff = endDate - startDate
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
-
-  if (days > 0) {
-    return `${days} day${days > 1 ? 's' : ''}`
-  }
-  return `${hours} hour${hours > 1 ? 's' : ''}`
-}
-
-const formatPrice = (price) => {
-  if (!price || price === '0.00') return 'Free'
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'NGN',
-  }).format(price)
-}
 
 const handleBuyTickets = () => {
   router.push({

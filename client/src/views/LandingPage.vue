@@ -1,4 +1,4 @@
-<template>
+  <template>
   <div class="landing-page">
     <!-- Hero Section -->
     <section class="hero text-center py-5">

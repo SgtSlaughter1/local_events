@@ -16,7 +16,7 @@
     <Settings v-else-if="currentView === 'settings'" />
 
     <!-- No Access -->
-    <template v-else>
+    <template v-if="!hasAccess">
       <div class="no-access">
         <h2>Access Denied</h2>
         <p>You don't have permission to access this area.</p>
@@ -64,6 +64,23 @@ const currentPageTitle = computed(() => {
     default:
       return 'Dashboard'
   }
+})
+
+const hasAccess = computed(() => {
+  const view = currentView.value
+  
+  // Global components are accessible to all authenticated users
+  if (view === 'profile' || view === 'settings') return true
+  
+  // Dashboard view is handled by role-specific components
+  if (view === 'dashboard') return true
+  
+  // My Events and Create Event are accessible to organizers and admins
+  if (view === 'my-events' || view === 'create-event') {
+    return auth.isOrganizer || auth.isAdmin
+  }
+  
+  return false
 })
 </script>
 
