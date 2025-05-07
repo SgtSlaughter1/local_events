@@ -24,7 +24,14 @@
 
         <div class="d-flex align-items-center mb-3">
           <i class="fas fa-map-marker-alt text-primary me-2"></i>
-          <span class="event-location">{{ event.location }}</span>
+          <span class="event-location">
+            <template v-if="event.is_online">
+              <i class="fas fa-video me-1"></i> Online Event
+            </template>
+            <template v-else>
+              {{ event.city }}, {{ event.country }}
+            </template>
+          </span>
         </div>
 
         <div class="d-flex align-items-center justify-content-between mt-4">
@@ -125,8 +132,20 @@
                 <div class="d-flex">
                   <i class="fas fa-map-marker-alt text-primary me-2 mt-1"></i>
                   <div>
-                    <div>{{ event.venue }}</div>
-                    <div class="text-muted">{{ event.address }}</div>
+                    <template v-if="event.is_online">
+                      <div class="online-badge mb-2">
+                        <i class="fas fa-video me-1"></i> Online Event
+                      </div>
+                      <div v-if="event.online_link" class="text-muted">
+                        <a :href="event.online_link" target="_blank" class="text-primary">
+                          Join Meeting <i class="fas fa-external-link-alt ms-1"></i>
+                        </a>
+                      </div>
+                    </template>
+                    <template v-else>
+                      <div v-if="event.street_address">{{ event.street_address }}</div>
+                      <div>{{ event.city }}, {{ event.country }}</div>
+                    </template>
                   </div>
                 </div>
               </div>

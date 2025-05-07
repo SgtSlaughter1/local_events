@@ -98,21 +98,31 @@
                   <div class="info-content">
                     <i class="fas fa-map-marker-alt"></i>
                     <div>
-                      <div class="venue">{{ event.location }}</div>
-                      <div v-if="event.is_online" class="online-badge">
-                        <i class="fas fa-video me-1"></i> Online Event
-                      </div>
-                      <div v-else class="mt-3">
-                        <MapView 
-                          v-if="mapData"
-                          :center="mapData.center"
-                          :zoom="13"
-                          :markers="[mapData.marker]"
-                        />
-                        <div v-else class="alert alert-warning">
-                          Unable to display map for this location
+                      <template v-if="event.is_online">
+                        <div class="online-badge mb-2">
+                          <i class="fas fa-video me-1"></i> Online Event
                         </div>
-                      </div>
+                        <div v-if="event.online_link" class="text-muted">
+                          <a :href="event.online_link" target="_blank" class="text-primary">
+                            Join Meeting <i class="fas fa-external-link-alt ms-1"></i>
+                          </a>
+                        </div>
+                      </template>
+                      <template v-else>
+                        <div v-if="event.street_address" class="venue">{{ event.street_address }}</div>
+                        <div class="venue">{{ event.city }}, {{ event.country }}</div>
+                        <div class="mt-3">
+                          <MapView 
+                            v-if="mapData"
+                            :center="mapData.center"
+                            :zoom="13"
+                            :markers="[mapData.marker]"
+                          />
+                          <div v-else class="alert alert-warning">
+                            Unable to display map for this location
+                          </div>
+                        </div>
+                      </template>
                     </div>
                   </div>
                 </div>
@@ -205,7 +215,7 @@ import { useAuthStore } from '../stores/auth'
 import { useRegistrationStore } from '../stores/registration'
 import { formatDate, formatTime, formatPrice, calculateDuration } from '@/utils/formatters'
 import MapView from '../components/MapView.vue'
-import { api } from '../services/api'
+import api from '../services/api'
 
 const route = useRoute()
 const router = useRouter()
@@ -219,7 +229,7 @@ const coordinates = ref(null)
 const { weather, loading, error, fetchWeather } = useWeather(event)
 
 const mapData = computed(() => {
-    if (!coordinates.value) {
+    if (!event.value || !event.value.city || !event.value.country) {
         return {
             center: [0, 0],
             zoom: 2,
@@ -228,11 +238,11 @@ const mapData = computed(() => {
     }
 
     return {
-        center: [coordinates.value.latitude, coordinates.value.longitude],
+        center: coordinates.value ? [coordinates.value.latitude, coordinates.value.longitude] : [0, 0],
         zoom: 13,
         markers: [{
-            position: [coordinates.value.latitude, coordinates.value.longitude],
-            popup: `${event.value?.city}, ${event.value?.country}`
+            city: event.value.city,
+            country: event.value.country
         }]
     }
 })

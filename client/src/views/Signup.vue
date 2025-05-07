@@ -127,6 +127,7 @@ import BaseButton from '@/components/Base/BaseButton.vue'
 import BaseInput from '@/components/Base/BaseInput.vue'
 import BaseSelect from '@/components/Base/BaseSelect.vue'
 import api from '@/services/api'
+import { useRouter } from 'vue-router'
 
 export default {
   name: 'Signup',
@@ -165,6 +166,8 @@ export default {
       !errors.password &&
       !errors.usertype
     )
+
+    const router = useRouter()
 
     onMounted(async () => {
       try {
@@ -239,7 +242,7 @@ export default {
 
         if (result.success) {
           toast.success('Registration successful! Please login to continue.')
-          window.location.href = '/login'
+          router.push('/login')
         } else {
           error.value = result.error
           toast.error(result.error)
