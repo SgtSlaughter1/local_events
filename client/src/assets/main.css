@@ -940,6 +940,10 @@ footer hr {
   color: #4a4a4a;
 }
 
+.info-content > div {
+  width: 100%;
+}
+
 .info-content i {
   color: #666;
   margin-top: 0.25rem;

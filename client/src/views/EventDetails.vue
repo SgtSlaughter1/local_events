@@ -102,6 +102,17 @@
                       <div v-if="event.is_online" class="online-badge">
                         <i class="fas fa-video me-1"></i> Online Event
                       </div>
+                      <div v-else class="mt-3">
+                        <MapView 
+                          v-if="mapData"
+                          :center="mapData.center"
+                          :zoom="13"
+                          :markers="[mapData.marker]"
+                        />
+                        <div v-else class="alert alert-warning">
+                          Unable to display map for this location
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -185,7 +196,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useEventStore } from '../stores/event'
 import useWeather from '../composables/useWeather'
@@ -193,6 +204,7 @@ import BaseButton from '../components/Base/BaseButton.vue'
 import { useAuthStore } from '../stores/auth'
 import { useRegistrationStore } from '../stores/registration'
 import { formatDate, formatTime, formatPrice, calculateDuration } from '@/utils/formatters'
+import MapView from '../components/MapView.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -201,14 +213,76 @@ const auth = useAuthStore()
 const registrationStore = useRegistrationStore()
 const event = ref(null)
 const registrationStatus = ref(null)
+const coordinates = ref(null)
 
 const { weather, loading, error, fetchWeather } = useWeather(event)
+
+// Add a computed property for map data
+const mapData = computed(() => {
+  console.log('Computing map data with coordinates:', coordinates.value);
+  if (!coordinates.value) {
+    console.log('No coordinates available');
+    return null;
+  }
+  // Convert Proxy array to plain array
+  const [lat, lng] = coordinates.value;
+  const center = [Number(lat), Number(lng)];
+  console.log('Computed map center:', center);
+  return {
+    center,
+    marker: {
+      position: center,
+      popup: event.value?.location || ''
+    }
+  };
+});
+
+const geocodeLocation = async (address) => {
+  try {    
+    // Check if we have cached coordinates for this address
+    const cachedCoords = localStorage.getItem(`coords_${address}`);
+    if (cachedCoords) {
+      const parsedCoords = JSON.parse(cachedCoords);
+      coordinates.value = [Number(parsedCoords[0]), Number(parsedCoords[1])];
+      return;
+    }
+
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`,
+      {
+        headers: {
+          'User-Agent': 'EventManagementApp/1.0'
+        }
+      }
+    );
+    const data = await response.json();
+    console.log('Nominatim response:', data);
+    
+    if (data && data.length > 0) {
+      const lat = Number(data[0].lat);
+      const lng = Number(data[0].lon);
+      coordinates.value = [lat, lng];
+      // Cache the coordinates for 24 hours
+      localStorage.setItem(`coords_${address}`, JSON.stringify([lat, lng]));
+    } else {
+      coordinates.value = null;
+    }
+  } catch (error) {
+    console.error('Error geocoding location:', error);
+    coordinates.value = null;
+  }
+};
 
 onMounted(async () => {
   try {
     const eventId = route.params.id
     const fetchedEvent = await eventStore.fetchEvent(eventId)
     event.value = fetchedEvent
+
+    if (!event.value.is_online) {
+      await geocodeLocation(event.value.location)
+    }
+    
     await fetchWeather()
 
     // Check if user is registered for this event
