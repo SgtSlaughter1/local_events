@@ -153,15 +153,15 @@
                         You have already registered for this event
                       </p>
                     </div>
-                    <BaseButton
+                  <BaseButton
                       v-else
-                      variant="primary"
-                      size="large"
-                      class="w-100"
-                      @click="handleBuyTickets"
-                    >
-                      Buy Tickets
-                    </BaseButton>
+                    variant="primary"
+                    size="large"
+                    class="w-100"
+                    @click="handleBuyTickets"
+                  >
+                    Buy Tickets
+                  </BaseButton>
                   </template>
                   <div v-else class="login-prompt">
                     <p class="text-muted">Please log in to purchase tickets</p>

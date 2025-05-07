@@ -102,6 +102,7 @@
 import { ref, reactive, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useToast } from 'vue-toastification'
+import { useRouter } from 'vue-router'
 import BaseButton from '@/components/Base/BaseButton.vue'
 import BaseInput from '@/components/Base/BaseInput.vue'
 
@@ -112,6 +113,7 @@ export default {
     BaseInput
   },
   setup() {
+    const router = useRouter()
     const email = ref('')
     const password = ref('')
     const showPassword = ref(false)
@@ -172,7 +174,7 @@ export default {
 
         if (result.success) {
           toast.success('Login successful!')
-          window.location.href = '/dashboard'
+          router.push('/dashboard')
         } else {
           error.value = result.error
           toast.error(result.error)
