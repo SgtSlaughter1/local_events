@@ -1,27 +1,19 @@
 <template>
   <DashboardLayout :page-title="currentPageTitle">
-    <!-- Admin Dashboard -->
-    <template v-if="auth.isAdmin">
-      <AdminDashboard v-if="currentView === 'dashboard'" />
-      <Profile v-else-if="currentView === 'profile'" />
-      <Settings v-else-if="currentView === 'settings'" />
-    </template>
+    <!-- Dashboard Components -->
+    <AdminDashboard v-if="currentView === 'dashboard' && auth.isAdmin" />
+    <OrganizerDashboard v-else-if="currentView === 'dashboard' && auth.isOrganizer" />
+    <AttendeeDashboard v-else-if="currentView === 'dashboard' && auth.isAttendee" />
 
-    <!-- Organizer Dashboard -->
-    <template v-else-if="auth.isOrganizer">
-      <OrganizerDashboard v-if="currentView === 'dashboard'" />
-      <MyEvents v-else-if="currentView === 'my-events'" />
+    <!-- Organizer Specific Components -->
+    <template v-if="auth.isOrganizer">
+      <MyEvents v-if="currentView === 'my-events'" />
       <CreateEvent v-else-if="currentView === 'create-event'" />
-      <Profile v-else-if="currentView === 'profile'" />
-      <Settings v-else-if="currentView === 'settings'" />
     </template>
 
-    <!-- Attendee Dashboard -->
-    <template v-else-if="auth.isAttendee">
-      <AttendeeDashboard v-if="currentView === 'dashboard'" />
-      <Profile v-else-if="currentView === 'profile'" />
-      <Settings v-else-if="currentView === 'settings'" />
-    </template>
+    <!-- Global Components -->
+    <Profile v-if="currentView === 'profile'" />
+    <Settings v-else-if="currentView === 'settings'" />
 
     <!-- No Access -->
     <template v-else>
