@@ -82,7 +82,6 @@ onMounted(async () => {
     try {
         const res = await api.get('/api/categories')
         categories.value = res.data.categories
-        // console.log('Fetched categories:', categories.value)
     } catch (e) {
         categories.value = []
     }
@@ -193,7 +192,6 @@ const submitEvent = async () => {
             router.push(`/events/${event.id}`)
         }, 10000)
     } catch (error) {
-        console.error('Error creating event:', error)
         errors.value = error.response?.data?.errors || {}
     }
 }

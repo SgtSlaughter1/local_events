@@ -33,81 +33,60 @@ export default {
 
     const geocodeAddress = async (address) => {
       try {
+        if (!address) return null
+
         // Extract city and country from the address
-        const parts = address.split(',').map(part => part.trim());
-        const city = parts[parts.length - 2] || '';
-        const country = parts[parts.length - 1] || '';
-        
+        const parts = address.split(',')
+        const city = parts[0]?.trim()
+        const country = parts[1]?.trim()
+
         if (!city || !country) {
-          console.error('City or country missing from address');
-          return null;
+            return null
         }
 
-        const response = await api.get('/api/geocode', {
-          params: { 
-            city,
-            country
-          }
-        });
-        return response.data;
+        const response = await api.get(`/api/geocode?city=${encodeURIComponent(city)}&country=${encodeURIComponent(country)}`)
+        return response.data
       } catch (error) {
-        console.error('Error geocoding address:', error);
-        return null;
+        return null
       }
     };
 
     const initMap = async () => {
-      if (!mapContainer.value) {
-        return;
-      }
-
       try {
-        // Ensure the container is visible
-        mapContainer.value.style.display = 'block';
-        mapContainer.value.style.visibility = 'visible';
-        
-        map = L.map(mapContainer.value, {
-          center: props.center,
-          zoom: props.zoom,
-          zoomControl: true,
-          attributionControl: true
-        });
-        
+        if (!mapContainer.value) return
+
+        map = L.map(mapContainer.value).setView([0, 0], 2)
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '© OpenStreetMap contributors',
-          maxZoom: 19
-        }).addTo(map);
+          attribution: '© OpenStreetMap contributors'
+        }).addTo(map)
 
-        // Force a resize event after a short delay
-        setTimeout(() => {
-          map.invalidateSize();
-        }, 100);
-
-        // Add markers if provided
+        // Add markers
         if (props.markers && props.markers.length > 0) {
           for (const marker of props.markers) {
             if (marker.position) {
-              // Use provided position directly
-              const newMarker = L.marker(marker.position)
-                .bindPopup(marker.popup)
-                .addTo(map);
-              markers.push(newMarker);
-              map.setView(marker.position, props.zoom);
-            } else if (marker.popup) {
-              // Try to geocode the address
-              const coordinates = await geocodeAddress(marker.popup);
-              if (coordinates) {
-                const newMarker = L.marker([coordinates.latitude, coordinates.longitude])
-                  .bindPopup(marker.popup)
-                  .addTo(map);
-                markers.push(newMarker);
-                map.setView([coordinates.latitude, coordinates.longitude], props.zoom);
+              // If we have coordinates, use them directly
+              const [lat, lng] = marker.position
+              L.marker([lat, lng])
+                .addTo(map)
+                .bindPopup(marker.popup || '')
+            } else if (marker.address) {
+              // Otherwise try to geocode the address
+              const coords = await geocodeAddress(marker.address)
+              if (coords) {
+                L.marker([coords.latitude, coords.longitude])
+                  .addTo(map)
+                  .bindPopup(marker.popup || '')
               }
             }
           }
         }
+
+        // Set the view to the center if provided
+        if (props.center) {
+          map.setView(props.center, props.zoom || 13)
+        }
       } catch (error) {
-        console.error('Error initializing map:', error);
+        // Handle error silently
       }
     };
 

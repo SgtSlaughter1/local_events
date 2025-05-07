@@ -145,10 +145,6 @@ export const useEventStore = defineStore('event', {
       this.loading = true
       this.error = null
       try {
-        console.log('Raw event data:', eventData)
-        console.log('Category value:', eventData.category)
-        console.log('Category type:', typeof eventData.category)
-
         // Format the address data and ensure all required fields are present
         const formattedData = {
           title: eventData.title,
@@ -167,8 +163,6 @@ export const useEventStore = defineStore('event', {
           online_link: eventData.online_link || null
         }
 
-        console.log('Formatted data before cleanup:', formattedData)
-
         // Remove any undefined or null values
         Object.keys(formattedData).forEach(key => {
           if (formattedData[key] === undefined || formattedData[key] === null) {
@@ -176,11 +170,8 @@ export const useEventStore = defineStore('event', {
           }
         })
 
-        console.log('Final formatted data:', formattedData)
-
         // Ensure category_id is present
         if (!formattedData.category_id) {
-          console.error('Category ID is missing:', formattedData)
           throw new Error('Category is required')
         }
 
@@ -196,12 +187,6 @@ export const useEventStore = defineStore('event', {
         this.events.push(newEvent)
         return newEvent
       } catch (error) {
-        console.error('Error details:', {
-          message: error.message,
-          response: error.response?.data,
-          status: error.response?.status
-        })
-
         if (error.response?.data?.errors) {
           // Format validation errors into a readable message
           const errorMessages = Object.entries(error.response.data.errors)
@@ -289,10 +274,8 @@ export const useEventStore = defineStore('event', {
     async fetchCategories() {
       try {
         const res = await api.get('/api/categories')
-        // console.log('Fetched categories:', res.data.categories)
         return res.data.categories
       } catch (e) {
-        console.error('Failed to fetch categories:', e)
         return []
       }
     },
@@ -300,10 +283,8 @@ export const useEventStore = defineStore('event', {
     async fetchMyEvents() {
       try {
         const res = await api.get('/api/my-events')
-        // Returns { created_events: [...], registered_events: [...] }
         return res.data.created_events || []
       } catch (e) {
-        console.error('Failed to fetch my events:', e)
         return []
       }
     },

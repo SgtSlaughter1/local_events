@@ -205,6 +205,7 @@ import { useAuthStore } from '../stores/auth'
 import { useRegistrationStore } from '../stores/registration'
 import { formatDate, formatTime, formatPrice, calculateDuration } from '@/utils/formatters'
 import MapView from '../components/MapView.vue'
+import { api } from '../services/api'
 
 const route = useRoute()
 const router = useRouter()
@@ -217,61 +218,45 @@ const coordinates = ref(null)
 
 const { weather, loading, error, fetchWeather } = useWeather(event)
 
-// Add a computed property for map data
 const mapData = computed(() => {
-  console.log('Computing map data with coordinates:', coordinates.value);
-  if (!coordinates.value) {
-    console.log('No coordinates available');
-    return null;
-  }
-  // Convert Proxy array to plain array
-  const [lat, lng] = coordinates.value;
-  const center = [Number(lat), Number(lng)];
-  console.log('Computed map center:', center);
-  return {
-    center,
-    marker: {
-      position: center,
-      popup: event.value?.location || ''
-    }
-  };
-});
-
-const geocodeLocation = async (address) => {
-  try {    
-    // Check if we have cached coordinates for this address
-    const cachedCoords = localStorage.getItem(`coords_${address}`);
-    if (cachedCoords) {
-      const parsedCoords = JSON.parse(cachedCoords);
-      coordinates.value = [Number(parsedCoords[0]), Number(parsedCoords[1])];
-      return;
-    }
-
-    const response = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`,
-      {
-        headers: {
-          'User-Agent': 'EventManagementApp/1.0'
+    if (!coordinates.value) {
+        return {
+            center: [0, 0],
+            zoom: 2,
+            markers: []
         }
-      }
-    );
-    const data = await response.json();
-    console.log('Nominatim response:', data);
-    
-    if (data && data.length > 0) {
-      const lat = Number(data[0].lat);
-      const lng = Number(data[0].lon);
-      coordinates.value = [lat, lng];
-      // Cache the coordinates for 24 hours
-      localStorage.setItem(`coords_${address}`, JSON.stringify([lat, lng]));
-    } else {
-      coordinates.value = null;
     }
-  } catch (error) {
-    console.error('Error geocoding location:', error);
-    coordinates.value = null;
-  }
-};
+
+    return {
+        center: [coordinates.value.latitude, coordinates.value.longitude],
+        zoom: 13,
+        markers: [{
+            position: [coordinates.value.latitude, coordinates.value.longitude],
+            popup: `${event.value?.city}, ${event.value?.country}`
+        }]
+    }
+})
+
+const geocodeLocation = async () => {
+    try {
+        const response = await api.get(`/api/geocode?city=${encodeURIComponent(event.value.city)}&country=${encodeURIComponent(event.value.country)}`)
+        coordinates.value = response.data
+    } catch (error) {
+        // Handle error silently
+    }
+}
+
+const fetchEvent = async () => {
+    try {
+        const response = await api.get(`/api/events/${route.params.id}`)
+        event.value = response.data.event
+        if (!event.value.is_online) {
+            await geocodeLocation()
+        }
+    } catch (error) {
+        // Handle error silently
+    }
+}
 
 onMounted(async () => {
   try {
@@ -280,7 +265,7 @@ onMounted(async () => {
     event.value = fetchedEvent
 
     if (!event.value.is_online) {
-      await geocodeLocation(event.value.location)
+      await geocodeLocation()
     }
     
     await fetchWeather()
