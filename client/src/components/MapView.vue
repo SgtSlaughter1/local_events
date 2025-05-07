@@ -161,4 +161,43 @@ export default {
   width: 100% !important;
   height: 100% !important;
 }
+
+/* Custom popup styling */
+:deep(.leaflet-popup-content-wrapper) {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  padding: 0;
+}
+
+:deep(.leaflet-popup-content) {
+  margin: 0;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+}
+
+:deep(.leaflet-popup-tip) {
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+:deep(.leaflet-popup-close-button) {
+  color: #666;
+  font-size: 18px;
+  padding: 4px 8px;
+  right: 0;
+  top: 0;
+}
+
+:deep(.leaflet-popup-close-button:hover) {
+  color: #333;
+  background: transparent;
+}
+
+/* Custom marker icon */
+:deep(.leaflet-marker-icon) {
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+}
 </style> 
