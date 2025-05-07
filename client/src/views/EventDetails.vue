@@ -192,6 +192,28 @@ onMounted(async () => {
 })
 
 const handleBuyTickets = () => {
+  // Save initial booking data
+  const bookingData = {
+    eventId: event.value.id,
+    eventTitle: event.value.title,
+    eventDate: event.value.start_date,
+    eventPrice: event.value.price,
+    tickets: [{
+      id: 1,
+      name: 'Standard Ticket',
+      price: event.value.price,
+      quantity: 0,
+      available_quantity: event.value.capacity || 100
+    }],
+    totalAmount: 0,
+    totalTickets: 0,
+    step: 'booking'
+  }
+  
+  // Save to localStorage
+  localStorage.setItem(`booking_${event.value.id}`, JSON.stringify(bookingData))
+  
+  // Navigate to booking page
   router.push({
     name: 'ticket-booking',
     params: { id: event.value.id }

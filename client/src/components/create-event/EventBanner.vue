@@ -112,11 +112,11 @@ async function onFileChange(e) {
   }
 
   // Create a preview
-  const reader = new FileReader()
-  reader.onload = (ev) => {
+    const reader = new FileReader()
+    reader.onload = (ev) => {
     form.imageUrl = ev.target.result
-  }
-  reader.readAsDataURL(file)
+    }
+    reader.readAsDataURL(file)
 
   // Upload the file
   await uploadImage(file)

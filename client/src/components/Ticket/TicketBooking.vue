@@ -1,124 +1,179 @@
 <template>
     <div class="ticket-booking">
-        <div class="ticket-booking__header">
+        <div class="booking-header">
             <h2>Book Tickets for {{ event?.title }}</h2>
+            <p class="text-muted">{{ formatDate(event?.start_date) }}</p>
         </div>
 
-        <div class="ticket-booking__content">
+        <div class="booking-content">
             <!-- Ticket Selection -->
-            <div class="ticket-types">
-                <div v-for="ticket in tickets" :key="ticket.id" class="ticket-type">
-                    <div class="ticket-type__info">
-                        <h3>{{ ticket.name }}</h3>
-                        <p class="price">₦{{ ticket.price.toFixed(2) }}</p>
-                        <p class="description">{{ ticket.description }}</p>
+            <div class="ticket-selection">
+                <h3>Select Tickets</h3>
+                <div v-if="loading" class="loading-spinner">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
                     </div>
-                    <div class="ticket-type__quantity">
-                        <button @click="decreaseQuantity(ticket)" :disabled="ticket.quantity <= 0" class="quantity-btn">
-                            -
-                        </button>
-                        <span class="quantity">{{ ticket.quantity }}</span>
-                        <button @click="increaseQuantity(ticket)" :disabled="ticket.quantity >= ticket.available"
-                            class="quantity-btn">
-                            +
-                        </button>
+                </div>
+                <div v-else-if="error" class="alert alert-danger">
+                    {{ error }}
+                </div>
+                <div v-else class="ticket-types">
+                    <div class="ticket-type-card">
+                        <div class="ticket-info">
+                            <h4>Standard Ticket</h4>
+                            <p class="price">{{ formatPrice(ticketPrice) }}</p>
+                            <p class="description">Access to the event</p>
+                        </div>
+                        <div class="ticket-quantity">
+                            <div class="quantity-controls">
+                                <button 
+                                    class="quantity-btn" 
+                                    @click="decreaseQuantity"
+                                    :disabled="selectedQuantity === 0"
+                                >
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <span class="quantity">{{ selectedQuantity }}</span>
+                                <button 
+                                    class="quantity-btn" 
+                                    @click="increaseQuantity"
+                                    :disabled="selectedQuantity >= (event?.capacity || 100)"
+                                >
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Booking Summary -->
-            <div class="booking-summary">
-                <h3>Booking Summary</h3>
-                <div class="summary-items">
-                    <div v-for="ticket in selectedTickets" :key="ticket.id" class="summary-item">
-                        <span>{{ ticket.name }} x {{ ticket.quantity }}</span>
-                        <span>₦{{ (ticket.price * ticket.quantity).toFixed(2) }}</span>
+            <!-- Order Summary -->
+            <div class="order-summary">
+                <h3>Order Summary</h3>
+                <div class="summary-content">
+                    <div v-if="selectedQuantity === 0" class="no-tickets">
+                        <p>No tickets selected</p>
                     </div>
+                    <template v-else>
+                        <div class="ticket-summary">
+                            <div class="summary-item">
+                                <span>Standard Ticket x {{ selectedQuantity }}</span>
+                                <span>{{ formatPrice(ticketPrice * selectedQuantity) }}</span>
+                            </div>
+                        </div>
+                        <div class="summary-total">
+                            <span>Total</span>
+                            <span>{{ formatPrice(ticketPrice * selectedQuantity) }}</span>
+                        </div>
+                    </template>
                 </div>
-                <div class="total">
-                    <span>Total:</span>
-                    <span>₦{{ totalAmount.toFixed(2) }}</span>
-                </div>
-                <router-link 
-                    :to="{
-                        name: 'checkout',
-                        params: { eventId: event?.id },
-                        state: { tickets: selectedTickets }
-                    }"
-                    :class="{ 'checkout-btn': true, 'disabled': !hasSelectedTickets }"
-                    :disabled="!hasSelectedTickets"
-                >
-                    Proceed to Checkout
-                </router-link>
             </div>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="booking-actions">
+            <BaseButton 
+                variant="secondary" 
+                @click="$router.push(`/events/${event?.id}`)"
+            >
+                Back to Event
+            </BaseButton>
+            <BaseButton 
+                variant="primary" 
+                :disabled="selectedQuantity === 0"
+                @click="proceedToCheckout"
+            >
+                Proceed to Checkout
+            </BaseButton>
         </div>
     </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { useEventStore } from '../../stores/event'
+import { ref, computed, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useEventStore } from '@/stores/event'
+import BaseButton from '@/components/Base/BaseButton.vue'
+import { formatDate, formatPrice } from '@/utils/formatters'
 
 const route = useRoute()
 const router = useRouter()
 const eventStore = useEventStore()
+const loading = ref(true)
+const error = ref(null)
 const event = ref(null)
+const selectedQuantity = ref(0)
+const ticketPrice = ref(0)
 
+// Load booking data from local storage if exists
 onMounted(async () => {
     try {
+        loading.value = true
         const eventId = route.params.id
         event.value = await eventStore.fetchEvent(eventId)
-    } catch (error) {
-        console.error('Error fetching event:', error)
+        
+        // Load saved booking data
+        const savedBooking = localStorage.getItem(`booking_${eventId}`)
+        if (savedBooking) {
+            const bookingData = JSON.parse(savedBooking)
+            selectedQuantity.value = bookingData.tickets[0]?.quantity || 0
+            ticketPrice.value = bookingData.eventPrice || event.value.price
+        } else {
+            // If no saved booking, initialize with event's standard ticket
+            ticketPrice.value = event.value.price
+            selectedQuantity.value = 0
+        }
+    } catch (err) {
+        error.value = 'Failed to load ticket information'
+        console.error('Error:', err)
+    } finally {
+        loading.value = false
     }
 })
 
-// Use event's price for tickets
-const tickets = ref([
-    {
-        id: 1,
-        name: 'General Admission',
-        price: 0,
-        description: 'Standard entry to the event',
-        quantity: 0,
-        available: 100
-    }
-])
-
-// Update ticket price when event is loaded
-watch(() => event.value, (newEvent) => {
-    if (newEvent) {
-        tickets.value[0].price = parseFloat(newEvent.price) || 0
-        tickets.value[0].available = parseInt(newEvent.capacity) || 100
-    }
-}, { immediate: true })
-
-const increaseQuantity = (ticket) => {
-    if (ticket.quantity < ticket.available) {
-        ticket.quantity++
+// Methods
+const increaseQuantity = () => {
+    if (selectedQuantity.value < (event.value?.capacity || 100)) {
+        selectedQuantity.value++
+        saveBookingData()
     }
 }
 
-const decreaseQuantity = (ticket) => {
-    if (ticket.quantity > 0) {
-        ticket.quantity--
+const decreaseQuantity = () => {
+    if (selectedQuantity.value > 0) {
+        selectedQuantity.value--
+        saveBookingData()
     }
 }
 
-const selectedTickets = computed(() => {
-    return tickets.value.filter(ticket => ticket.quantity > 0)
-})
+const saveBookingData = () => {
+    const bookingData = {
+        eventId: event.value.id,
+        eventTitle: event.value.title,
+        eventDate: event.value.start_date,
+        eventPrice: ticketPrice.value,
+        tickets: [{
+            id: 1,
+            name: 'Standard Ticket',
+            price: ticketPrice.value,
+            quantity: selectedQuantity.value,
+            available_quantity: event.value.capacity || 100
+        }],
+        totalAmount: ticketPrice.value * selectedQuantity.value,
+        totalTickets: selectedQuantity.value,
+        step: 'booking'
+    }
+    localStorage.setItem(`booking_${event.value.id}`, JSON.stringify(bookingData))
+}
 
-const totalAmount = computed(() => {
-    return selectedTickets.value.reduce((total, ticket) => {
-        return total + (ticket.price * ticket.quantity)
-    }, 0)
-})
-
-const hasSelectedTickets = computed(() => {
-    return selectedTickets.value.length > 0
-})
+const proceedToCheckout = () => {
+    if (selectedQuantity.value > 0) {
+        router.push({
+            name: 'checkout',
+            params: { id: event.value.id }
+        })
+    }
+}
 </script>
 
 <style scoped>
@@ -128,64 +183,82 @@ const hasSelectedTickets = computed(() => {
     padding: 2rem;
 }
 
-.ticket-booking__header {
-    margin-bottom: 2rem;
+.booking-header {
     text-align: center;
+    margin-bottom: 2rem;
 }
 
-.ticket-booking__content {
+.booking-header h2 {
+    margin-bottom: 0.5rem;
+}
+
+.booking-content {
     display: grid;
-    grid-template-columns: 1fr 300px;
     gap: 2rem;
 }
 
-.ticket-type {
+.ticket-selection {
+    background: var(--card-bg);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    box-shadow: var(--card-shadow);
+}
+
+.ticket-types {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.ticket-type-card {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 1rem;
-    border: 1px solid #e2e8f0;
+    background: var(--bg-color);
     border-radius: 0.5rem;
-    margin-bottom: 1rem;
 }
 
-.ticket-type__info {
-    flex: 1;
-}
-
-.ticket-type__info h3 {
+.ticket-info h4 {
     margin: 0 0 0.5rem 0;
-    color: #2d3748;
 }
 
-.price {
+.ticket-info .price {
     font-size: 1.25rem;
     font-weight: bold;
-    color: #4a5568;
+    color: var(--primary-color);
     margin: 0.5rem 0;
 }
 
-.description {
-    color: #718096;
+.ticket-info .description {
+    color: var(--text-muted);
     margin: 0;
 }
 
-.ticket-type__quantity {
+.quantity-controls {
     display: flex;
     align-items: center;
     gap: 1rem;
 }
 
 .quantity-btn {
-    width: 2rem;
-    height: 2rem;
-    border: 1px solid #e2e8f0;
-    border-radius: 0.25rem;
-    background: white;
-    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-color);
     display: flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.quantity-btn:hover:not(:disabled) {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
 }
 
 .quantity-btn:disabled {
@@ -194,61 +267,80 @@ const hasSelectedTickets = computed(() => {
 }
 
 .quantity {
+    font-size: 1.1rem;
     font-weight: bold;
     min-width: 2rem;
     text-align: center;
 }
 
-.booking-summary {
-    background: #f7fafc;
-    padding: 1.5rem;
+.order-summary {
+    background: var(--card-bg);
     border-radius: 0.5rem;
-    position: sticky;
-    top: 2rem;
+    padding: 1.5rem;
+    box-shadow: var(--card-shadow);
 }
 
-.summary-items {
-    margin: 1rem 0;
+.summary-content {
+    margin-top: 1rem;
+}
+
+.no-tickets {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 1rem;
+}
+
+.ticket-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
 .summary-item {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 0.5rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border-color);
 }
 
-.total {
+.summary-total {
     display: flex;
     justify-content: space-between;
+    padding: 1rem 0 0;
     font-weight: bold;
-    font-size: 1.25rem;
-    margin: 1rem 0;
-    padding-top: 1rem;
-    border-top: 1px solid #e2e8f0;
+    font-size: 1.1rem;
 }
 
-.checkout-btn {
-    display: block;
-    width: 100%;
-    padding: 0.75rem;
-    background: #4299e1;
-    color: white;
-    border: none;
-    border-radius: 0.25rem;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    text-align: center;
-    text-decoration: none;
+.booking-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 2rem;
+    gap: 1rem;
 }
 
-.checkout-btn:hover {
-    background: #3182ce;
+.loading-spinner {
+    display: flex;
+    justify-content: center;
+    padding: 2rem;
 }
 
-.checkout-btn.disabled {
-    background: #cbd5e0;
-    cursor: not-allowed;
-    pointer-events: none;
+@media (max-width: 768px) {
+    .ticket-booking {
+        padding: 1rem;
+    }
+
+    .ticket-type-card {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+
+    .booking-actions {
+        flex-direction: column;
+    }
+
+    .booking-actions .base-button {
+        width: 100%;
+    }
 }
 </style>

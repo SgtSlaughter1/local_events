@@ -10,7 +10,7 @@
           <BaseInput
             v-model="profileForm.name"
             label="Full Name"
-            type="text"
+              type="text" 
             :error="profileErrors.name?.[0]"
             required
           />
@@ -18,7 +18,7 @@
           <BaseInput
             v-model="profileForm.email"
             label="Email Address"
-            type="email"
+              type="email" 
             :error="profileErrors.email?.[0]"
             required
           />
@@ -26,7 +26,7 @@
           <BaseInput
             v-model="profileForm.phone"
             label="Phone Number"
-            type="tel"
+              type="tel" 
             :error="profileErrors.phone?.[0]"
           />
 
@@ -53,23 +53,23 @@
         <h3>Change Password</h3>
         <form @submit.prevent="updatePassword" class="settings-form">
           <BaseInput
-            v-model="passwordForm.current_password"
+              v-model="passwordForm.current_password" 
             label="Current Password"
-            type="password"
+              type="password" 
             :error="passwordErrors.current_password?.[0]"
             required
           />
 
           <BaseInput
-            v-model="passwordForm.password"
+              v-model="passwordForm.password" 
             label="New Password"
-            type="password"
+              type="password" 
             :error="passwordErrors.password?.[0]"
             required
           />
 
           <BaseInput
-            v-model="passwordForm.password_confirmation"
+              v-model="passwordForm.password_confirmation" 
             label="Confirm New Password"
             type="password"
             :error="passwordErrors.password_confirmation?.[0]"
@@ -128,7 +128,7 @@ onMounted(async () => {
   try {
     // First try to get data from auth store
     if (auth.user) {
-      profileForm.value = {
+    profileForm.value = {
         name: auth.user.name || '',
         email: auth.user.email || '',
         phone: auth.user.phone || '',
@@ -190,11 +190,11 @@ const updatePassword = async () => {
   try {
     const { success, error } = await auth.updatePassword(passwordForm.value)
     if (success) {
-      passwordForm.value = {
-        current_password: '',
-        password: '',
-        password_confirmation: ''
-      }
+    passwordForm.value = {
+      current_password: '',
+      password: '',
+      password_confirmation: ''
+    }
       toast.success('Password updated successfully')
     } else {
       if (error?.response?.data?.errors) {

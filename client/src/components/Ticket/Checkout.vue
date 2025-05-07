@@ -4,11 +4,17 @@
             <h2>Checkout</h2>
         </div>
 
-        <div v-if="!tickets.length" class="checkout__empty">
-            <p>No tickets selected. Please go back to select tickets.</p>
-            <router-link :to="{ name: 'ticket-booking', params: { id: route.params.eventId } }" class="back-btn">
+        <div v-if="loading" class="checkout__loading">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+
+        <div v-else-if="error" class="checkout__empty">
+            <p>{{ error }}</p>
+            <button @click="goBack" class="back-btn">
                 Go Back
-            </router-link>
+            </button>
         </div>
 
         <div v-else class="checkout__content">
@@ -18,12 +24,12 @@
                 <div class="summary-items">
                     <div v-for="ticket in tickets" :key="ticket.id" class="summary-item">
                         <span>{{ ticket.name }} x {{ ticket.quantity }}</span>
-                        <span>₦{{ (ticket.price * ticket.quantity).toFixed(2) }}</span>
+                        <span>{{ formatPrice(ticket.price * ticket.quantity) }}</span>
                     </div>
                 </div>
                 <div class="total">
                     <span>Total Amount:</span>
-                    <span>₦{{ totalAmount.toFixed(2) }}</span>
+                    <span>{{ formatPrice(totalAmount) }}</span>
                 </div>
             </div>
 
@@ -62,7 +68,7 @@
                 </div>
 
                 <button type="submit" class="pay-btn" :disabled="isProcessing">
-                    {{ isProcessing ? 'Processing...' : `Pay ₦${totalAmount.toFixed(2)}` }}
+                    {{ isProcessing ? 'Processing...' : `Pay ${formatPrice(totalAmount)}` }}
                 </button>
             </form>
         </div>
@@ -70,19 +76,58 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useEventStore } from '@/stores/event'
+import { formatPrice } from '@/utils/formatters'
 
 const router = useRouter()
 const route = useRoute()
+const eventStore = useEventStore()
+const loading = ref(true)
+const error = ref(null)
+const event = ref(null)
+const bookingData = ref(null)
 
-// Get tickets from route state
-const tickets = computed(() => route.state?.tickets || [])
+onMounted(async () => {
+    try {
+        loading.value = true
+        const eventId = route.params.id
+        
+        // Load booking data from localStorage
+        const savedBooking = localStorage.getItem(`booking_${eventId}`)
+        if (!savedBooking) {
+            error.value = 'No tickets selected. Please go back to select tickets.'
+            return
+        }
+        
+        bookingData.value = JSON.parse(savedBooking)
+        if (!bookingData.value.tickets || bookingData.value.totalTickets === 0) {
+            error.value = 'No tickets selected. Please go back to select tickets.'
+            return
+        }
+        
+        event.value = await eventStore.fetchEvent(eventId)
+    } catch (err) {
+        error.value = 'Failed to load checkout information'
+        console.error('Error:', err)
+    } finally {
+        loading.value = false
+    }
+})
+
+const goBack = () => {
+    router.push({
+        name: 'ticket-booking',
+        params: { id: event.value.id }
+    })
+}
+
+// Get tickets from booking data
+const tickets = computed(() => bookingData.value?.tickets || [])
 
 const totalAmount = computed(() => {
-    return tickets.value.reduce((total, ticket) => {
-        return total + (ticket.price * ticket.quantity)
-    }, 0)
+    return bookingData.value?.totalAmount || 0
 })
 
 const paymentDetails = ref({
@@ -102,11 +147,11 @@ const processPayment = async () => {
         // Mock API call
         await new Promise(resolve => setTimeout(resolve, 2000))
 
-        // Navigate to success page with ticket data
+        // Navigate to success page with booking data
         router.push({
             name: 'payment-success',
-            params: { eventId: route.params.eventId },
-            state: { tickets: tickets.value }
+            params: { id: event.value.id },
+            state: { bookingData: bookingData.value }
         })
     } catch (error) {
         console.error('Payment processing failed:', error)
