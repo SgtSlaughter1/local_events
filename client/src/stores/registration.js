@@ -15,7 +15,21 @@ export const useRegistrationStore = defineStore('registration', {
     getCurrentRegistration: (state) => state.currentRegistration,
     isLoading: (state) => state.loading,
     getError: (state) => state.error,
-    getAvailableTickets: (state) => state.availableTickets
+    getAvailableTickets: (state) => state.availableTickets,
+    getUpcomingRegistrations: (state) => {
+      const now = new Date()
+      return state.registrations.filter(registration => {
+        const eventDate = new Date(registration.event?.start_date)
+        return eventDate > now && registration.status !== 'cancelled'
+      })
+    },
+    getPastRegistrations: (state) => {
+      const now = new Date()
+      return state.registrations.filter(registration => {
+        const eventDate = new Date(registration.event?.start_date)
+        return eventDate < now && registration.status !== 'cancelled'
+      })
+    }
   },
 
   actions: {
@@ -42,6 +56,8 @@ export const useRegistrationStore = defineStore('registration', {
       try {
         const response = await api.post(`/api/events/${eventId}/register`, registrationData)
         this.currentRegistration = response.data.data
+        // Add to registrations list
+        this.registrations.unshift(response.data.data)
         return response.data
       } catch (error) {
         this.error = error.response?.data?.message || 'Failed to register for event'
@@ -56,7 +72,7 @@ export const useRegistrationStore = defineStore('registration', {
       this.loading = true
       this.error = null
       try {
-        const response = await api.get('/user/registrations')
+        const response = await api.get('/api/user/registrations')
         this.registrations = response.data.data
         return response.data
       } catch (error) {
@@ -74,6 +90,11 @@ export const useRegistrationStore = defineStore('registration', {
       try {
         const response = await api.get(`/api/registrations/${registrationId}`)
         this.currentRegistration = response.data.data
+        // Update in registrations list if exists
+        const index = this.registrations.findIndex(r => r.id === registrationId)
+        if (index !== -1) {
+          this.registrations[index] = response.data.data
+        }
         return response.data
       } catch (error) {
         this.error = error.response?.data?.message || 'Failed to fetch registration details'
@@ -88,7 +109,7 @@ export const useRegistrationStore = defineStore('registration', {
       this.loading = true
       this.error = null
       try {
-        const response = await api.post(`/registrations/${registrationId}/cancel`, { reason })
+        const response = await api.post(`/api/registrations/${registrationId}/cancel`, { reason })
         // Update the registration in the list
         const index = this.registrations.findIndex(r => r.id === registrationId)
         if (index !== -1) {
@@ -110,6 +131,11 @@ export const useRegistrationStore = defineStore('registration', {
       try {
         const response = await api.post(`/api/registrations/${registrationId}/payment`, paymentData)
         this.currentRegistration = response.data.data
+        // Update in registrations list
+        const index = this.registrations.findIndex(r => r.id === registrationId)
+        if (index !== -1) {
+          this.registrations[index] = response.data.data
+        }
         return response.data
       } catch (error) {
         this.error = error.response?.data?.message || 'Failed to process payment'

@@ -2,11 +2,11 @@
   <div class="max-w-2xl mx-auto p-6">
     <div v-if="loading" class="flex justify-center items-center min-h-[400px]">
       <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-    </div>
+            </div>
 
     <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
       <p class="text-red-600">{{ error }}</p>
-    </div>
+            </div>
 
     <div v-else class="text-center">
       <div class="mb-8">
@@ -17,7 +17,7 @@
         </div>
         <h2 class="text-2xl font-semibold mb-2">Payment Successful!</h2>
         <p class="text-gray-600">Thank you for your purchase.</p>
-      </div>
+        </div>
 
       <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
         <h3 class="text-lg font-medium mb-4">Order Details</h3>
@@ -55,8 +55,8 @@
           Browse More Events
         </button>
       </div>
+        </div>
     </div>
-  </div>
 </template>
 
 <script setup>

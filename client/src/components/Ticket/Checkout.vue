@@ -35,7 +35,7 @@
                                 placeholder="MM/YY"
                                 required
                             />
-                        </div>
+                </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">CVC</label>
                             <input 
@@ -45,8 +45,8 @@
                                 placeholder="123"
                                 required
                             />
-                        </div>
-                    </div>
+                </div>
+            </div>
 
                     <button 
                         type="submit"
@@ -56,7 +56,7 @@
                         {{ processing ? 'Processing...' : 'Pay Now' }}
                     </button>
                 </form>
-            </div>
+                </div>
 
             <!-- Order Summary -->
             <div class="bg-white rounded-lg shadow-sm p-6">
@@ -66,11 +66,11 @@
                     <div class="flex justify-between text-gray-600">
                         <span>Event</span>
                         <span>{{ registration?.event?.title }}</span>
-                    </div>
+                </div>
                     <div class="flex justify-between text-gray-600">
                         <span>Number of Tickets</span>
                         <span>{{ registration?.number_of_tickets }}</span>
-                    </div>
+                </div>
                     <div class="flex justify-between text-gray-600">
                         <span>Price per Ticket</span>
                         <span>{{ formatPrice(registration?.event?.price) }}</span>
@@ -140,7 +140,7 @@ const processPayment = async () => {
         
         // Clear registration data from localStorage
         localStorage.removeItem('currentRegistration')
-        
+
         // Navigate to success page
         router.push({
             name: 'payment-success',

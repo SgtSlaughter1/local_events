@@ -36,6 +36,69 @@
         </div>
 
         <div class="dashboard-sections">
+            <div class="section registered-events">
+                <div class="section-header">
+                    <h3>My Registered Events</h3>
+                    <router-link to="/my-events" class="view-all">View All</router-link>
+                </div>
+                <div class="table-responsive" v-if="registeredEvents.length">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Event</th>
+                                <th>Date</th>
+                                <th>Location</th>
+                                <th>Tickets</th>
+                                <th>Registration Status</th>
+                                <th>Payment Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="event in registeredEvents" :key="event.id">
+                                <td>
+                                    <div class="event-cell">
+                                        <img :src="event.image" :alt="event.title" class="event-thumbnail">
+                                        <span>{{ event.title }}</span>
+                                    </div>
+                                </td>
+                                <td>{{ formatDate(event.start_date) }}</td>
+                                <td>{{ event.location }}</td>
+                                <td>{{ event.number_of_tickets }}</td>
+                                <td>
+                                    <span :class="['status-badge', event.registration_status]">
+                                        {{ event.registration_status }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span :class="['status-badge', event.payment_status]">
+                                        {{ event.payment_status }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="table-actions">
+                                        <router-link :to="`/events/${event.id}`" class="btn btn-sm btn-primary">
+                                            View
+                                        </router-link>
+                                        <button 
+                                            v-if="event.registration_status === 'pending' || event.registration_status === 'confirmed'"
+                                            @click="cancelRegistration(event.registration_id)"
+                                            class="btn btn-sm btn-danger"
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div v-else class="no-events">
+                    <p>You haven't registered for any events yet</p>
+                    <router-link to="/events" class="btn btn-primary">Browse Events</router-link>
+                </div>
+            </div>
+
             <div class="section upcoming-events">
                 <div class="section-header">
                     <h3>Upcoming Events</h3>
@@ -44,7 +107,7 @@
                 <div class="events-grid" v-if="upcomingEvents.length">
                     <div v-for="event in upcomingEvents" :key="event.id" class="event-card">
                         <div class="event-image">
-                            <img :src="event.banner_url" :alt="event.title">
+                            <img :src="event.image" :alt="event.title">
                         </div>
                         <div class="event-info">
                             <h4>{{ event.title }}</h4>
@@ -74,22 +137,42 @@
                     <h3>My Tickets</h3>
                     <router-link to="/tickets" class="view-all">View All</router-link>
                 </div>
-                <div class="tickets-list" v-if="tickets.length">
-                    <div v-for="ticket in tickets" :key="ticket.id" class="ticket-card">
-                        <div class="ticket-info">
-                            <h4>{{ ticket.event.title }}</h4>
-                            <p class="ticket-type">{{ ticket.ticket_type }}</p>
-                            <p class="ticket-date">
-                                <i class="fas fa-calendar"></i>
-                                {{ formatDate(ticket.event.start_date) }}
-                            </p>
-                        </div>
-                        <div class="ticket-actions">
-                            <button class="btn btn-outline-primary" @click="downloadTicket(ticket)">
-                                <i class="fas fa-download"></i> Download
-                            </button>
-                        </div>
-                    </div>
+                <div class="table-responsive" v-if="tickets.length">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Event</th>
+                                <th>Ticket Type</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="ticket in tickets" :key="ticket.id">
+                                <td>
+                                    <div class="event-cell">
+                                        <img :src="ticket.event.image" :alt="ticket.event.title" class="event-thumbnail">
+                                        <span>{{ ticket.event.title }}</span>
+                                    </div>
+                                </td>
+                                <td>{{ ticket.ticket_type }}</td>
+                                <td>{{ formatDate(ticket.event.start_date) }}</td>
+                                <td>
+                                    <span :class="['status-badge', ticket.status]">
+                                        {{ ticket.status }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="table-actions">
+                                        <button class="btn btn-sm btn-primary" @click="downloadTicket(ticket)">
+                                            <i class="fas fa-download"></i> Download
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
                 <div v-else class="no-tickets">
                     <p>No tickets found</p>
@@ -102,9 +185,12 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
+import { useRegistrationStore } from '@/stores/registration'
 import api from '@/services/api'
+import { formatDate } from '@/utils/formatters'
 
 const authStore = useAuthStore()
+const registrationStore = useRegistrationStore()
 const user = ref(authStore.user)
 
 const stats = ref({
@@ -115,32 +201,49 @@ const stats = ref({
 
 const upcomingEvents = ref([])
 const tickets = ref([])
+const registeredEvents = ref([])
 
 async function fetchDashboardData() {
     try {
-        const response = await api.get('/api/attendee/dashboard')
-        const { stats: dashboardStats, upcomingEvents: events, tickets: userTickets } = response.data
+        // Fetch registered events first
+        await registrationStore.fetchUserRegistrations()
+        
+        // Calculate stats from registrations
+        const upcomingRegistrations = registrationStore.getUpcomingRegistrations
+        const pastRegistrations = registrationStore.getPastRegistrations
+        
+        stats.value = {
+            totalTickets: registrationStore.getUserRegistrations.reduce((sum, reg) => sum + reg.number_of_tickets, 0),
+            upcomingEvents: upcomingRegistrations.length,
+            pastEvents: pastRegistrations.length
+        }
 
-        stats.value = dashboardStats
-        upcomingEvents.value = events
-        tickets.value = userTickets
+        // Set registered events with proper status
+        registeredEvents.value = registrationStore.getUserRegistrations
+            .filter(registration => registration.status !== 'cancelled')
+            .map(registration => ({
+                ...registration.event,
+                registration_status: registration.status,
+                payment_status: registration.payment_status,
+                number_of_tickets: registration.number_of_tickets,
+                registration_id: registration.id
+            }))
+
+        // Fetch upcoming events (not registered)
+        const response = await api.get('/api/events/upcoming')
+        upcomingEvents.value = response.data.data
+
+        // Fetch tickets
+        const ticketsResponse = await api.get('/api/user/tickets')
+        tickets.value = ticketsResponse.data.data
     } catch (error) {
         console.error('Error fetching dashboard data:', error)
     }
 }
 
-function formatDate(date) {
-    return new Date(date).toLocaleDateString('en-US', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    })
-}
-
 async function downloadTicket(ticket) {
     try {
-        const response = await api.get(`/api/attendee/tickets/${ticket.id}/download`, {
+        const response = await api.get(`/api/tickets/${ticket.id}/download`, {
             responseType: 'blob'
         })
         
@@ -153,6 +256,16 @@ async function downloadTicket(ticket) {
         link.remove()
     } catch (error) {
         console.error('Error downloading ticket:', error)
+    }
+}
+
+async function cancelRegistration(registrationId) {
+    try {
+        await registrationStore.cancelRegistration(registrationId, 'Cancelled by user')
+        // Refresh dashboard data
+        await fetchDashboardData()
+    } catch (error) {
+        console.error('Error cancelling registration:', error)
     }
 }
 
@@ -284,6 +397,8 @@ onMounted(() => {
 }
 
 .event-actions {
+    display: flex;
+    gap: 0.5rem;
     margin-top: 1rem;
 }
 
@@ -345,5 +460,159 @@ onMounted(() => {
 
 .btn:hover {
     opacity: 0.9;
+}
+
+.event-status {
+    display: flex;
+    gap: 0.5rem;
+    margin: 0.5rem 0;
+}
+
+.status-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
+.status-badge.pending {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.status-badge.confirmed {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.status-badge.cancelled {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.status-badge.paid {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.status-badge.refunded {
+    background-color: #f3f4f6;
+    color: #374151;
+}
+
+.ticket-count {
+    color: #666;
+    font-size: 0.9rem;
+    margin: 0.5rem 0;
+}
+
+.ticket-count i {
+    margin-right: 0.5rem;
+    color: var(--primary-color);
+}
+
+.btn-danger {
+    background-color: #dc2626;
+    color: white;
+    margin-left: 0.5rem;
+}
+
+.btn-danger:hover {
+    background-color: #b91c1c;
+}
+
+.no-events {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.no-events .btn {
+    margin-top: 1rem;
+}
+
+.table-responsive {
+    overflow-x: auto;
+    margin: 0 -1.5rem;
+    padding: 0 1.5rem;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    background: white;
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.data-table th,
+.data-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.data-table th {
+    background-color: #f9fafb;
+    font-weight: 600;
+    color: #374151;
+}
+
+.data-table tbody tr:hover {
+    background-color: #f9fafb;
+}
+
+.event-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.event-thumbnail {
+    width: 40px;
+    height: 40px;
+    border-radius: 0.375rem;
+    object-fit: cover;
+}
+
+.table-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.status-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: capitalize;
+    display: inline-block;
+}
+
+.no-events,
+.no-tickets {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.no-events .btn,
+.no-tickets .btn {
+    margin-top: 1rem;
 }
 </style> 
