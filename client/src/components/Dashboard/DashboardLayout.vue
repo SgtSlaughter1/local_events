@@ -157,7 +157,7 @@ export default {
             return ''
         })
 
-        const userAvatar = computed(() => auth.user?.avatar || '/default-avatar.png')
+        const userAvatar = computed(() => auth.user?.avatar || '/images/avatar.svg')
         const userName = computed(() => auth.user?.name || 'User')
         const userRole = computed(() => {
             if (auth.isAdmin) return 'Administrator'

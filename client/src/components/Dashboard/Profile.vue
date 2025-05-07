@@ -81,7 +81,7 @@ import axios from 'axios'
     const auth = useAuthStore()
 const user = computed(() => auth.user)
 
-const userAvatar = computed(() => user.value?.avatar || '/default-avatar.png')
+const userAvatar = computed(() => user.value?.avatar || '/images/avatar.svg')
 const userRole = computed(() => {
   if (auth.isAdmin) return 'Administrator'
   if (auth.isOrganizer) return 'Event Organizer'
