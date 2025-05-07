@@ -6,7 +6,6 @@ use App\Http\Controllers\ReviewController;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\OrganizerController;
 use App\Http\Middleware\OrganizerMiddleware;
 use App\Http\Controllers\WeatherController;
 use App\Http\Controllers\Api\AttendeeController;
@@ -35,6 +34,30 @@ Route::get('/test', function () {
 // Public routes
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+
+// Geocoding endpoint
+Route::get('/geocode', function (Request $request) {
+    $request->validate([
+        'city' => 'required|string',
+        'country' => 'required|string'
+    ]);
+
+    $geocodingService = app(App\Services\GeocodingService::class);
+    $address = implode(', ', array_filter([
+        $request->city,
+        $request->country
+    ]));
+
+    $coordinates = $geocodingService->geocodeAddress($address);
+
+    if (!$coordinates) {
+        return response()->json([
+            'error' => 'Could not geocode address'
+        ], 404);
+    }
+
+    return response()->json($coordinates);
+});
 
 // Event routes (public)
 Route::get('/events', [EventController::class, 'index']);

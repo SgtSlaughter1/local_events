@@ -8,6 +8,7 @@
 import { onMounted, onUnmounted, ref, watch } from 'vue';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import api from '../services/api';
 
 export default {
   name: 'MapView',
@@ -30,7 +31,32 @@ export default {
     let map = null;
     let markers = [];
 
-    const initMap = () => {
+    const geocodeAddress = async (address) => {
+      try {
+        // Extract city and country from the address
+        const parts = address.split(',').map(part => part.trim());
+        const city = parts[parts.length - 2] || '';
+        const country = parts[parts.length - 1] || '';
+        
+        if (!city || !country) {
+          console.error('City or country missing from address');
+          return null;
+        }
+
+        const response = await api.get('/api/geocode', {
+          params: { 
+            city,
+            country
+          }
+        });
+        return response.data;
+      } catch (error) {
+        console.error('Error geocoding address:', error);
+        return null;
+      }
+    };
+
+    const initMap = async () => {
       if (!mapContainer.value) {
         return;
       }
@@ -59,12 +85,26 @@ export default {
 
         // Add markers if provided
         if (props.markers && props.markers.length > 0) {
-          props.markers.forEach(marker => {
-            const newMarker = L.marker(marker.position)
-              .bindPopup(marker.popup || '')
-              .addTo(map);
-            markers.push(newMarker);
-          });
+          for (const marker of props.markers) {
+            if (marker.position) {
+              // Use provided position directly
+              const newMarker = L.marker(marker.position)
+                .bindPopup(marker.popup)
+                .addTo(map);
+              markers.push(newMarker);
+              map.setView(marker.position, props.zoom);
+            } else if (marker.popup) {
+              // Try to geocode the address
+              const coordinates = await geocodeAddress(marker.popup);
+              if (coordinates) {
+                const newMarker = L.marker([coordinates.latitude, coordinates.longitude])
+                  .bindPopup(marker.popup)
+                  .addTo(map);
+                markers.push(newMarker);
+                map.setView([coordinates.latitude, coordinates.longitude], props.zoom);
+              }
+            }
+          }
         }
       } catch (error) {
         console.error('Error initializing map:', error);
@@ -78,7 +118,7 @@ export default {
       }
     });
 
-    watch(() => props.markers, (newMarkers) => {
+    watch(() => props.markers, async (newMarkers) => {
       if (map) {
         // Remove existing markers
         markers.forEach(marker => marker.remove());
@@ -86,12 +126,18 @@ export default {
 
         // Add new markers
         if (newMarkers && newMarkers.length > 0) {
-          newMarkers.forEach(marker => {
-            const newMarker = L.marker(marker.position)
-              .bindPopup(marker.popup || '')
-              .addTo(map);
-            markers.push(newMarker);
-          });
+          for (const marker of newMarkers) {
+            if (marker.popup) {
+              const coordinates = await geocodeAddress(marker.popup);
+              if (coordinates) {
+                const newMarker = L.marker([coordinates.latitude, coordinates.longitude])
+                  .bindPopup(marker.popup)
+                  .addTo(map);
+                markers.push(newMarker);
+                map.setView([coordinates.latitude, coordinates.longitude], props.zoom);
+              }
+            }
+          }
         }
       }
     });

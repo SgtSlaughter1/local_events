@@ -16,13 +16,13 @@ export default function useWeather(event) {
 
     try {
       console.log('Fetching weather for:', {
-        location: event.value.location,
+        city: event.value.city,
         date: event.value.start_date
       });
 
       const { data } = await api.get('/api/weather/forecast', {
         params: {
-          address: event.value.location,
+          city: event.value.city,
           date: event.value.start_date
         }
       });

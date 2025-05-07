@@ -4,7 +4,6 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
 
 class GeocodingService
 {
@@ -20,6 +19,10 @@ class GeocodingService
     public function geocodeAddress(string $address): ?array
     {
         try {
+            if (empty($address)) {
+                return null;
+            }
+
             $cacheKey = "geocode:" . md5($address);
 
             return Cache::remember($cacheKey, now()->addDays(30), function () use ($address) {
@@ -27,7 +30,7 @@ class GeocodingService
                     'verify' => false
                 ])->withHeaders([
                     'User-Agent' => 'EventManagementApp/1.0'
-                ])->get('https://nominatim.openstreetmap.org/search', [
+                ])->get($this->baseUrl, [
                     'q' => $address,
                     'format' => 'json',
                     'limit' => 1
@@ -41,20 +44,42 @@ class GeocodingService
                     }
 
                     $result = $data[0];
-                    return [
+                    $coordinates = [
                         'latitude' => (float) $result['lat'],
                         'longitude' => (float) $result['lon']
                     ];
+
+                    // Validate coordinates
+                    if (!$this->validateCoordinates($coordinates)) {
+                        return null;
+                    }
+
+                    return $coordinates;
                 }
 
                 return null;
             });
         } catch (\Exception $e) {
-            Log::error('Geocoding error', [
-                'message' => $e->getMessage()
-            ]);
-
             return null;
         }
+    }
+
+    /**
+     * Validate coordinates are within reasonable bounds
+     *
+     * @param array $coordinates
+     * @return bool
+     */
+    protected function validateCoordinates(array $coordinates): bool
+    {
+        if (!isset($coordinates['latitude']) || !isset($coordinates['longitude'])) {
+            return false;
+        }
+
+        $lat = $coordinates['latitude'];
+        $lon = $coordinates['longitude'];
+
+        // Check if coordinates are within valid ranges
+        return $lat >= -90 && $lat <= 90 && $lon >= -180 && $lon <= 180;
     }
 }

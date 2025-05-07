@@ -145,7 +145,46 @@ export const useEventStore = defineStore('event', {
       this.loading = true
       this.error = null
       try {
-        const response = await api.post('/api/events', eventData)
+        console.log('Raw event data:', eventData)
+        console.log('Category value:', eventData.category)
+        console.log('Category type:', typeof eventData.category)
+
+        // Format the address data and ensure all required fields are present
+        const formattedData = {
+          title: eventData.title,
+          description: eventData.description,
+          start_date: eventData.start_date,
+          end_date: eventData.end_date,
+          street_address: eventData.street_address,
+          city: eventData.city,
+          country: eventData.country,
+          capacity: eventData.capacity ? parseInt(eventData.capacity) : null,
+          price: eventData.tickets?.[0]?.price ? parseFloat(eventData.tickets[0].price) : null,
+          category_id: eventData.category, // The category value is already the ID from the select
+          image: eventData.image,
+          image_alt: eventData.image_alt,
+          is_online: eventData.is_online || false,
+          online_link: eventData.online_link || null
+        }
+
+        console.log('Formatted data before cleanup:', formattedData)
+
+        // Remove any undefined or null values
+        Object.keys(formattedData).forEach(key => {
+          if (formattedData[key] === undefined || formattedData[key] === null) {
+            delete formattedData[key]
+          }
+        })
+
+        console.log('Final formatted data:', formattedData)
+
+        // Ensure category_id is present
+        if (!formattedData.category_id) {
+          console.error('Category ID is missing:', formattedData)
+          throw new Error('Category is required')
+        }
+
+        const response = await api.post('/api/events', formattedData)
         
         // Check if we have a valid event in the response
         if (!response.data || !response.data.event) {
@@ -157,7 +196,21 @@ export const useEventStore = defineStore('event', {
         this.events.push(newEvent)
         return newEvent
       } catch (error) {
-        this.error = error.response?.data?.message || error.message || 'Error creating event'
+        console.error('Error details:', {
+          message: error.message,
+          response: error.response?.data,
+          status: error.response?.status
+        })
+
+        if (error.response?.data?.errors) {
+          // Format validation errors into a readable message
+          const errorMessages = Object.entries(error.response.data.errors)
+            .map(([field, messages]) => `${field}: ${messages.join(', ')}`)
+            .join('\n')
+          this.error = `Validation failed:\n${errorMessages}`
+        } else {
+          this.error = error.response?.data?.message || error.message || 'Error creating event'
+        }
         throw error
       } finally {
         this.loading = false
@@ -169,7 +222,13 @@ export const useEventStore = defineStore('event', {
       this.loading = true
       this.error = null
       try {
-        const response = await api.put(`/api/events/${id}`, eventData)
+        // Format the address data
+        const formattedData = {
+          ...eventData,
+          location: eventData.street_address ? `${eventData.street_address}, ${eventData.city}, ${eventData.country}` : `${eventData.city}, ${eventData.country}`
+        }
+
+        const response = await api.put(`/api/events/${id}`, formattedData)
         const index = this.events.findIndex((event) => event.id === id)
         if (index !== -1) {
           this.events[index] = response.data.data

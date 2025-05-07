@@ -14,8 +14,14 @@
                 required />
         </div>
         <div class="location-section">
-            <BaseInput v-model="form.location" label="Event Location" placeholder="Enter the event location"
-                :error="errors.location" />
+            <BaseInput v-model="form.street_address" label="Street Address" placeholder="Enter street address"
+                :error="errors.street_address" />
+            <BaseInput v-model="form.city" label="City" placeholder="Enter city name"
+                :error="errors.city" required />
+            <BaseInput v-model="form.country" label="Country" placeholder="Enter country"
+                :error="errors.country" required />
+        </div>
+        <div class="capacity-section">
             <BaseInput v-model="form.capacity" label="Event Capacity" type="number" min="1"
                 placeholder="Enter maximum number of attendees" :error="errors.capacity" />
         </div>
@@ -50,7 +56,9 @@ const form = reactive({
     description: '',
     start_date: '',
     end_date: '',
-    location: '',
+    street_address: '',
+    city: '',
+    country: '',
     capacity: '',
     is_online: false,
     online_link: ''
@@ -62,7 +70,9 @@ const errors = reactive({
     description: '',
     start_date: '',
     end_date: '',
-    location: '',
+    street_address: '',
+    city: '',
+    country: '',
     capacity: '',
     online_link: ''
 })
@@ -98,6 +108,7 @@ watch(() => props.modelValue, (newVal) => {
 
 .date-time-section,
 .location-section,
+.capacity-section,
 .online-section {
     display: flex;
     gap: 1rem;
@@ -112,6 +123,10 @@ watch(() => props.modelValue, (newVal) => {
 .location-section>* {
     flex: 1;
     min-width: 200px;
+}
+
+.capacity-section {
+    max-width: 300px;
 }
 
 .online-section {

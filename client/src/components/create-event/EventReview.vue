@@ -26,9 +26,17 @@
             <div class="location-section">
                 <div class="location-label">
                     <i class="fas fa-map-marker-alt"></i>
-                    <span>{{ data.location || 'Address' }}</span>
+                    <span>{{ formatAddress(data) }}</span>
                 </div>
-                <div class="map-placeholder">
+                <MapView 
+                    v-if="data.city && data.country"
+                    :center="[data.latitude || 0, data.longitude || 0]"
+                    :markers="[{
+                        position: [data.latitude || 0, data.longitude || 0],
+                        popup: `${data.city}, ${data.country}`
+                    }]"
+                />
+                <div v-else class="map-placeholder">
                     <img src="/images/map.png" alt="Map Placeholder" />
                 </div>
             </div>
@@ -53,6 +61,7 @@
 
 <script setup>
 import { computed } from 'vue'
+import MapView from '../MapView.vue'
 
 const props = defineProps({
     modelValue: Object,
@@ -73,6 +82,17 @@ const formatDate = (date) => {
         hour: '2-digit',
         minute: '2-digit'
     })
+}
+
+const formatAddress = (data) => {
+    if (!data.city && !data.country) return 'Address not specified'
+    
+    const parts = []
+    if (data.street_address) parts.push(data.street_address)
+    if (data.city) parts.push(data.city)
+    if (data.country) parts.push(data.country)
+    
+    return parts.join(', ')
 }
 </script>
 

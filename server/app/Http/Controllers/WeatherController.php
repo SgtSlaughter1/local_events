@@ -21,14 +21,14 @@ class WeatherController extends Controller
     {
         try {
             $request->validate([
-                'address' => 'required|string',
+                'city' => 'required|string',
                 'date' => 'required|date'
             ]);
 
-            $coordinates = $this->geocodingService->geocodeAddress($request->address);
+            $coordinates = $this->geocodingService->geocodeAddress($request->city);
 
             if (!$coordinates) {
-                return response()->json(['error' => 'Could not geocode address'], 400);
+                return response()->json(['error' => 'Could not geocode city'], 400);
             }
 
             // Format date to YYYY-MM-DD

@@ -17,7 +17,7 @@
 
         <!-- Step Content -->
         <div class="step-content">
-            <component :is="steps[currentStep].component" v-model="formData" />
+            <component :is="steps[currentStep].component" v-model="formData" :errors="errors" />
         </div>
 
         <!-- Navigation Buttons -->
@@ -33,11 +33,24 @@
                 Submit
             </BaseButton>
         </div>
+
+        <!-- Success Modal -->
+        <BaseModal
+            v-model="showSuccessModal"
+            title="Success!"
+            size="modal-sm"
+        >
+            <div class="text-center">
+                <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
+                <p class="mb-0">Event created successfully!</p>
+                <p class="text-muted small">Redirecting to event page...</p>
+            </div>
+        </BaseModal>
     </div>
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { useEventStore } from '../stores/event'
 import api from '../services/api'
@@ -46,6 +59,7 @@ import EventDetails from '../components/create-event/EventDetails.vue'
 import EventBanner from '../components/create-event/EventBanner.vue'
 import EventTicketing from '../components/create-event/EventTicketing.vue'
 import EventReview from '../components/create-event/EventReview.vue'
+import BaseModal from '@/components/Base/BaseModal.vue'
 
 const router = useRouter()
 const eventStore = useEventStore()
@@ -81,7 +95,9 @@ const formData = ref({
     description: '',
     start_date: '',
     end_date: '',
-    location: '',
+    street_address: '',
+    city: '',
+    country: '',
     capacity: '',
     is_online: false,
     online_link: '',
@@ -97,7 +113,7 @@ const formData = ref({
 
 const stepKeys = [
     // Step 0: Details
-    ['title', 'category', 'description', 'start_date', 'end_date', 'location', 'capacity', 'is_online', 'online_link'],
+    ['title', 'category', 'description', 'start_date', 'end_date', 'street_address', 'city', 'country', 'capacity', 'is_online', 'online_link'],
     // Step 1: Image
     ['image', 'image_alt'],
     // Step 2: Ticketing
@@ -135,6 +151,10 @@ const steps = [
 ]
 
 const currentStep = ref(0)
+const totalSteps = steps.length
+const errors = ref({})
+const showSuccessModal = ref(false)
+let redirectTimer = null
 
 const nextStep = () => {
     // Validate current step before proceeding
@@ -165,53 +185,25 @@ const prevStep = () => {
 
 const submitEvent = async () => {
     try {
-        // Transform the form data to match the backend API requirements
-        const eventData = {
-            title: formData.value.title,
-            description: formData.value.description,
-            category_id: formData.value.category,
-            start_date: formData.value.start_date ? new Date(formData.value.start_date).toISOString() : null,
-            end_date: formData.value.end_date ? new Date(formData.value.end_date).toISOString() : null,
-            location: formData.value.location || null,
-            capacity: formData.value.capacity ? parseInt(formData.value.capacity) : null,
-            price: formData.value.eventType === 'ticketed' ? parseFloat(formData.value.tickets[0]?.price || 0) : 0,
-            image: formData.value.image || null,
-            image_alt: formData.value.image_alt || null,
-            is_online: formData.value.is_online || false,
-            online_link: formData.value.online_link || null
-        }
-
-        // Call the event store to create the event
-        const createdEvent = await eventStore.createEvent(eventData)
+        const event = await eventStore.createEvent(formData.value)
+        showSuccessModal.value = true
         
-        if (!createdEvent || !createdEvent.id) {
-            throw new Error('Failed to create event: Invalid response from server')
-        }
-        
-        // Remove all step drafts after successful publish
-        clearAllStepDrafts()
-        
-        // Show success message and redirect to the event details page
-        alert('Event created successfully!')
-        router.push(`/events/${createdEvent.id}`)
+        // Set timer to redirect after 10 seconds
+        redirectTimer = setTimeout(() => {
+            router.push(`/events/${event.id}`)
+        }, 10000)
     } catch (error) {
         console.error('Error creating event:', error)
-        if (error.response?.data?.errors) {
-            const errorMessages = Object.values(error.response.data.errors).flat().join('\n')
-            alert(`Validation errors:\n${errorMessages}`)
-        } else if (error.response?.data?.message) {
-            alert(error.response.data.message)
-        } else {
-            alert(error.message || 'Failed to create event. Please try again.')
-        }
+        errors.value = error.response?.data?.errors || {}
     }
 }
 
-const clearAllStepDrafts = () => {
-    stepKeys.forEach((keys, idx) => {
-        localStorage.removeItem(`eventDraft-step-${idx}`)
-    })
-}
+// Clean up timer when component is unmounted
+onBeforeUnmount(() => {
+    if (redirectTimer) {
+        clearTimeout(redirectTimer)
+    }
+})
 </script>
 
 <style scoped>
@@ -296,5 +288,21 @@ const clearAllStepDrafts = () => {
     display: flex;
     justify-content: flex-end;
     gap: 1rem;
+}
+
+.progress {
+    height: 25px;
+    border-radius: 12px;
+    background-color: #e9ecef;
+}
+
+.progress-bar {
+    background-color: #4CAF50;
+    transition: width 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 500;
 }
 </style>

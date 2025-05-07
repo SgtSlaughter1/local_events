@@ -13,7 +13,6 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
-use Illuminate\Support\Facades\Log;
 
 class EventController extends BaseController
 {
@@ -64,7 +63,9 @@ class EventController extends BaseController
             'description' => 'required|string',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
-            'location' => 'required|string|max:255',
+            'street_address' => 'required_if:is_online,false|string|max:255',
+            'city' => 'required_if:is_online,false|string|max:255',
+            'country' => 'required_if:is_online,false|string|max:255',
             'capacity' => 'nullable|integer|min:1',
             'price' => 'nullable|numeric|min:0',
             'category_id' => 'required|exists:categories,id',
@@ -74,12 +75,20 @@ class EventController extends BaseController
             'online_link' => 'required_if:is_online,true|url|nullable',
         ]);
 
-        $event = new Event($request->except('image'));
+        // Create event with validated data
+        $event = new Event();
+        $event->fill($validated);
         $event->created_by = Auth::id();
 
         // Geocode the address if it's not an online event
-        if (!$request->is_online && $request->location) {
-            $coordinates = $this->geocodingService->geocodeAddress($request->location);
+        if (!$request->is_online) {
+            // Use only city and country for geocoding
+            $address = implode(', ', array_filter([
+                $request->city,
+                $request->country
+            ]));
+
+            $coordinates = $this->geocodingService->geocodeAddress($address);
             if ($coordinates) {
                 $event->latitude = $coordinates['latitude'];
                 $event->longitude = $coordinates['longitude'];
@@ -119,7 +128,9 @@ class EventController extends BaseController
             'description' => 'sometimes|required|string',
             'start_date' => 'sometimes|required|date',
             'end_date' => 'sometimes|required|date|after:start_date',
-            'location' => 'sometimes|required_if:is_online,false|string|max:255',
+            'street_address' => 'required_if:is_online,false|string|max:255',
+            'city' => 'required_if:is_online,false|string|max:255',
+            'country' => 'required_if:is_online,false|string|max:255',
             'capacity' => 'nullable|integer|min:1',
             'price' => 'nullable|numeric|min:0',
             'category_id' => 'sometimes|required|exists:categories,id',
@@ -140,6 +151,27 @@ class EventController extends BaseController
         }
 
         $event->update($request->except('image'));
+
+        // Update coordinates if address fields changed
+        if (!$request->is_online && (
+            $request->has('street_address') ||
+            $request->has('city') ||
+            $request->has('country')
+        )) {
+            $address = implode(', ', array_filter([
+                $request->street_address,
+                $request->city,
+                $request->country
+            ]));
+
+            $coordinates = $this->geocodingService->geocodeAddress($address);
+            if ($coordinates) {
+                $event->update([
+                    'latitude' => $coordinates['latitude'],
+                    'longitude' => $coordinates['longitude']
+                ]);
+            }
+        }
 
         return response()->json([
             'message' => 'Event updated successfully',
@@ -210,7 +242,6 @@ class EventController extends BaseController
         ]);
     }
 
-    // Organizer specific methods
     public function organizerEvents()
     {
         $events = $this->getOrganizerEvents();
@@ -264,14 +295,12 @@ class EventController extends BaseController
                 'message' => 'No image file provided'
             ], 400);
         } catch (\Exception $e) {
-            Log::error('Image upload failed: ' . $e->getMessage());
             return response()->json([
                 'message' => 'Failed to upload image'
             ], 500);
         }
     }
 
-    // Private helper methods
     private function getCreatedEvents()
     {
         return Event::where('created_by', Auth::id())

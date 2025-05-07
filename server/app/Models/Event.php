@@ -17,6 +17,9 @@ class Event extends Model
         'start_date',
         'end_date',
         'location',
+        'street_address',
+        'city',
+        'country',
         'capacity',
         'price',
         'status',
@@ -37,6 +40,11 @@ class Event extends Model
         'is_online' => 'boolean',
         'latitude' => 'decimal:8',
         'longitude' => 'decimal:8'
+    ];
+
+    protected $appends = [
+        'full_address',
+        'city_country'
     ];
 
     // Relationships
@@ -130,5 +138,33 @@ class Event extends Model
         }
 
         return asset('storage/' . $fullPath);
+    }
+
+    // Computed attributes
+    public function getFullAddressAttribute()
+    {
+        if ($this->is_online) {
+            return 'Online Event';
+        }
+
+        $parts = array_filter([
+            $this->street_address,
+            $this->city,
+            $this->country
+        ]);
+
+        return implode(', ', $parts);
+    }
+
+    public function getCityCountryAttribute()
+    {
+        if ($this->is_online) {
+            return null;
+        }
+
+        return implode(', ', array_filter([
+            $this->city,
+            $this->country
+        ]));
     }
 }
