@@ -7,52 +7,44 @@
       <div class="settings-section">
         <h3>Profile Settings</h3>
         <form @submit.prevent="updateProfile" class="settings-form">
-          <div class="form-group">
-            <label for="name">Full Name</label>
-            <input 
-              type="text" 
-              id="name" 
-              v-model="profileForm.name" 
-              class="form-control"
-              :class="{ 'is-invalid': profileErrors.name }"
-            >
-            <div class="invalid-feedback" v-if="profileErrors.name">
-              {{ profileErrors.name[0] }}
-            </div>
-          </div>
+          <BaseInput
+            v-model="profileForm.name"
+            label="Full Name"
+            type="text"
+            :error="profileErrors.name?.[0]"
+            required
+          />
 
-          <div class="form-group">
-            <label for="email">Email Address</label>
-            <input 
-              type="email" 
-              id="email" 
-              v-model="profileForm.email" 
-              class="form-control"
-              :class="{ 'is-invalid': profileErrors.email }"
-            >
-            <div class="invalid-feedback" v-if="profileErrors.email">
-              {{ profileErrors.email[0] }}
-            </div>
-          </div>
+          <BaseInput
+            v-model="profileForm.email"
+            label="Email Address"
+            type="email"
+            :error="profileErrors.email?.[0]"
+            required
+          />
 
-          <div class="form-group">
-            <label for="phone">Phone Number</label>
-            <input 
-              type="tel" 
-              id="phone" 
-              v-model="profileForm.phone" 
-              class="form-control"
-              :class="{ 'is-invalid': profileErrors.phone }"
-            >
-            <div class="invalid-feedback" v-if="profileErrors.phone">
-              {{ profileErrors.phone[0] }}
-            </div>
-          </div>
+          <BaseInput
+            v-model="profileForm.phone"
+            label="Phone Number"
+            type="tel"
+            :error="profileErrors.phone?.[0]"
+          />
 
-          <button type="submit" class="btn btn-primary" :disabled="profileLoading">
-            <span v-if="profileLoading">Updating...</span>
-            <span v-else>Update Profile</span>
-          </button>
+          <BaseTextarea
+            v-model="profileForm.address"
+            label="Address"
+            :error="profileErrors.address?.[0]"
+            rows="3"
+          />
+
+          <BaseButton
+            type="submit"
+            :loading="auth.loading"
+            variant="primary"
+            class="mt-4"
+          >
+            {{ auth.loading ? 'Updating...' : 'Update Profile' }}
+          </BaseButton>
         </form>
       </div>
 
@@ -60,93 +52,43 @@
       <div class="settings-section">
         <h3>Change Password</h3>
         <form @submit.prevent="updatePassword" class="settings-form">
-          <div class="form-group">
-            <label for="current_password">Current Password</label>
-            <input 
-              type="password" 
-              id="current_password" 
-              v-model="passwordForm.current_password" 
-              class="form-control"
-              :class="{ 'is-invalid': passwordErrors.current_password }"
-            >
-            <div class="invalid-feedback" v-if="passwordErrors.current_password">
-              {{ passwordErrors.current_password[0] }}
-            </div>
-          </div>
+          <BaseInput
+            v-model="passwordForm.current_password"
+            label="Current Password"
+            type="password"
+            :error="passwordErrors.current_password?.[0]"
+            required
+          />
 
-          <div class="form-group">
-            <label for="password">New Password</label>
-            <input 
-              type="password" 
-              id="password" 
-              v-model="passwordForm.password" 
-              class="form-control"
-              :class="{ 'is-invalid': passwordErrors.password }"
-            >
-            <div class="invalid-feedback" v-if="passwordErrors.password">
-              {{ passwordErrors.password[0] }}
-            </div>
-          </div>
+          <BaseInput
+            v-model="passwordForm.password"
+            label="New Password"
+            type="password"
+            :error="passwordErrors.password?.[0]"
+            required
+          />
 
-          <div class="form-group">
-            <label for="password_confirmation">Confirm New Password</label>
-            <input 
-              type="password" 
-              id="password_confirmation" 
-              v-model="passwordForm.password_confirmation" 
-              class="form-control"
-              :class="{ 'is-invalid': passwordErrors.password_confirmation }"
-            >
-            <div class="invalid-feedback" v-if="passwordErrors.password_confirmation">
-              {{ passwordErrors.password_confirmation[0] }}
-            </div>
-          </div>
+          <BaseInput
+            v-model="passwordForm.password_confirmation"
+            label="Confirm New Password"
+            type="password"
+            :error="passwordErrors.password_confirmation?.[0]"
+            required
+          />
 
-          <button type="submit" class="btn btn-primary" :disabled="passwordLoading">
-            <span v-if="passwordLoading">Updating...</span>
-            <span v-else>Change Password</span>
-          </button>
+          <BaseButton
+            type="submit"
+            :loading="passwordLoading"
+            variant="primary"
+            class="mt-4"
+          >
+            {{ passwordLoading ? 'Updating...' : 'Change Password' }}
+          </BaseButton>
         </form>
       </div>
 
       <!-- Notification Settings -->
-      <div class="settings-section">
-        <h3>Notification Settings</h3>
-        <div class="settings-form">
-          <div class="form-group">
-            <div class="form-check">
-              <input 
-                type="checkbox" 
-                id="email_notifications" 
-                v-model="notificationSettings.email_notifications" 
-                class="form-check-input"
-              >
-              <label class="form-check-label" for="email_notifications">
-                Email Notifications
-              </label>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <div class="form-check">
-              <input 
-                type="checkbox" 
-                id="sms_notifications" 
-                v-model="notificationSettings.sms_notifications" 
-                class="form-check-input"
-              >
-              <label class="form-check-label" for="sms_notifications">
-                SMS Notifications
-              </label>
-            </div>
-          </div>
-
-          <button @click="updateNotifications" class="btn btn-primary" :disabled="notificationLoading">
-            <span v-if="notificationLoading">Updating...</span>
-            <span v-else>Save Preferences</span>
-          </button>
-        </div>
-      </div>
+      
     </div>
   </div>
 </template>
@@ -155,17 +97,22 @@
 import { ref, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import axios from 'axios'
+import BaseInput from '@/components/Base/BaseInput.vue'
+import BaseTextarea from '@/components/Base/BaseTextarea.vue'
+import BaseButton from '@/components/Base/BaseButton.vue'
+import { useToast } from 'vue-toastification'
 
+const toast = useToast()
 const auth = useAuthStore()
 
 // Profile Form
 const profileForm = ref({
   name: '',
   email: '',
-  phone: ''
+  phone: '',
+  address: ''
 })
 const profileErrors = ref({})
-const profileLoading = ref(false)
 
 // Password Form
 const passwordForm = ref({
@@ -176,47 +123,62 @@ const passwordForm = ref({
 const passwordErrors = ref({})
 const passwordLoading = ref(false)
 
-// Notification Settings
-const notificationSettings = ref({
-  email_notifications: true,
-  sms_notifications: false
-})
-const notificationLoading = ref(false)
-
 // Load user data
 onMounted(async () => {
   try {
-    const response = await axios.get('/api/user')
-    const user = response.data
-    profileForm.value = {
-      name: user.name,
-      email: user.email,
-      phone: user.phone || ''
+    // First try to get data from auth store
+    if (auth.user) {
+      profileForm.value = {
+        name: auth.user.name || '',
+        email: auth.user.email || '',
+        phone: auth.user.phone || '',
+        address: auth.user.address || ''
+      }
     }
-    notificationSettings.value = {
-      email_notifications: user.email_notifications ?? true,
-      sms_notifications: user.sms_notifications ?? false
+
+    // Then fetch fresh data from API
+    const { success, data } = await auth.fetchUser()
+    if (success && data) {
+      profileForm.value = {
+        name: data.name || '',
+        email: data.email || '',
+        phone: data.phone || '',
+        address: data.address || ''
+      }
     }
   } catch (error) {
     console.error('Error loading user data:', error)
+    toast.error('Failed to load user data. Please refresh the page.')
   }
 })
 
 // Update Profile
 const updateProfile = async () => {
-  profileLoading.value = true
   profileErrors.value = {}
   
   try {
-    await axios.put('/api/user/profile', profileForm.value)
-    auth.setUser({ ...auth.user, ...profileForm.value })
-    // Show success message
+    const { success, error } = await auth.updateProfile(profileForm.value)
+    if (success) {
+      toast.success('Profile updated successfully')
+    } else {
+      if (error?.response?.data?.errors) {
+        profileErrors.value = error.response.data.errors
+        // Show first error message in toast
+        const firstError = Object.values(error.response.data.errors)[0][0]
+        toast.error(firstError)
+      } else {
+        toast.error(error?.response?.data?.message || 'Failed to update profile. Please try again.')
+      }
+    }
   } catch (error) {
     if (error.response?.data?.errors) {
       profileErrors.value = error.response.data.errors
+      // Show first error message in toast
+      const firstError = Object.values(error.response.data.errors)[0][0]
+      toast.error(firstError)
+    } else {
+      toast.error('Failed to update profile. Please try again.')
     }
-  } finally {
-    profileLoading.value = false
   }
 }
 
@@ -226,35 +188,38 @@ const updatePassword = async () => {
   passwordErrors.value = {}
   
   try {
-    await axios.put('/api/user/password', passwordForm.value)
-    passwordForm.value = {
-      current_password: '',
-      password: '',
-      password_confirmation: ''
+    const { success, error } = await auth.updatePassword(passwordForm.value)
+    if (success) {
+      passwordForm.value = {
+        current_password: '',
+        password: '',
+        password_confirmation: ''
+      }
+      toast.success('Password updated successfully')
+    } else {
+      if (error?.response?.data?.errors) {
+        passwordErrors.value = error.response.data.errors
+        // Show first error message in toast
+        const firstError = Object.values(error.response.data.errors)[0][0]
+        toast.error(firstError)
+      } else {
+        toast.error(error?.response?.data?.message || 'Failed to update password. Please try again.')
+      }
     }
-    // Show success message
   } catch (error) {
     if (error.response?.data?.errors) {
       passwordErrors.value = error.response.data.errors
+      // Show first error message in toast
+      const firstError = Object.values(error.response.data.errors)[0][0]
+      toast.error(firstError)
+    } else {
+      toast.error('Failed to update password. Please try again.')
     }
   } finally {
     passwordLoading.value = false
   }
 }
 
-// Update Notifications
-const updateNotifications = async () => {
-  notificationLoading.value = true
-  
-  try {
-    await axios.put('/api/user/notifications', notificationSettings.value)
-    // Show success message
-  } catch (error) {
-    console.error('Error updating notification settings:', error)
-  } finally {
-    notificationLoading.value = false
-  }
-}
 </script>
 
 <style scoped>
@@ -300,78 +265,7 @@ const updateNotifications = async () => {
   max-width: 500px;
 }
 
-.form-group {
-  margin-bottom: 1.5rem;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-  color: var(--text-color);
-}
-
-.form-control {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
-  font-size: 1rem;
-  transition: border-color 0.2s;
-}
-
-.form-control:focus {
-  border-color: var(--primary-color);
-  outline: none;
-}
-
-.form-control.is-invalid {
-  border-color: #dc3545;
-}
-
-.invalid-feedback {
-  color: #dc3545;
-  font-size: 0.875rem;
-  margin-top: 0.25rem;
-}
-
-.btn {
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.btn-primary {
-  background-color: var(--primary-color);
-  color: white;
-}
-
-.btn-primary:hover {
-  background-color: var(--primary-dark);
-}
-
-.btn-primary:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
-
-.form-check {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.form-check-input {
-  width: 1.25rem;
-  height: 1.25rem;
-}
-
-.form-check-label {
-  font-weight: normal;
+.mt-4 {
+  margin-top: 1rem;
 }
 </style> 

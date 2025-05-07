@@ -112,17 +112,34 @@ export const useAuthStore = defineStore('auth', {
       this.loading = true
       this.error = null
       try {
-        const response = await api.put('/api/profile', profileData)
-        this.user = response.data
-        // Update localStorage
-        localStorage.setItem('user', JSON.stringify(this.user))
-        return { success: true, data: response.data }
+        const response = await api.put('/api/user/profile', profileData)
+        if (response.data && response.data.user) {
+          this.user = response.data.user
+          // Update localStorage
+          localStorage.setItem('user', JSON.stringify(this.user))
+          return { success: true, data: response.data.user }
+        }
+        return { success: false, error: 'Invalid response format' }
       } catch (error) {
         this.error = error.response?.data?.message || 'An error occurred while updating profile'
-        return { success: false, error: this.error }
+        return { success: false, error }
       } finally {
         this.loading = false
       }
     },
+
+    async updatePassword(passwordData) {
+      this.loading = true
+      this.error = null
+      try {
+        const response = await api.put('/api/user/password', passwordData)
+        return { success: true, data: response.data }
+      } catch (error) {
+        this.error = error.response?.data?.message || 'An error occurred while updating password'
+        return { success: false, error }
+      } finally {
+        this.loading = false
+      }
+    }
   },
 })

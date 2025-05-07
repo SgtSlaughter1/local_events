@@ -50,8 +50,6 @@ class AttendeeController extends Controller
         $ticket = Ticket::with(['event', 'user'])
             ->where('user_id', Auth::id())
             ->findOrFail($ticketId);
-
-        // TODO: Implement PDF generation
         // For now, return a simple response
         return response()->json([
             'message' => 'Ticket download functionality will be implemented soon',

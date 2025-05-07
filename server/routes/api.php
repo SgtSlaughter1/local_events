@@ -86,6 +86,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/attendee/dashboard', [AttendeeController::class, 'getDashboardData']);
         Route::get('/attendee/tickets/{ticketId}/download', [AttendeeController::class, 'downloadTicket']);
     });
+
+    // User Profile Routes
+    Route::get('/user', [AuthController::class, 'user']);
+    Route::put('/user/profile', [AuthController::class, 'updateProfile']);
+    Route::put('/user/password', [AuthController::class, 'updatePassword']);
 });
 
 Route::get('/weather/forecast', [WeatherController::class, 'getForecast']);

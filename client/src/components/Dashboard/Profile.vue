@@ -101,11 +101,11 @@ onMounted(async () => {
       try {
     // Fetch user stats
     const statsResponse = await axios.get('/api/user/stats')
-    stats.value = statsResponse.data
+    stats.value = statsResponse.data.stats
 
     // Fetch recent activity
     const activityResponse = await axios.get('/api/user/activity')
-    recentActivity.value = activityResponse.data
+    recentActivity.value = activityResponse.data.activities
       } catch (error) {
     console.error('Error loading profile data:', error)
       }
@@ -124,9 +124,15 @@ const handleAvatarUpload = async (event) => {
         'Content-Type': 'multipart/form-data'
       }
     })
-    auth.setUser({ ...auth.user, avatar: response.data.avatar })
+    
+    // Update the user's avatar in the auth store
+    auth.setUser({ ...auth.user, avatar: response.data.avatar_url })
+    
+    // Show success message
+    alert('Avatar updated successfully')
   } catch (error) {
     console.error('Error uploading avatar:', error)
+    alert('Failed to upload avatar. Please try again.')
   }
 }
 </script>
