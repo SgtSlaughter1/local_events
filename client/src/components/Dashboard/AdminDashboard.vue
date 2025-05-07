@@ -1,5 +1,11 @@
 <template>
   <div class="admin-dashboard">
+    <!-- Loading State -->
+    <BaseLoading 
+      :show="loading" 
+      message="Loading dashboard data..."
+    />
+
     <!-- Welcome Section -->
     <div class="welcome-section">
       <h1>Welcome, {{ auth.user?.name }}</h1>
@@ -173,6 +179,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import BaseButton from '@/components/Base/BaseButton.vue'
+import BaseLoading from '@/components/Base/BaseLoading.vue'
 import { formatDate, formatTimeAgo, formatPrice } from '@/utils/formatters'
 
 const router = useRouter()
@@ -365,9 +372,7 @@ onMounted(() => {
 }
 
 .loading-spinner {
-  display: flex;
-  justify-content: center;
-  padding: 2rem;
+  display: none;
 }
 
 .no-data {

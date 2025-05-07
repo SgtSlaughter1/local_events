@@ -1,5 +1,11 @@
 <template>
     <div class="attendee-dashboard">
+        <!-- Loading State -->
+        <BaseLoading 
+            :show="loading" 
+            message="Loading dashboard data..."
+        />
+
         <div class="dashboard-header">
             <h2>My Dashboard</h2>
             <p class="welcome-message">Welcome back, {{ user?.name }}</p>
@@ -227,10 +233,12 @@ import { useRegistrationStore } from '@/stores/registration'
 import api from '@/services/api'
 import { formatDate } from '@/utils/formatters'
 import BaseModal from '@/components/Base/BaseModal.vue'
+import BaseLoading from '@/components/Base/BaseLoading.vue'
 
 const authStore = useAuthStore()
 const registrationStore = useRegistrationStore()
 const user = ref(authStore.user)
+const loading = ref(true)
 
 const stats = ref({
     totalTickets: 0,
@@ -250,6 +258,7 @@ const isCancelling = ref(false)
 
 async function fetchDashboardData() {
     try {
+        loading.value = true
         // Fetch registered events first
         await registrationStore.fetchUserRegistrations()
         
@@ -283,6 +292,8 @@ async function fetchDashboardData() {
         tickets.value = ticketsResponse.data.data
     } catch (error) {
         console.error('Error fetching dashboard data:', error)
+    } finally {
+        loading.value = false
     }
 }
 

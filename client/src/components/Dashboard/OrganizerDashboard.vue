@@ -1,5 +1,11 @@
 <template>
   <div class="organizer-dashboard">
+    <!-- Loading State -->
+    <BaseLoading 
+      :show="isLoading" 
+      message="Loading dashboard data..."
+    />
+
     <!-- Quick Stats -->
     <div class="stats-grid">
       <div class="stat-card">
@@ -79,16 +85,25 @@
             <h3 class="event-title">{{ event.title }}</h3>
             <p class="event-location">
               <i class="fas fa-map-marker-alt"></i>
-              {{ event.location }}
+              <template v-if="event.is_online">
+                <i class="fas fa-video me-1"></i> Online Event
+              </template>
+              <template v-else>
+                {{ event.city }}, {{ event.country }}
+              </template>
             </p>
             <div class="event-stats">
               <span class="stat">
                 <i class="fas fa-ticket-alt"></i>
-                {{ event.bookings }} Bookings
+                {{ event.bookings_count || 0 }} Bookings
               </span>
               <span class="stat">
                 <i class="fas fa-users"></i>
-                {{ event.attendees }} Attendees
+                {{ event.attendees_count || 0 }} Attendees
+              </span>
+              <span class="stat" v-if="event.price">
+                <i class="fas fa-dollar-sign"></i>
+                {{ formatPrice(event.price) }}
               </span>
             </div>
           </div>
@@ -118,8 +133,16 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import axios from 'axios'
+import { ref, onBeforeMount } from 'vue'
+import { useEventStore } from '@/stores/event'
+import { useRegistrationStore } from '@/stores/registration'
+import api from '@/services/api'
+import { formatDate, formatTime, formatPrice } from '@/utils/formatters'
+import BaseLoading from '@/components/Base/BaseLoading.vue'
+
+const eventStore = useEventStore()
+const registrationStore = useRegistrationStore()
+const isLoading = ref(true)
 
 const stats = ref({
   totalEvents: 0,
@@ -131,33 +154,55 @@ const stats = ref({
 const upcomingEvents = ref([])
 const recentActivity = ref([])
 
-onMounted(async () => {
+const fetchDashboardData = async () => {
   try {
-    // Fetch dashboard data
-    const response = await axios.get('/api/organizer/dashboard')
-    stats.value = response.data.stats
-    upcomingEvents.value = response.data.upcomingEvents
-    recentActivity.value = response.data.recentActivity
+    isLoading.value = true
+    // Fetch user's events
+    const eventsResponse = await eventStore.fetchMyEvents()
+    const events = eventsResponse || []
+    
+    // Calculate stats
+    stats.value = {
+      totalEvents: events.length,
+      totalBookings: events.reduce((sum, event) => sum + (event.bookings_count || 0), 0),
+      totalAttendees: events.reduce((sum, event) => sum + (event.attendees_count || 0), 0),
+      totalRevenue: events.reduce((sum, event) => sum + (event.revenue || 0), 0)
+    }
+
+    // Get upcoming events (events with start_date in the future)
+    const now = new Date()
+    upcomingEvents.value = events
+      .filter(event => new Date(event.start_date) > now)
+      .sort((a, b) => new Date(a.start_date) - new Date(b.start_date))
+      .slice(0, 3) // Show only 3 upcoming events
+
+    // Fetch recent registrations for activity feed
+    const registrationsResponse = await registrationStore.fetchUserRegistrations()
+    const registrations = registrationsResponse?.data || []
+
+    // Format recent activity
+    recentActivity.value = registrations
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+      .slice(0, 5) // Show only 5 recent activities
+      .map(registration => ({
+        id: registration.id,
+        type: 'booking',
+        icon: 'fas fa-ticket-alt',
+        text: `New booking for ${registration.event?.title || 'Event'}`,
+        time: registration.created_at
+      }))
+
   } catch (error) {
     console.error('Error loading dashboard data:', error)
+  } finally {
+    isLoading.value = false
   }
+}
+
+// Use onBeforeMount as it's the earliest available hook in Vue 3 Composition API
+onBeforeMount(() => {
+  fetchDashboardData()
 })
-
-const formatDate = (date) => {
-  return new Date(date).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric'
-  })
-}
-
-const formatTime = (time) => {
-  return new Date(time).toLocaleTimeString('en-US', {
-    hour: 'numeric',
-    minute: 'numeric',
-    hour12: true
-  })
-}
 </script>
 
 <style scoped>
