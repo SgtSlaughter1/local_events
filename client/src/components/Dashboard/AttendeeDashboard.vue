@@ -82,7 +82,7 @@
                                         </router-link>
                                         <button 
                                             v-if="event.registration_status === 'pending' || event.registration_status === 'confirmed'"
-                                            @click="cancelRegistration(event.registration_id)"
+                                            @click="openCancelModal(event)"
                                             class="btn btn-sm btn-danger"
                                         >
                                             Cancel
@@ -179,6 +179,44 @@
                 </div>
             </div>
         </div>
+
+   
+        <BaseModal
+            v-model="showCancelModal"
+            title="Cancel Registration"
+            @close="cancelReason = ''"
+        >
+            <div class="cancel-modal-content">
+                <p>Are you sure you want to cancel your registration for <strong>{{ selectedRegistration?.title }}</strong>?</p>
+                <div class="form-group">
+                    <label for="cancelReason">Reason for cancellation:</label>
+                    <textarea
+                        id="cancelReason"
+                        v-model="cancelReason"
+                        class="form-control"
+                        rows="3"
+                        placeholder="Please provide a reason for cancellation"
+                        required
+                    ></textarea>
+                </div>
+            </div>
+            <template #footer>
+                <button 
+                    class="btn btn-secondary" 
+                    @click="showCancelModal = false"
+                    :disabled="isCancelling"
+                >
+                    Close
+                </button>
+                <button 
+                    class="btn btn-danger" 
+                    @click="handleCancelRegistration"
+                    :disabled="isCancelling"
+                >
+                    {{ isCancelling ? 'Cancelling...' : 'Confirm Cancellation' }}
+                </button>
+            </template>
+        </BaseModal>
     </div>
 </template>
 
@@ -188,6 +226,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useRegistrationStore } from '@/stores/registration'
 import api from '@/services/api'
 import { formatDate } from '@/utils/formatters'
+import BaseModal from '@/components/Base/BaseModal.vue'
 
 const authStore = useAuthStore()
 const registrationStore = useRegistrationStore()
@@ -202,6 +241,12 @@ const stats = ref({
 const upcomingEvents = ref([])
 const tickets = ref([])
 const registeredEvents = ref([])
+
+// Add new refs for modal
+const showCancelModal = ref(false)
+const selectedRegistration = ref(null)
+const cancelReason = ref('')
+const isCancelling = ref(false)
 
 async function fetchDashboardData() {
     try {
@@ -259,13 +304,33 @@ async function downloadTicket(ticket) {
     }
 }
 
-async function cancelRegistration(registrationId) {
+async function openCancelModal(registration) {
+    selectedRegistration.value = registration
+    showCancelModal.value = true
+}
+
+async function handleCancelRegistration() {
+    if (!cancelReason.value.trim()) {
+        alert('Please provide a reason for cancellation')
+        return
+    }
+
+    isCancelling.value = true
     try {
-        await registrationStore.cancelRegistration(registrationId, 'Cancelled by user')
-        // Refresh dashboard data
-        await fetchDashboardData()
+        await registrationStore.cancelRegistration(selectedRegistration.value.registration_id, cancelReason.value)
+        // Update the registration status in the list
+        const index = registeredEvents.value.findIndex(
+            event => event.registration_id === selectedRegistration.value.registration_id
+        )
+        if (index !== -1) {
+            registeredEvents.value[index].registration_status = 'pending'
+        }
+        showCancelModal.value = false
+        cancelReason.value = ''
     } catch (error) {
         console.error('Error cancelling registration:', error)
+    } finally {
+        isCancelling.value = false
     }
 }
 
@@ -614,5 +679,38 @@ onMounted(() => {
 .no-events .btn,
 .no-tickets .btn {
     margin-top: 1rem;
+}
+
+.cancel-modal-content {
+    padding: 1rem 0;
+}
+
+.form-group {
+    margin-top: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.1);
+}
+
+.btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
 }
 </style> 
