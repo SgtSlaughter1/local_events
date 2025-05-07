@@ -24,7 +24,7 @@ export const useRegistrationStore = defineStore('registration', {
       this.loading = true
       this.error = null
       try {
-        const response = await api.get(`/events/${eventId}/tickets`)
+        const response = await api.get(`/api/events/${eventId}/tickets`)
         this.availableTickets = response.data.data
         return response.data
       } catch (error) {
@@ -40,11 +40,11 @@ export const useRegistrationStore = defineStore('registration', {
       this.loading = true
       this.error = null
       try {
-        const response = await api.post(`/events/${eventId}/register`, registrationData)
+        const response = await api.post(`/api/events/${eventId}/register`, registrationData)
         this.currentRegistration = response.data.data
         return response.data
       } catch (error) {
-        this.error = error.response?.data?.message || 'Registration failed'
+        this.error = error.response?.data?.message || 'Failed to register for event'
         throw error
       } finally {
         this.loading = false
@@ -72,7 +72,7 @@ export const useRegistrationStore = defineStore('registration', {
       this.loading = true
       this.error = null
       try {
-        const response = await api.get(`/registrations/${registrationId}`)
+        const response = await api.get(`/api/registrations/${registrationId}`)
         this.currentRegistration = response.data.data
         return response.data
       } catch (error) {
@@ -108,15 +108,11 @@ export const useRegistrationStore = defineStore('registration', {
       this.loading = true
       this.error = null
       try {
-        const response = await api.post(`/registrations/${registrationId}/payment`, paymentData)
-        // Update the registration in the list
-        const index = this.registrations.findIndex(r => r.id === registrationId)
-        if (index !== -1) {
-          this.registrations[index] = response.data.data
-        }
+        const response = await api.post(`/api/registrations/${registrationId}/payment`, paymentData)
+        this.currentRegistration = response.data.data
         return response.data
       } catch (error) {
-        this.error = error.response?.data?.message || 'Payment processing failed'
+        this.error = error.response?.data?.message || 'Failed to process payment'
         throw error
       } finally {
         this.loading = false

@@ -1,90 +1,76 @@
 <template>
-    <div class="ticket-booking">
-        <div class="booking-header">
-            <h2>Book Tickets for {{ event?.title }}</h2>
-            <p class="text-muted">{{ formatDate(event?.start_date) }}</p>
+    <div class="max-w-4xl mx-auto p-6">
+        <div v-if="loading" class="flex justify-center items-center min-h-[400px]">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
         </div>
 
-        <div class="booking-content">
+        <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+            <p class="text-red-600">{{ error }}</p>
+        </div>
+
+        <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-8">
             <!-- Ticket Selection -->
-            <div class="ticket-selection">
-                <h3>Select Tickets</h3>
-                <div v-if="loading" class="loading-spinner">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <h2 class="text-2xl font-semibold mb-6">Select Tickets</h2>
+                
+                <div class="space-y-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="font-medium">Standard Ticket</h3>
+                            <p class="text-gray-600 text-sm">{{ availableTickets?.available_tickets }} tickets available</p>
+                        </div>
+                        <div class="text-xl font-semibold">{{ formatPrice(availableTickets?.price) }}</div>
                     </div>
-                </div>
-                <div v-else-if="error" class="alert alert-danger">
-                    {{ error }}
-                </div>
-                <div v-else class="ticket-types">
-                    <div class="ticket-type-card">
-                        <div class="ticket-info">
-                            <h4>Standard Ticket</h4>
-                            <p class="price">{{ formatPrice(ticketPrice) }}</p>
-                            <p class="description">Access to the event</p>
-                        </div>
-                        <div class="ticket-quantity">
-                            <div class="quantity-controls">
-                                <button 
-                                    class="quantity-btn" 
-                                    @click="decreaseQuantity"
-                                    :disabled="selectedQuantity === 0"
-                                >
-                                    <i class="fas fa-minus"></i>
+
+                    <div class="flex items-center space-x-4">
+                        <button 
+                            @click="decreaseQuantity" 
+                            :disabled="quantity <= 1"
+                            class="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 disabled:opacity-50"
+                        >
+                            -
                         </button>
-                                <span class="quantity">{{ selectedQuantity }}</span>
-                                <button 
-                                    class="quantity-btn" 
-                                    @click="increaseQuantity"
-                                    :disabled="selectedQuantity >= (event?.capacity || 100)"
-                                >
-                                    <i class="fas fa-plus"></i>
+                        <span class="text-lg font-medium">{{ quantity }}</span>
+                        <button 
+                            @click="increaseQuantity" 
+                            :disabled="quantity >= availableTickets?.available_tickets"
+                            class="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 disabled:opacity-50"
+                        >
+                            +
                         </button>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Order Summary -->
-            <div class="order-summary">
-                <h3>Order Summary</h3>
-                <div class="summary-content">
-                    <div v-if="selectedQuantity === 0" class="no-tickets">
-                        <p>No tickets selected</p>
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <h2 class="text-2xl font-semibold mb-6">Order Summary</h2>
+                
+                <div class="space-y-4">
+                    <div class="flex justify-between text-gray-600">
+                        <span>Number of Tickets</span>
+                        <span>{{ quantity }}</span>
                     </div>
-                    <template v-else>
-                        <div class="ticket-summary">
-                            <div class="summary-item">
-                                <span>Standard Ticket x {{ selectedQuantity }}</span>
-                                <span>{{ formatPrice(ticketPrice * selectedQuantity) }}</span>
-                            </div>
-                        </div>
-                        <div class="summary-total">
+                    <div class="flex justify-between text-gray-600">
+                        <span>Price per Ticket</span>
+                        <span>{{ formatPrice(availableTickets?.price) }}</span>
+                    </div>
+                    <div class="border-t pt-4">
+                        <div class="flex justify-between font-semibold text-lg">
                             <span>Total</span>
-                            <span>{{ formatPrice(ticketPrice * selectedQuantity) }}</span>
+                            <span>{{ formatPrice(totalAmount) }}</span>
+                        </div>
+                    </div>
                 </div>
-                    </template>
-                </div>
-            </div>
-        </div>
 
-        <!-- Navigation Buttons -->
-        <div class="booking-actions">
-            <BaseButton 
-                variant="secondary" 
-                @click="$router.push(`/events/${event?.id}`)"
-            >
-                Back to Event
-            </BaseButton>
-            <BaseButton 
-                variant="primary" 
-                :disabled="selectedQuantity === 0"
-                @click="proceedToCheckout"
-            >
-                Proceed to Checkout
-            </BaseButton>
+                <button 
+                    @click="proceedToCheckout"
+                    :disabled="!canProceed"
+                    class="w-full mt-6 bg-primary text-white py-3 rounded-lg font-medium hover:bg-primary-dark disabled:opacity-50"
+                >
+                    Proceed to Checkout
+                </button>
+            </div>
         </div>
     </div>
 </template>
@@ -92,86 +78,66 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useEventStore } from '@/stores/event'
-import BaseButton from '@/components/Base/BaseButton.vue'
-import { formatDate, formatPrice } from '@/utils/formatters'
+import { useRegistrationStore } from '@/stores/registration'
+import { formatPrice } from '@/utils/formatters'
 
 const route = useRoute()
 const router = useRouter()
-const eventStore = useEventStore()
-const loading = ref(true)
-const error = ref(null)
-const event = ref(null)
-const selectedQuantity = ref(0)
-const ticketPrice = ref(0)
+const registrationStore = useRegistrationStore()
 
-// Load booking data from local storage if exists
+const quantity = ref(1)
+const loading = computed(() => registrationStore.isLoading)
+const error = computed(() => registrationStore.getError)
+const availableTickets = computed(() => registrationStore.getAvailableTickets)
+
+const totalAmount = computed(() => {
+    if (!availableTickets.value?.price) return 0
+    return quantity.value * availableTickets.value.price
+})
+
+const canProceed = computed(() => {
+    return quantity.value > 0 && availableTickets.value?.available_tickets > 0
+})
+
 onMounted(async () => {
     try {
-        loading.value = true
-        const eventId = route.params.id
-        event.value = await eventStore.fetchEvent(eventId)
-        
-        // Load saved booking data
-        const savedBooking = localStorage.getItem(`booking_${eventId}`)
-        if (savedBooking) {
-            const bookingData = JSON.parse(savedBooking)
-            selectedQuantity.value = bookingData.tickets[0]?.quantity || 0
-            ticketPrice.value = bookingData.eventPrice || event.value.price
-        } else {
-            // If no saved booking, initialize with event's standard ticket
-            ticketPrice.value = event.value.price
-            selectedQuantity.value = 0
-    }
-    } catch (err) {
-        error.value = 'Failed to load ticket information'
-        console.error('Error:', err)
-    } finally {
-        loading.value = false
+        await registrationStore.fetchAvailableTickets(route.params.id)
+    } catch (error) {
+        console.error('Failed to fetch available tickets:', error)
     }
 })
 
-// Methods
 const increaseQuantity = () => {
-    if (selectedQuantity.value < (event.value?.capacity || 100)) {
-        selectedQuantity.value++
-        saveBookingData()
+    if (quantity.value < availableTickets.value?.available_tickets) {
+        quantity.value++
     }
 }
 
 const decreaseQuantity = () => {
-    if (selectedQuantity.value > 0) {
-        selectedQuantity.value--
-        saveBookingData()
+    if (quantity.value > 1) {
+        quantity.value--
     }
 }
 
-const saveBookingData = () => {
-    const bookingData = {
-        eventId: event.value.id,
-        eventTitle: event.value.title,
-        eventDate: event.value.start_date,
-        eventPrice: ticketPrice.value,
-        tickets: [{
-            id: 1,
-            name: 'Standard Ticket',
-            price: ticketPrice.value,
-            quantity: selectedQuantity.value,
-            available_quantity: event.value.capacity || 100
-        }],
-        totalAmount: ticketPrice.value * selectedQuantity.value,
-        totalTickets: selectedQuantity.value,
-        step: 'booking'
-    }
-    localStorage.setItem(`booking_${event.value.id}`, JSON.stringify(bookingData))
-}
+const proceedToCheckout = async () => {
+    try {
+        const registrationData = {
+            number_of_tickets: quantity.value,
+            payment_method: 'card' // Default payment method
+        }
 
-const proceedToCheckout = () => {
-    if (selectedQuantity.value > 0) {
+        const response = await registrationStore.registerForEvent(route.params.id, registrationData)
+        
+        // Save registration data to localStorage for checkout
+        localStorage.setItem('currentRegistration', JSON.stringify(response.data))
+        
+        // Navigate to checkout
         router.push({
             name: 'checkout',
-            params: { id: event.value.id }
+            params: { id: response.data.id }
         })
+    } catch (error) {
+        console.error('Failed to proceed to checkout:', error)
     }
 }
 </script>

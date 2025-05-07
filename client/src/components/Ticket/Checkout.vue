@@ -1,163 +1,155 @@
 <template>
-    <div class="checkout">
-        <div class="checkout__header">
-            <h2>Checkout</h2>
+    <div class="max-w-4xl mx-auto p-6">
+        <div v-if="loading" class="flex justify-center items-center min-h-[400px]">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
         </div>
 
-        <div v-if="loading" class="checkout__loading">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
+        <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+            <p class="text-red-600">{{ error }}</p>
         </div>
 
-        <div v-else-if="error" class="checkout__empty">
-            <p>{{ error }}</p>
-            <button @click="goBack" class="back-btn">
-                Go Back
-            </button>
-        </div>
-
-        <div v-else class="checkout__content">
-            <!-- Order Summary -->
-            <div class="order-summary">
-                <h3>Order Summary</h3>
-                <div class="summary-items">
-                    <div v-for="ticket in tickets" :key="ticket.id" class="summary-item">
-                        <span>{{ ticket.name }} x {{ ticket.quantity }}</span>
-                        <span>{{ formatPrice(ticket.price * ticket.quantity) }}</span>
-                    </div>
-                </div>
-                <div class="total">
-                    <span>Total Amount:</span>
-                    <span>{{ formatPrice(totalAmount) }}</span>
-                </div>
-            </div>
-
+        <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-8">
             <!-- Payment Form -->
-            <form @submit.prevent="processPayment" class="payment-form">
-                <div class="form-group">
-                    <label for="name">Full Name</label>
-                    <input type="text" id="name" v-model="paymentDetails.name" required
-                        placeholder="Enter your full name">
-                </div>
-
-                <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" v-model="paymentDetails.email" required
-                        placeholder="Enter your email">
-                </div>
-
-                <div class="form-group">
-                    <label for="card">Card Number</label>
-                    <input type="text" id="card" v-model="paymentDetails.cardNumber" required
-                        placeholder="1234 5678 9012 3456" maxlength="19">
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="expiry">Expiry Date</label>
-                        <input type="text" id="expiry" v-model="paymentDetails.expiry" required placeholder="MM/YY"
-                            maxlength="5">
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <h2 class="text-2xl font-semibold mb-6">Payment Details</h2>
+                
+                <form @submit.prevent="processPayment" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Card Number</label>
+                        <input 
+                            type="text" 
+                            v-model="paymentDetails.cardNumber"
+                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                            placeholder="4242 4242 4242 4242"
+                            required
+                        />
                     </div>
 
-                    <div class="form-group">
-                        <label for="cvv">CVV</label>
-                        <input type="text" id="cvv" v-model="paymentDetails.cvv" required placeholder="123"
-                            maxlength="3">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Expiry Date</label>
+                            <input 
+                                type="text" 
+                                v-model="paymentDetails.expiryDate"
+                                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                                placeholder="MM/YY"
+                                required
+                            />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">CVC</label>
+                            <input 
+                                type="text" 
+                                v-model="paymentDetails.cvc"
+                                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                                placeholder="123"
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <button 
+                        type="submit"
+                        :disabled="processing"
+                        class="w-full bg-primary text-white py-3 rounded-lg font-medium hover:bg-primary-dark disabled:opacity-50"
+                    >
+                        {{ processing ? 'Processing...' : 'Pay Now' }}
+                    </button>
+                </form>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <h2 class="text-2xl font-semibold mb-6">Order Summary</h2>
+                
+                <div class="space-y-4">
+                    <div class="flex justify-between text-gray-600">
+                        <span>Event</span>
+                        <span>{{ registration?.event?.title }}</span>
+                    </div>
+                    <div class="flex justify-between text-gray-600">
+                        <span>Number of Tickets</span>
+                        <span>{{ registration?.number_of_tickets }}</span>
+                    </div>
+                    <div class="flex justify-between text-gray-600">
+                        <span>Price per Ticket</span>
+                        <span>{{ formatPrice(registration?.event?.price) }}</span>
+                    </div>
+                    <div class="border-t pt-4">
+                        <div class="flex justify-between font-semibold text-lg">
+                            <span>Total</span>
+                            <span>{{ formatPrice(registration?.payment_amount) }}</span>
+                        </div>
                     </div>
                 </div>
-
-                <button type="submit" class="pay-btn" :disabled="isProcessing">
-                    {{ isProcessing ? 'Processing...' : `Pay ${formatPrice(totalAmount)}` }}
-                </button>
-            </form>
+            </div>
         </div>
     </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { useEventStore } from '@/stores/event'
+import { useRoute, useRouter } from 'vue-router'
+import { useRegistrationStore } from '@/stores/registration'
 import { formatPrice } from '@/utils/formatters'
 
-const router = useRouter()
 const route = useRoute()
-const eventStore = useEventStore()
-const loading = ref(true)
-const error = ref(null)
-const event = ref(null)
-const bookingData = ref(null)
+const router = useRouter()
+const registrationStore = useRegistrationStore()
+
+const paymentDetails = ref({
+    cardNumber: '',
+    expiryDate: '',
+    cvc: ''
+})
+
+const processing = ref(false)
+const loading = computed(() => registrationStore.isLoading)
+const error = computed(() => registrationStore.getError)
+const registration = computed(() => registrationStore.getCurrentRegistration)
 
 onMounted(async () => {
     try {
-        loading.value = true
-        const eventId = route.params.id
-        
-        // Load booking data from localStorage
-        const savedBooking = localStorage.getItem(`booking_${eventId}`)
-        if (!savedBooking) {
-            error.value = 'No tickets selected. Please go back to select tickets.'
+        // Load registration data from localStorage
+        const savedRegistration = localStorage.getItem('currentRegistration')
+        if (!savedRegistration) {
+            router.push({ name: 'events' })
             return
         }
-        
-        bookingData.value = JSON.parse(savedBooking)
-        if (!bookingData.value.tickets || bookingData.value.totalTickets === 0) {
-            error.value = 'No tickets selected. Please go back to select tickets.'
-            return
-        }
-        
-        event.value = await eventStore.fetchEvent(eventId)
-    } catch (err) {
-        error.value = 'Failed to load checkout information'
-        console.error('Error:', err)
-    } finally {
-        loading.value = false
+
+        // Fetch registration details
+        await registrationStore.fetchRegistrationDetails(route.params.id)
+    } catch (error) {
+        console.error('Failed to load registration details:', error)
     }
 })
 
-const goBack = () => {
-    router.push({
-        name: 'ticket-booking',
-        params: { id: event.value.id }
-    })
-}
-
-// Get tickets from booking data
-const tickets = computed(() => bookingData.value?.tickets || [])
-
-const totalAmount = computed(() => {
-    return bookingData.value?.totalAmount || 0
-})
-
-const paymentDetails = ref({
-    name: '',
-    email: '',
-    cardNumber: '',
-    expiry: '',
-    cvv: ''
-})
-
-const isProcessing = ref(false)
-
 const processPayment = async () => {
     try {
-        isProcessing.value = true
-        
-        // Mock API call
-        await new Promise(resolve => setTimeout(resolve, 2000))
+        processing.value = true
+        const paymentData = {
+            payment_method: 'card',
+            payment_details: {
+                card_number: paymentDetails.value.cardNumber,
+                expiry_date: paymentDetails.value.expiryDate,
+                cvc: paymentDetails.value.cvc
+            }
+        }
 
-        // Navigate to success page with booking data
+        await registrationStore.processPayment(route.params.id, paymentData)
+        
+        // Clear registration data from localStorage
+        localStorage.removeItem('currentRegistration')
+        
+        // Navigate to success page
         router.push({
             name: 'payment-success',
-            params: { id: event.value.id },
-            state: { bookingData: bookingData.value }
+            params: { id: route.params.id }
         })
     } catch (error) {
         console.error('Payment processing failed:', error)
-        alert('Payment processing failed. Please try again.')
     } finally {
-        isProcessing.value = false
+        processing.value = false
     }
 }
 </script>
