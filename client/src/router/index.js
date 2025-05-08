@@ -10,6 +10,7 @@ import CreateEvent from '../views/CreateEvent.vue'
 import TicketBooking from '../components/Ticket/TicketBooking.vue'
 import Checkout from '../components/Ticket/Checkout.vue'
 import PaymentSuccess from '../components/Ticket/PaymentSuccess.vue'
+import { useAuthStore } from '../stores/auth'
 
 const routes = [
   {
@@ -94,6 +95,24 @@ const routes = [
     component: Dashboard,
     meta: { requiresAuth: true },
   },
+  {
+    path: '/dashboard/users',
+    name: 'dashboard-users',
+    component: Dashboard,
+    meta: { requiresAuth: true, requiresAdmin: true },
+  },
+  {
+    path: '/dashboard/categories',
+    name: 'dashboard-categories',
+    component: Dashboard,
+    meta: { requiresAuth: true, requiresAdmin: true },
+  },
+  {
+    path: '/dashboard/analytics',
+    name: 'dashboard-analytics',
+    component: Dashboard,
+    meta: { requiresAuth: true, requiresAdmin: true },
+  },
 ]
 
 const router = createRouter({
@@ -102,6 +121,19 @@ const router = createRouter({
   scrollBehavior() {
     return { top: 0 }
   },
+})
+
+// Navigation guard for admin routes
+router.beforeEach((to, from, next) => {
+  const auth = useAuthStore()
+  
+  if (to.meta.requiresAuth && !auth.isAuthenticated) {
+    next('/login')
+  } else if (to.meta.requiresAdmin && !auth.isAdmin) {
+    next('/dashboard')
+  } else {
+    next()
+  }
 })
 
 export default router

@@ -5,6 +5,11 @@
     <OrganizerDashboard v-else-if="currentView === 'dashboard' && auth.isOrganizer" />
     <AttendeeDashboard v-else-if="currentView === 'dashboard' && auth.isAttendee" />
 
+    <!-- Admin Components -->
+    <Users v-if="currentView === 'users' && auth.isAdmin" />
+    <Categories v-if="currentView === 'categories' && auth.isAdmin" />
+    <Analytics v-if="currentView === 'analytics' && auth.isAdmin" />
+
     <!-- Organizer Specific Components -->
     <template v-if="auth.isOrganizer">
       <MyEvents v-if="currentView === 'my-events'" />
@@ -37,6 +42,9 @@ import MyEvents from '../components/Dashboard/MyEvents.vue'
 import CreateEvent from '../views/CreateEvent.vue'
 import Profile from '@/components/Dashboard/Profile.vue'
 import Settings from '@/components/Dashboard/Settings.vue'
+import Users from '@/components/admin/Users.vue'
+import Categories from '@/components/admin/Categories.vue'
+import Analytics from '@/components/admin/Analytics.vue'
 
 const route = useRoute()
 const auth = useAuthStore()
@@ -48,6 +56,9 @@ const currentView = computed(() => {
   if (path === '/dashboard/create-event') return 'create-event'
   if (path === '/dashboard/profile') return 'profile'
   if (path === '/dashboard/settings') return 'settings'
+  if (path === '/dashboard/users') return 'users'
+  if (path === '/dashboard/categories') return 'categories'
+  if (path === '/dashboard/analytics') return 'analytics'
   return ''
 })
 
@@ -61,6 +72,12 @@ const currentPageTitle = computed(() => {
       return 'Profile'
     case 'settings':
       return 'Settings'
+    case 'users':
+      return 'User Management'
+    case 'categories':
+      return 'Categories'
+    case 'analytics':
+      return 'Analytics'
     default:
       return 'Dashboard'
   }
@@ -78,6 +95,11 @@ const hasAccess = computed(() => {
   // My Events and Create Event are accessible to organizers and admins
   if (view === 'my-events' || view === 'create-event') {
     return auth.isOrganizer || auth.isAdmin
+  }
+
+  // Admin-only views
+  if (view === 'users' || view === 'categories' || view === 'analytics') {
+    return auth.isAdmin
   }
   
   return false
