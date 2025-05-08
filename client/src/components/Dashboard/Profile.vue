@@ -21,8 +21,53 @@
           <h2 class="profile-name">{{ user.name }}</h2>
           <p class="profile-role">{{ userRole }}</p>
           <p class="profile-email">{{ user.email }}</p>
-            </div>
-            </div>
+        </div>
+      </div>
+
+      <!-- Profile Update Form -->
+      <div class="profile-section">
+        <h3>Update Profile</h3>
+        <form @submit.prevent="updateProfile" class="profile-form">
+          <BaseInput
+            v-model="profileForm.name"
+            label="Full Name"
+            type="text" 
+            :error="profileErrors.name?.[0]"
+            required
+          />
+
+          <BaseInput
+            v-model="profileForm.email"
+            label="Email Address"
+            type="email" 
+            :error="profileErrors.email?.[0]"
+            required
+          />
+
+          <BaseInput
+            v-model="profileForm.phone"
+            label="Phone Number"
+            type="tel" 
+            :error="profileErrors.phone?.[0]"
+          />
+
+          <BaseTextarea
+            v-model="profileForm.address"
+            label="Address"
+            :error="profileErrors.address?.[0]"
+            rows="3"
+          />
+
+          <BaseButton
+            type="submit"
+            :loading="auth.loading"
+            variant="primary"
+            class="mt-4"
+          >
+            {{ auth.loading ? 'Updating...' : 'Update Profile' }}
+          </BaseButton>
+        </form>
+      </div>
 
       <div class="profile-stats">
         <div class="stat-item">
@@ -31,14 +76,14 @@
             <span class="stat-value">{{ stats.totalEvents }}</span>
             <span class="stat-label">Total Events</span>
           </div>
-            </div>
+        </div>
         <div class="stat-item">
           <i class="fas fa-ticket-alt"></i>
           <div class="stat-info">
             <span class="stat-value">{{ stats.totalBookings }}</span>
             <span class="stat-label">Total Bookings</span>
           </div>
-            </div>
+        </div>
         <div class="stat-item">
           <i class="fas fa-star"></i>
           <div class="stat-info">
@@ -47,12 +92,6 @@
           </div>
         </div>
       </div>
-
-      <div class="profile-actions">
-        <router-link to="/dashboard/settings" class="btn btn-primary">
-          <i class="fas fa-cog"></i> Edit Settings
-        </router-link>
-            </div>
 
       <!-- Recent Activity -->
       <div class="profile-section">
@@ -67,7 +106,7 @@
               <span class="activity-time">{{ activity.time }}</span>
             </div>
           </div>
-      </div>
+        </div>
       </div>
     </div>
   </div>
@@ -76,9 +115,14 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
+import { useToast } from 'vue-toastification'
 import axios from 'axios'
+import BaseInput from '@/components/Base/BaseInput.vue'
+import BaseTextarea from '@/components/Base/BaseTextarea.vue'
+import BaseButton from '@/components/Base/BaseButton.vue'
 
-    const auth = useAuthStore()
+const toast = useToast()
+const auth = useAuthStore()
 const user = computed(() => auth.user)
 
 const userAvatar = computed(() => user.value?.avatar || '/images/avatar.svg')
@@ -89,6 +133,15 @@ const userRole = computed(() => {
   return 'User'
 })
 
+// Profile Form
+const profileForm = ref({
+  name: '',
+  email: '',
+  phone: '',
+  address: ''
+})
+const profileErrors = ref({})
+
 const stats = ref({
   totalEvents: 0,
   totalBookings: 0,
@@ -98,7 +151,28 @@ const stats = ref({
 const recentActivity = ref([])
 
 onMounted(async () => {
-      try {
+  try {
+    // Load profile form data
+    if (auth.user) {
+      profileForm.value = {
+        name: auth.user.name || '',
+        email: auth.user.email || '',
+        phone: auth.user.phone || '',
+        address: auth.user.address || ''
+      }
+    }
+
+    // Fetch fresh data from API
+    const { success, data } = await auth.fetchUser()
+    if (success && data) {
+      profileForm.value = {
+        name: data.name || '',
+        email: data.email || '',
+        phone: data.phone || '',
+        address: data.address || ''
+      }
+    }
+
     // Fetch user stats
     const statsResponse = await axios.get('/api/user/stats')
     stats.value = statsResponse.data.stats
@@ -106,10 +180,41 @@ onMounted(async () => {
     // Fetch recent activity
     const activityResponse = await axios.get('/api/user/activity')
     recentActivity.value = activityResponse.data.activities
-      } catch (error) {
+  } catch (error) {
     console.error('Error loading profile data:', error)
-      }
+    toast.error('Failed to load profile data. Please refresh the page.')
+  }
 })
+
+// Update Profile
+const updateProfile = async () => {
+  profileErrors.value = {}
+  
+  try {
+    const { success, error } = await auth.updateProfile(profileForm.value)
+    if (success) {
+      toast.success('Profile updated successfully')
+    } else {
+      if (error?.response?.data?.errors) {
+        profileErrors.value = error.response.data.errors
+        // Show first error message in toast
+        const firstError = Object.values(error.response.data.errors)[0][0]
+        toast.error(firstError)
+      } else {
+        toast.error(error?.response?.data?.message || 'Failed to update profile. Please try again.')
+      }
+    }
+  } catch (error) {
+    if (error.response?.data?.errors) {
+      profileErrors.value = error.response.data.errors
+      // Show first error message in toast
+      const firstError = Object.values(error.response.data.errors)[0][0]
+      toast.error(firstError)
+    } else {
+      toast.error('Failed to update profile. Please try again.')
+    }
+  }
+}
 
 const handleAvatarUpload = async (event) => {
   const file = event.target.files[0]
@@ -129,10 +234,10 @@ const handleAvatarUpload = async (event) => {
     auth.setUser({ ...auth.user, avatar: response.data.avatar_url })
     
     // Show success message
-    alert('Avatar updated successfully')
+    toast.success('Avatar updated successfully')
   } catch (error) {
     console.error('Error uploading avatar:', error)
-    alert('Failed to upload avatar. Please try again.')
+    toast.error('Failed to upload avatar. Please try again.')
   }
 }
 </script>
@@ -222,6 +327,11 @@ const handleAvatarUpload = async (event) => {
   margin: 0;
 }
 
+.profile-form {
+  max-width: 500px;
+  margin-bottom: 2rem;
+}
+
 .profile-stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -257,34 +367,6 @@ const handleAvatarUpload = async (event) => {
 .stat-label {
   font-size: 0.875rem;
   color: #6c757d;
-}
-
-.profile-actions {
-  margin-bottom: 2rem;
-  text-align: center;
-}
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  text-decoration: none;
-}
-
-.btn-primary {
-  background-color: var(--primary-color);
-  color: white;
-}
-
-.btn-primary:hover {
-  background-color: var(--primary-dark);
 }
 
 .profile-section {
@@ -350,6 +432,10 @@ const handleAvatarUpload = async (event) => {
 .activity-time {
   font-size: 0.875rem;
   color: #6c757d;
+}
+
+.mt-4 {
+  margin-top: 1rem;
 }
 
 @media (max-width: 768px) {
