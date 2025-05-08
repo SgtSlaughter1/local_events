@@ -12,14 +12,14 @@
                 variant="primary"
                 size="large"
                 class="me-3"
-                @click="navigateToEvents"
+                @click="() => navigateToEvents()"
               >
                 Browse Events
               </BaseButton>
               <BaseButton
                 variant="secondary"
                 size="large"
-                @click="navigateToRegister"
+                @click="() => navigateToRegister()"
               >
                 Register Now
               </BaseButton>
@@ -135,7 +135,7 @@
         <BaseButton
           variant="primary"
           size="large"
-          @click="navigateToEvents"
+          @click="() => navigateToEvents()"
         >
           Get Started
         </BaseButton>
@@ -148,6 +148,7 @@
 import BaseButton from '@/components/Base/BaseButton.vue'
 import EventCard from '@/components/Events/EventCard.vue'
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import api from '@/services/api'
 
 export default {
@@ -157,6 +158,7 @@ export default {
     EventCard
   },
   setup() {
+    const router = useRouter()
     const upcomingEvents = ref([])
     const onlineEvents = ref([])
     const categories = ref([])
@@ -165,6 +167,14 @@ export default {
       online: true,
       categories: true
     })
+
+    const navigateToEvents = () => {
+      router.push('/events')
+    }
+
+    const navigateToRegister = () => {
+      router.push('/register')
+    }
 
     const fetchEvents = async () => {
       try {
@@ -211,27 +221,10 @@ export default {
       upcomingEvents,
       onlineEvents,
       categories,
-      loading
+      loading,
+      navigateToEvents,
+      navigateToRegister
     }
-  },
-  methods: {
-    navigateToEvents() {
-      this.$router.push('/events')
-    },
-    navigateToRegister() {
-      this.$router.push('/register')
-    },
-    viewEvent(eventId) {
-      this.$router.push(`/events/${eventId}`)
-    },
-    formatDate(date) {
-      return new Date(date).toLocaleDateString('en-US', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      })
-    },
-  },
+  }
 }
 </script>
