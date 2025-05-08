@@ -19,8 +19,8 @@
           <i class="fas fa-calendar-check"></i>
         </div>
         <div class="stat-content">
-          <h3>{{ stats.totalEvents || 0 }}</h3>
-          <p>Total Events</p>
+          <h3 class="stat-value">{{ stats.totalEvents || 0 }}</h3>
+          <p class="stat-label">Total Events</p>
         </div>
       </div>
 
@@ -29,8 +29,8 @@
           <i class="fas fa-users"></i>
         </div>
         <div class="stat-content">
-          <h3>{{ stats.totalUsers || 0 }}</h3>
-          <p>Total Users</p>
+          <h3 class="stat-value">{{ stats.totalUsers || 0 }}</h3>
+          <p class="stat-label">Total Users</p>
         </div>
       </div>
 
@@ -39,8 +39,8 @@
           <i class="fas fa-ticket-alt"></i>
         </div>
         <div class="stat-content">
-          <h3>{{ stats.totalTickets || 0 }}</h3>
-          <p>Total Tickets</p>
+          <h3 class="stat-value">{{ stats.totalTickets || 0 }}</h3>
+          <p class="stat-label">Total Tickets</p>
         </div>
       </div>
 
@@ -49,8 +49,8 @@
           <i class="fas fa-money-bill-wave"></i>
         </div>
         <div class="stat-content">
-          <h3>{{ formatPrice(stats.totalRevenue || 0) }}</h3>
-          <p>Total Revenue</p>
+          <h3 class="stat-value">{{ formatPrice(stats.totalRevenue || 0) }}</h3>
+          <p class="stat-label">Total Revenue</p>
         </div>
       </div>
     </div>
@@ -303,43 +303,51 @@ onMounted(() => {
   margin-bottom: 0.5rem;
 }
 
+/* Stats Grid */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
   margin-bottom: 2rem;
 }
 
 .stat-card {
-  background: var(--card-bg);
-  border-radius: 0.5rem;
+  background: var(--white-color);
+  border-radius: 8px;
   padding: 1.5rem;
   display: flex;
   align-items: center;
   gap: 1rem;
-  box-shadow: var(--card-shadow);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .stat-icon {
   width: 48px;
   height: 48px;
-  border-radius: 50%;
+  border-radius: 12px;
   background: var(--primary-color);
+  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
   font-size: 1.5rem;
 }
 
-.stat-content h3 {
-  font-size: 1.5rem;
-  margin: 0;
+.stat-content {
+  flex: 1;
 }
 
-.stat-content p {
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 600;
   margin: 0;
-  color: var(--text-muted);
+  color: var(--text-color);
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: #6c757d;
+  margin: 0;
 }
 
 .dashboard-grid {
@@ -349,14 +357,14 @@ onMounted(() => {
 }
 
 .dashboard-card {
-  background: var(--card-bg);
-  border-radius: 0.5rem;
-  box-shadow: var(--card-shadow);
+  background: var(--white-color);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .card-header {
   padding: 1rem;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid #e9ecef;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -365,6 +373,8 @@ onMounted(() => {
 .card-header h3 {
   margin: 0;
   font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-color);
 }
 
 .card-content {
@@ -391,28 +401,36 @@ onMounted(() => {
 .event-item {
   display: flex;
   gap: 1rem;
-  padding: 0.5rem;
-  border-radius: 0.5rem;
+  padding: 1rem;
+  border-radius: 8px;
   background: var(--bg-color);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.event-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .event-image {
   width: 80px;
   height: 80px;
-  border-radius: 0.5rem;
+  border-radius: 8px;
   object-fit: cover;
 }
 
 .event-details h4 {
   margin: 0 0 0.5rem 0;
   font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-color);
 }
 
 .event-stats {
   display: flex;
   gap: 1rem;
   font-size: 0.875rem;
-  color: var(--text-muted);
+  color: #6c757d;
 }
 
 /* User List Styles */
@@ -425,9 +443,15 @@ onMounted(() => {
 .user-item {
   display: flex;
   gap: 1rem;
-  padding: 0.5rem;
-  border-radius: 0.5rem;
+  padding: 1rem;
+  border-radius: 8px;
   background: var(--bg-color);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.user-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .user-avatar {
@@ -440,13 +464,15 @@ onMounted(() => {
 .user-details h4 {
   margin: 0 0 0.25rem 0;
   font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-color);
 }
 
 .user-role {
   font-size: 0.875rem;
   color: var(--primary-color);
   background: var(--primary-light);
-  padding: 0.25rem 0.5rem;
+  padding: 0.25rem 0.75rem;
   border-radius: 1rem;
 }
 
@@ -460,37 +486,44 @@ onMounted(() => {
 .activity-item {
   display: flex;
   gap: 1rem;
-  padding: 0.5rem;
-  border-radius: 0.5rem;
+  padding: 1rem;
+  border-radius: 8px;
   background: var(--bg-color);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.activity-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .activity-icon {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  font-size: 1.25rem;
 }
 
-.activity-icon.event { background: var(--primary-color); }
-.activity-icon.user { background: var(--success-color); }
-.activity-icon.ticket { background: var(--warning-color); }
-.activity-icon.payment { background: var(--info-color); }
+.activity-icon.event { background: #e8f5e9; color: #2e7d32; }
+.activity-icon.user { background: #e3f2fd; color: #1976d2; }
+.activity-icon.ticket { background: #fff3e0; color: #f57c00; }
+.activity-icon.payment { background: #f3e5f5; color: #7b1fa2; }
 
 .activity-details p {
   margin: 0 0 0.25rem 0;
   font-size: 0.875rem;
+  color: var(--text-color);
 }
 
 .activity-time {
   font-size: 0.75rem;
-  color: var(--text-muted);
+  color: #6c757d;
 }
 
-/* Quick Actions Styles */
+/* Quick Actions */
 .quick-actions {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -501,15 +534,29 @@ onMounted(() => {
   width: 100%;
   justify-content: center;
   gap: 0.5rem;
+  padding: 1rem;
+  border-radius: 8px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.quick-actions .base-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 1200px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 768px) {
-  .dashboard-grid {
+  .stats-grid {
     grid-template-columns: 1fr;
   }
   
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
+  .dashboard-grid {
+    grid-template-columns: 1fr;
   }
   
   .quick-actions {
