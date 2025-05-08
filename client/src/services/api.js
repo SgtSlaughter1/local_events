@@ -8,9 +8,15 @@ const api = axios.create({
 // Request interceptor
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token')
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
+    // List of public routes that don't require authentication
+    const publicRoutes = ['/api/events', '/api/categories', '/api/register', '/api/login'];
+    
+    // Only add token for non-public routes
+    if (!publicRoutes.some(route => config.url.includes(route))) {
+      const token = localStorage.getItem('token')
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`
+      }
     }
     return config
   },
