@@ -165,7 +165,6 @@ const selectedEventId = ref(null)
 onMounted(async () => {
   try {
     await eventStore.fetchEvents(1)
-    // console.log('Fetched events:', eventStore.getEvents)
   } catch (error) {
     console.error('Error fetching events:', error)
   }
@@ -207,7 +206,6 @@ const error = computed(() => eventStore.getError)
 
 const handleSearch = () => {
   selectedEventId.value = null
-  // console.log('Searching for:', searchQuery.value)
 }
 
 const showEventDetails = (eventId) => {

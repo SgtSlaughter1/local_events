@@ -15,11 +15,7 @@ export default function useWeather(event) {
     error.value = null;
 
     try {
-      console.log('Fetching weather for:', {
-        city: event.value.city,
-        date: event.value.start_date
-      });
-
+      
       const { data } = await api.get('/api/weather/forecast', {
         params: {
           city: event.value.city,
@@ -27,7 +23,7 @@ export default function useWeather(event) {
         }
       });
 
-      console.log('Weather API response:', data);
+
       
       if (!data || !data.daily) {
         throw new Error('Invalid weather data received');
