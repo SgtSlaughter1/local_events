@@ -10,11 +10,10 @@
     <Categories v-if="currentView === 'categories' && auth.isAdmin" />
     <Analytics v-if="currentView === 'analytics' && auth.isAdmin" />
 
-    <!-- Organizer Specific Components -->
-    <template v-if="auth.isOrganizer">
-      <MyEvents v-if="currentView === 'my-events'" />
-      <CreateEvent v-else-if="currentView === 'create-event'" />
-    </template>
+    <!-- Organizer Components -->
+    <MyEvents v-if="currentView === 'my-events' && auth.isOrganizer" />
+    <CreateEvent v-if="currentView === 'create-event' && auth.isOrganizer" />
+    <MyBookings v-if="currentView === 'my-bookings' && auth.isOrganizer" />
 
     <!-- Global Components -->
     <Profile v-if="currentView === 'profile'" />
@@ -45,6 +44,7 @@ import Settings from '@/components/Dashboard/Settings.vue'
 import Users from '@/components/admin/Users.vue'
 import Categories from '@/components/admin/Categories.vue'
 import Analytics from '@/components/admin/Analytics.vue'
+import MyBookings from '@/components/Dashboard/MyBookings.vue'
 
 const route = useRoute()
 const auth = useAuthStore()
@@ -59,6 +59,7 @@ const currentView = computed(() => {
   if (path === '/dashboard/users') return 'users'
   if (path === '/dashboard/categories') return 'categories'
   if (path === '/dashboard/analytics') return 'analytics'
+  if (path === '/dashboard/my-bookings') return 'my-bookings'
   return ''
 })
 
@@ -78,6 +79,8 @@ const currentPageTitle = computed(() => {
       return 'Categories'
     case 'analytics':
       return 'Analytics'
+    case 'my-bookings':
+      return 'My Bookings'
     default:
       return 'Dashboard'
   }
@@ -92,8 +95,8 @@ const hasAccess = computed(() => {
   // Dashboard view is handled by role-specific components
   if (view === 'dashboard') return true
   
-  // My Events and Create Event are accessible to organizers and admins
-  if (view === 'my-events' || view === 'create-event') {
+  // My Events, Create Event, and My Bookings are accessible to organizers and admins
+  if (view === 'my-events' || view === 'create-event' || view === 'my-bookings') {
     return auth.isOrganizer || auth.isAdmin
   }
 

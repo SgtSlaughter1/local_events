@@ -87,7 +87,7 @@
                         <i class="fas fa-plus-circle"></i>
                         <span>Create Event</span>
                     </router-link>
-                    <router-link to="/dashboard/bookings" class="nav-item" :class="{ active: currentView === 'bookings' }">
+                    <router-link to="/dashboard/my-bookings" class="nav-item" :class="{ active: currentView === 'my-bookings' }">
                         <i class="fas fa-ticket-alt"></i>
                         <span>Bookings</span>
                     </router-link>
@@ -151,7 +151,6 @@ export default {
             if (path === '/dashboard/settings') return 'settings'
             if (path === '/dashboard/my-events') return 'my-events'
             if (path === '/dashboard/create-event') return 'create-event'
-            if (path === '/dashboard/bookings') return 'bookings'
             if (path === '/dashboard/my-bookings') return 'my-bookings'
             if (path === '/dashboard/users') return 'users'
             if (path === '/dashboard/categories') return 'categories'

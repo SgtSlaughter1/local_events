@@ -113,6 +113,12 @@ const routes = [
     component: Dashboard,
     meta: { requiresAuth: true, requiresAdmin: true },
   },
+  {
+    path: '/dashboard/my-bookings',
+    name: 'dashboard-my-bookings',
+    component: Dashboard,
+    meta: { requiresAuth: true, requiresOrganizer: true },
+  },
 ]
 
 const router = createRouter({
@@ -130,6 +136,8 @@ router.beforeEach((to, from, next) => {
   if (to.meta.requiresAuth && !auth.isAuthenticated) {
     next('/login')
   } else if (to.meta.requiresAdmin && !auth.isAdmin) {
+    next('/dashboard')
+  } else if (to.meta.requiresOrganizer && !auth.isOrganizer) {
     next('/dashboard')
   } else {
     next()
