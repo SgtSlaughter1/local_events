@@ -9,10 +9,20 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     // List of public routes that don't require authentication
-    const publicRoutes = ['/api/events', '/api/categories', '/api/register', '/api/login'];
+    const publicRoutes = [
+      { path: '/api/events', method: 'GET' },
+      { path: '/api/categories', method: 'GET' },
+      { path: '/api/register', method: 'POST' },
+      { path: '/api/login', method: 'POST' }
+    ];
     
+    // Check if the current request matches any public route
+    const isPublicRoute = publicRoutes.some(route => 
+      config.url.includes(route.path) && config.method.toLowerCase() === route.method.toLowerCase()
+    );
+
     // Only add token for non-public routes
-    if (!publicRoutes.some(route => config.url.includes(route))) {
+    if (!isPublicRoute) {
       const token = localStorage.getItem('token')
       if (token) {
         config.headers.Authorization = `Bearer ${token}`
@@ -30,8 +40,14 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Handle unauthorized access
+      // Clear auth data
       localStorage.removeItem('token')
+      localStorage.removeItem('user')
+      
+      // Remove token from axios defaults
+      delete api.defaults.headers.common['Authorization']
+      
+      // Redirect to login
       router.push('/login')
     }
     return Promise.reject(error)

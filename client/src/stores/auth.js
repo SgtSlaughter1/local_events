@@ -26,12 +26,22 @@ export const useAuthStore = defineStore('auth', {
       this.error = null
       try {
         const response = await api.post('/api/login', credentials)
+        
+        // Check if we have the expected response structure
+        if (!response.data || !response.data.token) {
+          throw new Error('Invalid response from server')
+        }
+
+        // Set token and user data
         this.token = response.data.token
         this.user = response.data.user
 
         // Store in localStorage
         localStorage.setItem('token', this.token)
         localStorage.setItem('user', JSON.stringify(this.user))
+
+        // Set the token in axios defaults for future requests
+        api.defaults.headers.common['Authorization'] = `Bearer ${this.token}`
 
         return { success: true, data: response.data }
       } catch (error) {
