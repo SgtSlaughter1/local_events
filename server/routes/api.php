@@ -88,7 +88,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Event management
-    Route::post('/events/{event}/register', [EventController::class, 'register']);
+    // Route::post('/events/{event}/register', [EventController::class, 'register']);
     Route::get('/my-events', [EventController::class, 'myEvents']);
 
     // Reviews

@@ -68,21 +68,6 @@ class Event extends Model
         return $this->hasMany(Review::class);
     }
 
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
-
-    public function tickets()
-    {
-        return $this->hasMany(Ticket::class);
-    }
-
-    public function bookings()
-    {
-        return $this->hasMany(Booking::class);
-    }
-
     // Scopes
     public function scopeUpcoming($query)
     {
