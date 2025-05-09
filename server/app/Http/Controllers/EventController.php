@@ -194,43 +194,6 @@ class EventController extends BaseController
         ]);
     }
 
-    public function register(Request $request, Event $event)
-    {
-        $request = request();
-        $request->validate([
-            'number_of_tickets' => 'required|integer|min:1'
-        ]);
-
-        if (!$event->isRegistrationOpen()) {
-            return response()->json([
-                'message' => 'Registration is not available for this event'
-            ], 422);
-        }
-
-        // Check if there's enough capacity
-        if ($event->capacity) {
-            $remainingCapacity = $event->getRemainingCapacity();
-            if ($remainingCapacity < $request->number_of_tickets) {
-                return response()->json([
-                    'message' => 'Not enough tickets available. Only ' . $remainingCapacity . ' tickets left.'
-                ], 422);
-            }
-        }
-
-        $registration = $event->registrations()->create([
-            'user_id' => Auth::id(),
-            'status' => 'pending',
-            'payment_status' => $event->price > 0 ? 'pending' : 'paid',
-            'payment_amount' => $event->price * $request->number_of_tickets,
-            'number_of_tickets' => $request->number_of_tickets
-        ]);
-
-        return response()->json([
-            'message' => 'Registration successful',
-            'registration' => $registration
-        ], 201);
-    }
-
     public function myEvents()
     {
         $createdEvents = $this->getCreatedEvents();
@@ -253,18 +216,6 @@ class EventController extends BaseController
         $this->authorize('view', $event);
         $registrations = $this->getEventRegistrations($event);
         return response()->json(['registrations' => $registrations]);
-    }
-
-    public function updateRegistration(Request $request, EventRegistration $registration)
-    {
-        $this->authorize('update', $registration->event);
-        $this->validateRegistrationStatus($request);
-        $registration = $this->updateRegistrationStatus($registration, $request->status);
-
-        return response()->json([
-            'message' => 'Registration updated successfully',
-            'registration' => $registration
-        ]);
     }
 
     public function eventStats(Event $event)
@@ -344,19 +295,6 @@ class EventController extends BaseController
             ->with('user')
             ->latest()
             ->get();
-    }
-
-    private function validateRegistrationStatus(Request $request)
-    {
-        return $request->validate([
-            'status' => 'required|in:pending,confirmed,cancelled',
-        ]);
-    }
-
-    private function updateRegistrationStatus(EventRegistration $registration, string $status)
-    {
-        $registration->update(['status' => $status]);
-        return $registration;
     }
 
     private function calculateEventStats(Event $event)
