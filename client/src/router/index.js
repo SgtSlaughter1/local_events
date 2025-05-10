@@ -11,6 +11,8 @@ import TicketBooking from '../components/Ticket/TicketBooking.vue'
 import Checkout from '../components/Ticket/Checkout.vue'
 import PaymentSuccess from '../components/Ticket/PaymentSuccess.vue'
 import AdminEvents from '../components/admin/Events.vue'
+import AttendeeDetails from '../components/Ticket/AttendeeDetails.vue'
+import OrderSummary from '../components/Ticket/OrderSummary.vue'
 import { useAuthStore } from '../stores/auth'
 
 const routes = [
@@ -44,6 +46,18 @@ const routes = [
     path: '/events/:id/book',
     name: 'ticket-booking',
     component: TicketBooking,
+    props: true,
+  },
+  {
+    path: '/events/:id/attendee',
+    name: 'attendee',
+    component: AttendeeDetails,
+    props: true,
+  },
+  {
+    path: '/events/:id/summary',
+    name: 'summary',
+    component: OrderSummary,
     props: true,
   },
   {

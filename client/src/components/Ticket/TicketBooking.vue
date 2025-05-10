@@ -1,75 +1,35 @@
 <template>
-    <div class="max-w-4xl mx-auto p-6">
-        <div v-if="loading" class="flex justify-center items-center min-h-[400px]">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-        </div>
-
-        <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-            <p class="text-red-600">{{ error }}</p>
-        </div>
-
-        <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <!-- Ticket Selection -->
-            <div class="bg-white rounded-lg shadow-sm p-6">
-                <h2 class="text-2xl font-semibold mb-6">Select Tickets</h2>
-                
-                <div class="space-y-6">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h3 class="font-medium">Standard Ticket</h3>
-                            <p class="text-gray-600 text-sm">{{ availableTickets?.available_tickets }} tickets available</p>
-                        </div>
-                        <div class="text-xl font-semibold">{{ formatPrice(availableTickets?.price) }}</div>
-                    </div>
-
-                    <div class="flex items-center space-x-4">
-                        <button 
-                            @click="decreaseQuantity" 
-                            :disabled="quantity <= 1"
-                            class="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 disabled:opacity-50"
-                        >
-                            -
-                        </button>
-                        <span class="text-lg font-medium">{{ quantity }}</span>
-                        <button 
-                            @click="increaseQuantity" 
-                            :disabled="quantity >= availableTickets?.available_tickets"
-                            class="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 disabled:opacity-50"
-                        >
-                            +
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Order Summary -->
-            <div class="bg-white rounded-lg shadow-sm p-6">
-                <h2 class="text-2xl font-semibold mb-6">Order Summary</h2>
-                
-                <div class="space-y-4">
-                    <div class="flex justify-between text-gray-600">
-                        <span>Number of Tickets</span>
-                        <span>{{ quantity }}</span>
-                    </div>
-                    <div class="flex justify-between text-gray-600">
-                        <span>Price per Ticket</span>
-                        <span>{{ formatPrice(availableTickets?.price) }}</span>
-                    </div>
-                    <div class="border-t pt-4">
-                        <div class="flex justify-between font-semibold text-lg">
-                            <span>Total</span>
-                            <span>{{ formatPrice(totalAmount) }}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <button 
-                    @click="proceedToCheckout"
-                    :disabled="!canProceed"
-                    class="w-full mt-6 bg-primary text-white py-3 rounded-lg font-medium hover:bg-primary-dark disabled:opacity-50"
-                >
-                    Proceed to Checkout
+    <div class="container d-flex justify-content-center align-items-center min-vh-100">
+        <div class="card shadow-lg" style="max-width: 420px; width: 100%;">
+            <div class="card-header d-flex align-items-center justify-content-between bg-light border-bottom-0">
+                <span class="fw-semibold">Select Tickets</span>
+                <button class="btn btn-link p-0 text-muted" @click="closeBooking" title="Close">
+                    <i class="bi bi-x-lg"></i>
                 </button>
+            </div>
+            <div class="card-body pb-0">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <div class="fw-bold">Standard Ticket</div>
+                        <div class="text-muted small">{{ availableTickets?.available_tickets }} tickets available</div>
+                    </div>
+                    <div class="d-flex align-items-center bg-light rounded-pill px-3 py-1">
+                        <BaseButton @click="decreaseQuantity" :disabled="quantity <= 1" variant="secondary"
+                            size="small">-</BaseButton>
+                        <span class="mx-2 fw-semibold">{{ quantity }}</span>
+                        <BaseButton @click="increaseQuantity"
+                            :disabled="quantity >= availableTickets?.available_tickets" variant="secondary"
+                            size="small">+</BaseButton>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center border-top pt-3 mb-3">
+                    <span>Qty: <b>{{ quantity }}</b></span>
+                    <span>Total: <b class="text-success">{{ formatPrice(totalAmount) }}</b></span>
+                </div>
+                <BaseButton @click="proceedToCheckout" :disabled="!canProceed" variant="primary" size="large"
+                    :full-width="true" class="mb-2">
+                    Proceed <i class="bi bi-arrow-right ms-2"></i>
+                </BaseButton>
             </div>
         </div>
     </div>
@@ -80,6 +40,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useRegistrationStore } from '@/stores/registration'
 import { formatPrice } from '@/utils/formatters'
+import BaseButton from '@/components/Base/BaseButton.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -127,186 +88,152 @@ const proceedToCheckout = async () => {
         }
 
         const response = await registrationStore.registerForEvent(route.params.id, registrationData)
-        
-        // Save registration data to localStorage for checkout
         localStorage.setItem('currentRegistration', JSON.stringify(response.data))
-        
-        // Navigate to checkout
-        router.push({
-            name: 'checkout',
-            params: { id: response.data.id }
-        })
+        router.push({ name: 'attendee', params: { id: response.data.id } })
     } catch (error) {
         console.error('Failed to proceed to checkout:', error)
     }
+}
+
+const closeBooking = () => {
+    router.push({ name: 'events' })
 }
 </script>
 
 <style scoped>
 .ticket-booking {
     max-width: 800px;
-    margin: 0 auto;
+    margin: 2rem auto;
     padding: 2rem;
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.booking-header {
-    text-align: center;
-    margin-bottom: 2rem;
+.ticket-booking h2 {
+    color: #2c3e50;
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
 }
 
-.booking-header h2 {
-    margin-bottom: 0.5rem;
-}
-
-.booking-content {
-    display: grid;
-    gap: 2rem;
-}
-
-.ticket-selection {
-    background: var(--card-bg);
-    border-radius: 0.5rem;
-    padding: 1.5rem;
-    box-shadow: var(--card-shadow);
-}
-
-.ticket-types {
+.ticket-booking-card {
+    max-width: 400px;
+    margin: 3rem auto;
+    background: #fff;
+    border-radius: 1rem;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07);
+    padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    overflow: hidden;
 }
 
-.ticket-type-card {
+.card-header {
     display: flex;
+    align-items: center;
     justify-content: space-between;
-    align-items: center;
-    padding: 1rem;
-    background: var(--bg-color);
-    border-radius: 0.5rem;
+    background: #f7f7f7;
+    padding: 1.25rem 1.5rem 1rem 1.5rem;
+    border-bottom: 1px solid #f0f0f0;
 }
 
-.ticket-info h4 {
-    margin: 0 0 0.5rem 0;
+.card-title {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #222;
 }
 
-.ticket-info .price {
-    font-size: 1.25rem;
-    font-weight: bold;
-    color: var(--primary-color);
-    margin: 0.5rem 0;
-}
-
-.ticket-info .description {
-    color: var(--text-muted);
-    margin: 0;
-}
-
-.quantity-controls {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.quantity-btn {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    border: 1px solid var(--border-color);
-    background: var(--card-bg);
-    color: var(--text-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #888;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: color 0.2s;
 }
 
-.quantity-btn:hover:not(:disabled) {
-    background: var(--primary-color);
-    color: white;
-    border-color: var(--primary-color);
+.close-btn:hover {
+    color: #222;
 }
 
-.quantity-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+.ticket-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 1.5rem 1rem 1.5rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.ticket-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.ticket-type {
+    font-weight: 500;
+    font-size: 1.1rem;
+    margin-bottom: 0.25rem;
+}
+
+.ticket-price {
+    color: #888;
+    font-size: 1rem;
+}
+
+.quantity-selector {
+    display: flex;
+    align-items: center;
+    background: #f4f4f4;
+    border-radius: 999px;
+    padding: 0.25rem 0.75rem;
+    gap: 0.5rem;
 }
 
 .quantity {
     font-size: 1.1rem;
-    font-weight: bold;
+    font-weight: 500;
     min-width: 2rem;
     text-align: center;
 }
 
-.order-summary {
-    background: var(--card-bg);
-    border-radius: 0.5rem;
-    padding: 1.5rem;
-    box-shadow: var(--card-shadow);
-}
-
-.summary-content {
-    margin-top: 1rem;
-}
-
-.no-tickets {
-    text-align: center;
-    color: var(--text-muted);
-    padding: 1rem;
-}
-
-.ticket-summary {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.summary-item {
+.summary-bar {
     display: flex;
     justify-content: space-between;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid var(--border-color);
+    align-items: center;
+    background: #f7f7f7;
+    padding: 1rem 1.5rem;
+    font-size: 1.05rem;
+    border-top: 1px solid #f0f0f0;
+    border-bottom: 1px solid #f0f0f0;
 }
 
-.summary-total {
-    display: flex;
-    justify-content: space-between;
-    padding: 1rem 0 0;
-    font-weight: bold;
-    font-size: 1.1rem;
+.total-price {
+    color: #1db954;
+    font-weight: 600;
 }
 
-.booking-actions {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 2rem;
-    gap: 1rem;
+.proceed-btn {
+    margin: 1.5rem 1.5rem 1.25rem 1.5rem;
 }
 
-.loading-spinner {
-    display: flex;
-    justify-content: center;
-    padding: 2rem;
+.arrow {
+    margin-left: 0.5rem;
+    font-size: 1.2em;
 }
 
-@media (max-width: 768px) {
-    .ticket-booking {
-        padding: 1rem;
+@media (max-width: 600px) {
+    .ticket-booking-card {
+        max-width: 98vw;
+        margin: 1rem auto;
     }
 
-    .ticket-type-card {
-        flex-direction: column;
-        gap: 1rem;
-    text-align: center;
-    }
-
-    .booking-actions {
-        flex-direction: column;
-}
-
-    .booking-actions .base-button {
-        width: 100%;
+    .card-header,
+    .ticket-row,
+    .summary-bar,
+    .proceed-btn {
+        padding-left: 1rem;
+        padding-right: 1rem;
     }
 }
 </style>

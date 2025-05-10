@@ -1,62 +1,50 @@
 <template>
-  <div class="max-w-2xl mx-auto p-6">
-    <div v-if="loading" class="flex justify-center items-center min-h-[400px]">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-            </div>
-
-    <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-      <p class="text-red-600">{{ error }}</p>
-            </div>
-
-    <div v-else class="text-center">
-      <div class="mb-8">
-        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-          </svg>
-        </div>
-        <h2 class="text-2xl font-semibold mb-2">Payment Successful!</h2>
-        <p class="text-gray-600">Thank you for your purchase.</p>
-        </div>
-
-      <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
-        <h3 class="text-lg font-medium mb-4">Order Details</h3>
-        <div class="space-y-3">
-          <div class="flex justify-between text-gray-600">
-            <span>Event</span>
-            <span>{{ registration?.event?.title }}</span>
-          </div>
-          <div class="flex justify-between text-gray-600">
-            <span>Number of Tickets</span>
-            <span>{{ registration?.number_of_tickets }}</span>
-          </div>
-          <div class="flex justify-between text-gray-600">
-            <span>Total Amount</span>
-            <span>{{ formatPrice(registration?.payment_amount) }}</span>
-          </div>
-          <div class="flex justify-between text-gray-600">
-            <span>Order ID</span>
-            <span>{{ registration?.id }}</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="space-x-4">
-        <button 
-          @click="viewTickets"
-          class="bg-primary text-white px-6 py-2 rounded-lg font-medium hover:bg-primary-dark"
-        >
-          View My Tickets
-        </button>
-        <button 
-          @click="goToEvents"
-          class="bg-gray-100 text-gray-700 px-6 py-2 rounded-lg font-medium hover:bg-gray-200"
-        >
-          Browse More Events
+  <div class="container d-flex justify-content-center align-items-center min-vh-100">
+    <div class="card shadow-lg" style="max-width: 420px; width: 100%;">
+      <div class="card-header d-flex align-items-center justify-content-between bg-light border-bottom-0">
+        <span class="fw-semibold">Payment Success</span>
+        <button class="btn btn-link p-0 text-muted" @click="closeBooking" title="Close">
+          <i class="bi bi-x-lg"></i>
         </button>
       </div>
+      <div class="card-body text-center">
+        <div class="mb-4">
+          <div class="mx-auto mb-3" style="width: 64px; height: 64px;">
+            <div class="bg-success bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style="width: 64px; height: 64px;">
+              <i class="bi bi-check2-circle text-success fs-1"></i>
+            </div>
+          </div>
+          <h2 class="fw-bold mb-2">Payment Successful!</h2>
+          <p class="text-muted">Thank you for your purchase.</p>
         </div>
+        <div class="bg-light rounded p-3 mb-4 text-start">
+          <div class="fw-bold">Order Details</div>
+          <div class="small text-muted">Event: {{ registration?.event?.title }}</div>
+          <div class="small text-muted">Tickets: {{ registration?.number_of_tickets }}</div>
+          <div class="small text-muted">Total: {{ formatPrice(registration?.payment_amount) }}</div>
+          <div class="small text-muted">Order ID: {{ registration?.id }}</div>
+        </div>
+        <div class="d-flex gap-2 justify-content-center">
+          <BaseButton 
+            @click="viewTickets"
+            variant="primary"
+            size="large"
+            :full-width="false"
+          >
+            View My Tickets
+          </BaseButton>
+          <BaseButton 
+            @click="goToEvents"
+            variant="secondary"
+            size="large"
+            :full-width="false"
+          >
+            Browse More Events
+          </BaseButton>
+        </div>
+      </div>
     </div>
+  </div>
 </template>
 
 <script setup>
@@ -64,13 +52,12 @@ import { computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useRegistrationStore } from '@/stores/registration'
 import { formatPrice } from '@/utils/formatters'
+import BaseButton from '@/components/Base/BaseButton.vue'
 
 const route = useRoute()
 const router = useRouter()
 const registrationStore = useRegistrationStore()
 
-const loading = computed(() => registrationStore.isLoading)
-const error = computed(() => registrationStore.getError)
 const registration = computed(() => registrationStore.getCurrentRegistration)
 
 onMounted(async () => {
@@ -88,106 +75,178 @@ const viewTickets = () => {
 const goToEvents = () => {
   router.push({ name: 'events' })
 }
+
+const closeBooking = () => {
+  router.push({ name: 'events' })
+}
 </script>
 
 <style scoped>
 .payment-success {
-    max-width: 600px;
-    margin: 4rem auto;
-    padding: 2rem;
-    text-align: center;
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
 }
 
 .success-icon {
-    width: 80px;
-    height: 80px;
-    background: #48bb78;
-    color: white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2.5rem;
-    margin: 0 auto 2rem;
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 1.5rem;
+  background: #dcfce7;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #16a34a;
+  font-size: 2.5rem;
 }
 
-h2 {
-    color: #2d3748;
-    margin-bottom: 1rem;
+.payment-success h2 {
+  color: #2c3e50;
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
 }
 
-p {
-    color: #718096;
-    margin-bottom: 2rem;
+.payment-success p {
+  color: #64748b;
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
 }
 
-.ticket-details {
-    background: #f7fafc;
-    padding: 1.5rem;
-    border-radius: 0.5rem;
-    margin-bottom: 2rem;
+.order-details {
+  background: #f8fafc;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  margin: 2rem 0;
+  text-align: left;
 }
 
-.ticket-details h3 {
-    margin-bottom: 1rem;
-    color: #2d3748;
+.order-details h3 {
+  color: #1e293b;
+  font-size: 1.4rem;
+  margin-bottom: 1rem;
+  font-weight: 500;
 }
 
-.ticket-item {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 0.5rem;
-    color: #4a5568;
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  color: #475569;
 }
 
-.total {
-    display: flex;
-    justify-content: space-between;
-    font-weight: bold;
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid #e2e8f0;
+.detail-item.total {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 2px solid #e2e8f0;
+  font-weight: 600;
+  color: #1e293b;
+  font-size: 1.1rem;
 }
 
-.actions {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 2rem;
 }
 
-.download-btn,
-.home-btn {
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.25rem;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.2s;
+.view-tickets-btn,
+.browse-events-btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
 }
 
-.download-btn {
-    background: #4299e1;
-    color: white;
-    border: none;
+.view-tickets-btn {
+  background: #3b82f6;
+  color: white;
+  border: none;
 }
 
-.download-btn:hover {
-    background: #3182ce;
+.view-tickets-btn:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
 }
 
-.home-btn {
-    display: inline-block;
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.25rem;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    background: white;
-    color: #4a5568;
-    border: 1px solid #e2e8f0;
-    text-decoration: none;
+.browse-events-btn {
+  background: white;
+  color: #3b82f6;
+  border: 2px solid #3b82f6;
 }
 
-.home-btn:hover {
-    background: #f7fafc;
+.browse-events-btn:hover {
+  background: #f8fafc;
+  transform: translateY(-1px);
+}
+
+.error-message {
+  background: #fee2e2;
+  color: #dc2626;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #e2e8f0;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 640px) {
+  .payment-success {
+    margin: 1rem;
+    padding: 1rem;
+  }
+
+  .payment-success h2 {
+    font-size: 1.5rem;
+  }
+
+  .order-details h3 {
+    font-size: 1.2rem;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+  }
+
+  .view-tickets-btn,
+  .browse-events-btn {
+    width: 100%;
+  }
 }
 </style>
