@@ -95,6 +95,7 @@ export const useEventStore = defineStore('event', {
     isLoading: (state) => state.loading,
     getError: (state) => state.error,
     getCategories: (state) => state.categories,
+    getPagination: (state) => state.pagination,
   },
 
   actions: {

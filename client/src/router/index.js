@@ -10,6 +10,7 @@ import CreateEvent from '../views/CreateEvent.vue'
 import TicketBooking from '../components/Ticket/TicketBooking.vue'
 import Checkout from '../components/Ticket/Checkout.vue'
 import PaymentSuccess from '../components/Ticket/PaymentSuccess.vue'
+import AdminEvents from '../components/admin/Events.vue'
 import { useAuthStore } from '../stores/auth'
 
 const routes = [
@@ -118,6 +119,12 @@ const routes = [
     name: 'dashboard-my-bookings',
     component: Dashboard,
     meta: { requiresAuth: true, requiresOrganizer: true },
+  },
+  {
+    path: '/dashboard/events',
+    name: 'dashboard-events',
+    component: Dashboard,
+    meta: { requiresAuth: true, requiresAdmin: true },
   },
 ]
 

@@ -7,6 +7,7 @@
 
     <!-- Admin Components -->
     <Users v-if="currentView === 'users' && auth.isAdmin" />
+    <Events v-if="currentView === 'events' && auth.isAdmin" />
     <Categories v-if="currentView === 'categories' && auth.isAdmin" />
     <Analytics v-if="currentView === 'analytics' && auth.isAdmin" />
 
@@ -42,6 +43,7 @@ import CreateEvent from '../views/CreateEvent.vue'
 import Profile from '@/components/Dashboard/Profile.vue'
 import Settings from '@/components/Dashboard/Settings.vue'
 import Users from '@/components/admin/Users.vue'
+import Events from '@/components/admin/Events.vue'
 import Categories from '@/components/admin/Categories.vue'
 import Analytics from '@/components/admin/Analytics.vue'
 import MyBookings from '@/components/Dashboard/MyBookings.vue'
@@ -57,6 +59,7 @@ const currentView = computed(() => {
   if (path === '/dashboard/profile') return 'profile'
   if (path === '/dashboard/settings') return 'settings'
   if (path === '/dashboard/users') return 'users'
+  if (path === '/dashboard/events') return 'events'
   if (path === '/dashboard/categories') return 'categories'
   if (path === '/dashboard/analytics') return 'analytics'
   if (path === '/dashboard/my-bookings') return 'my-bookings'
@@ -75,6 +78,8 @@ const currentPageTitle = computed(() => {
       return 'Settings'
     case 'users':
       return 'User Management'
+    case 'events':
+      return 'Event Management'
     case 'categories':
       return 'Categories'
     case 'analytics':
@@ -101,7 +106,7 @@ const hasAccess = computed(() => {
   }
 
   // Admin-only views
-  if (view === 'users' || view === 'categories' || view === 'analytics') {
+  if (view === 'users' || view === 'categories' || view === 'analytics' || view === 'events') {
     return auth.isAdmin
   }
   

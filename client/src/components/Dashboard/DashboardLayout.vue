@@ -63,6 +63,10 @@
                         <i class="fas fa-users"></i>
                         <span>Manage Users</span>
                     </router-link>
+                    <router-link to="/dashboard/events" class="nav-item" :class="{ active: currentView === 'events' }">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Manage Events</span>
+                    </router-link>
                     <router-link to="/dashboard/categories" class="nav-item" :class="{ active: currentView === 'categories' }">
                         <i class="fas fa-tags"></i>
                         <span>Categories</span>
@@ -153,6 +157,7 @@ export default {
             if (path === '/dashboard/create-event') return 'create-event'
             if (path === '/dashboard/my-bookings') return 'my-bookings'
             if (path === '/dashboard/users') return 'users'
+            if (path === '/dashboard/events') return 'events'
             if (path === '/dashboard/categories') return 'categories'
             if (path === '/dashboard/analytics') return 'analytics'
             return ''
