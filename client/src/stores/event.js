@@ -116,6 +116,7 @@ export const useEventStore = defineStore('event', {
           per_page: response.data.events.per_page,
           total: response.data.events.total,
         }
+        return response.data
       } catch (error) {
         this.error = error.response?.data?.message || 'Error fetching events'
         throw error

@@ -107,7 +107,6 @@
               <tr>
                 <th>User</th>
                 <th>Role</th>
-                <th>Status</th>
                 <th>Joined</th>
                 <th>Actions</th>
               </tr>
@@ -129,11 +128,6 @@
                 <td>
                   <span class="badge" :class="getRoleBadgeClass(user.user_type_id)">
                     {{ user.user_type?.name }}
-                  </span>
-                </td>
-                <td>
-                  <span class="badge" :class="user.is_active ? 'bg-success' : 'bg-danger'">
-                    {{ user.is_active ? 'Active' : 'Inactive' }}
                   </span>
                 </td>
                 <td>
@@ -159,14 +153,6 @@
                       title="Edit User"
                     >
                       <i class="fas fa-edit"></i>
-                    </BaseButton>
-                    <BaseButton
-                      :variant="user.is_active ? 'danger' : 'success'"
-                      size="small"
-                      @click="toggleUserStatus(user)"
-                      :title="user.is_active ? 'Deactivate User' : 'Activate User'"
-                    >
-                      <i :class="user.is_active ? 'fas fa-ban' : 'fas fa-check'"></i>
                     </BaseButton>
                   </div>
                 </td>
@@ -235,14 +221,6 @@
             <tr>
               <th>Role:</th>
               <td>{{ selectedUser.user_type?.name }}</td>
-            </tr>
-            <tr>
-              <th>Status:</th>
-              <td>
-                <span class="badge" :class="selectedUser.is_active ? 'bg-success' : 'bg-danger'">
-                  {{ selectedUser.is_active ? 'Active' : 'Inactive' }}
-                </span>
-              </td>
             </tr>
             <tr>
               <th>Joined:</th>
@@ -347,11 +325,6 @@ const openUserDetails = (user) => {
 const openEditUser = (user) => {
   // Implement edit user functionality
   console.log('Edit user:', user)
-}
-
-const toggleUserStatus = async (user) => {
-  // Implement toggle user status functionality
-  console.log('Toggle status for:', user)
 }
 
 // Initialize

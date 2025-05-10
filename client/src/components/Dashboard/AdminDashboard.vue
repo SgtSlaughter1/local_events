@@ -197,7 +197,7 @@ const fetchDashboardData = async () => {
     const usersResponse = await userStore.fetchUsers({ page: 1 })
     if (usersResponse.success) {
       stats.value.totalUsers = userStore.getPagination.total
-      recentUsers.value = userStore.getUsers.slice(0, 2).map(user => ({
+      recentUsers.value = userStore.getUsers.slice(0, 3).map(user => ({
         id: user.id,
         name: user.name,
         email: user.email,
@@ -208,9 +208,9 @@ const fetchDashboardData = async () => {
 
     // Fetch events
     const eventsResponse = await eventStore.fetchEvents(1)
-    if (eventsResponse) {
-      stats.value.totalEvents = eventStore.getPagination.total
-      recentEvents.value = eventStore.getEvents.slice(0, 5).map(event => ({
+    if (eventsResponse?.events) {
+      stats.value.totalEvents = eventsResponse.events.total
+      recentEvents.value = eventStore.getEvents.slice(0, 3).map(event => ({
         id: event.id,
         title: event.title,
         image_url: event.image_url || '/images/event-placeholder.jpg',
@@ -218,10 +218,10 @@ const fetchDashboardData = async () => {
         attendees_count: event.attendees_count || 0,
         tickets_sold: event.tickets_sold || 0
       }))
+    } else {
+      console.error('Invalid response structure:', eventsResponse)
     }
 
-    // TODO: Implement API endpoints for these statistics
-    // For now, using mock data for tickets and revenue
     stats.value.totalTickets = 500
     stats.value.totalRevenue = 1500000
 
