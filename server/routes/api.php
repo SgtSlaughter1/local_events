@@ -112,7 +112,6 @@ Route::middleware('auth:sanctum')->group(function () {
     // Attendee Routes
     Route::middleware(['auth:sanctum', 'role:attendee'])->group(function () {
         Route::get('/attendee/dashboard', [AttendeeController::class, 'getDashboardData']);
-        Route::get('/attendee/tickets/{ticketId}/download', [AttendeeController::class, 'downloadTicket']);
     });
 
     // User Profile Routes
@@ -127,6 +126,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/registrations/{registration}', [EventRegistrationController::class, 'show']);
     Route::post('/registrations/{registration}/cancel', [EventRegistrationController::class, 'cancel']);
     Route::post('/registrations/{registration}/payment', [EventRegistrationController::class, 'processPayment']);
+    Route::get('/registrations/ticket/{ticketReference}', [EventRegistrationController::class, 'getByTicketReference']);
 });
 
 Route::get('/weather/forecast', [WeatherController::class, 'getForecast']);

@@ -13,6 +13,7 @@ class EventRegistration extends Model
     protected $fillable = [
         'user_id',
         'event_id',
+        'ticket_reference',
         'number_of_tickets',
         'payment_amount',
         'payment_method',
@@ -25,6 +26,24 @@ class EventRegistration extends Model
         'payment_amount' => 'decimal:2'
     ];
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($registration) {
+            $registration->ticket_reference = static::generateTicketReference();
+        });
+    }
+
+    public static function generateTicketReference()
+    {
+        do {
+            $reference = strtoupper(substr(md5(uniqid()), 0, 8));
+        } while (static::where('ticket_reference', $reference)->exists());
+
+        return $reference;
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -33,12 +52,6 @@ class EventRegistration extends Model
     public function event()
     {
         return $this->belongsTo(Event::class);
-    }
-
-    public function tickets()
-    {
-        return $this->hasMany(Ticket::class, 'event_id', 'event_id')
-            ->where('user_id', $this->user_id);
     }
 
     // Scopes

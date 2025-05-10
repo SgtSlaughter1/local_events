@@ -63,7 +63,7 @@ class EventRegistrationController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Registration successful',
-                'data' => $registration->load('event')
+                'data' => $registration->load(['event', 'user'])
             ]);
 
         } catch (\Exception $e) {
@@ -198,5 +198,27 @@ class EventRegistrationController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Get registration by ticket reference
+     */
+    public function getByTicketReference($ticketReference)
+    {
+        $registration = EventRegistration::with(['event', 'user'])
+            ->where('ticket_reference', $ticketReference)
+            ->first();
+
+        if (!$registration) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Registration not found'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $registration
+        ]);
     }
 }

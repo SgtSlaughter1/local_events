@@ -12,6 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users');
             $table->foreignId('event_id')->constrained('events');
+            $table->string('ticket_reference')->nullable();
             $table->string('status')->default('pending'); // pending, confirmed, cancelled
             $table->integer('number_of_tickets')->default(1);
             $table->string('payment_status')->default('pending'); // pending, paid, refunded
