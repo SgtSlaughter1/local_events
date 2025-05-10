@@ -178,12 +178,16 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useUserStore } from '@/stores/user'
+import { useEventStore } from '@/stores/event'
 import BaseButton from '@/components/Base/BaseButton.vue'
 import BaseLoading from '@/components/Base/BaseLoading.vue'
 import { formatDate, formatTimeAgo, formatPrice } from '@/utils/formatters'
 
 const router = useRouter()
 const auth = useAuthStore()
+const userStore = useUserStore()
+const eventStore = useEventStore()
 const loading = ref(true)
 
 // Data
@@ -201,43 +205,40 @@ const activities = ref([])
 const fetchDashboardData = async () => {
   try {
     loading.value = true
-    // TODO: Implement API calls to fetch dashboard data
-    // For now, using mock data
-    stats.value = {
-      totalEvents: 25,
-      totalUsers: 150,
-      totalTickets: 500,
-      totalRevenue: 1500000
+    
+    // Fetch users
+    const usersResponse = await userStore.fetchUsers({ page: 1 })
+    if (usersResponse.success) {
+      stats.value.totalUsers = userStore.getPagination.total
+      recentUsers.value = userStore.getUsers.slice(0, 5).map(user => ({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        avatar: '/images/avatar.svg',
+        role: user.user_type?.name || 'User'
+      }))
     }
-    
-    recentEvents.value = [
-      {
-        id: 1,
-        title: 'Tech Conference 2024',
-        image_url: '/images/event1.jpg',
-        start_date: '2024-04-15',
-        attendees_count: 150,
-        tickets_sold: 200
-      },
-    ]
-    
-    recentUsers.value = [
-      {
-        id: 1,
-        name: 'John Doe',
-        email: 'john@example.com',
-        avatar: '/images/avatar.svg',
-        role: 'Organizer'
-      },
-      {
-        id: 2,
-        name: 'Jane Smith',
-        email: 'jane@example.com',
-        avatar: '/images/avatar.svg',
-        role: 'Attendee'
-      },
-    ]
-    
+
+    // Fetch events
+    const eventsResponse = await eventStore.fetchEvents(1)
+    if (eventsResponse) {
+      stats.value.totalEvents = eventStore.getPagination.total
+      recentEvents.value = eventStore.getEvents.slice(0, 5).map(event => ({
+        id: event.id,
+        title: event.title,
+        image_url: event.image_url || '/images/event-placeholder.jpg',
+        start_date: event.start_date,
+        attendees_count: event.attendees_count || 0,
+        tickets_sold: event.tickets_sold || 0
+      }))
+    }
+
+    // TODO: Implement API endpoints for these statistics
+    // For now, using mock data for tickets and revenue
+    stats.value.totalTickets = 500
+    stats.value.totalRevenue = 1500000
+
+    // TODO: Implement activities API endpoint
     activities.value = [
       {
         id: 1,
