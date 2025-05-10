@@ -10,6 +10,7 @@ use App\Http\Middleware\OrganizerMiddleware;
 use App\Http\Controllers\WeatherController;
 use App\Http\Controllers\Api\AttendeeController;
 use App\Http\Controllers\EventRegistrationController;
+use App\Http\Middleware\AdminMiddleware;
 
 
 
@@ -78,6 +79,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', function (Request $request) {
         return $request->user();
+    });
+
+    // Admin specific routes
+    Route::middleware([AdminMiddleware::class])->prefix('admin')->group(function () {
+        Route::get('/users', [AuthController::class, 'getAllUsers']);
     });
 
     // Event routes

@@ -98,10 +98,10 @@ class AuthController extends Controller
     }
 
     public function userTypes()
-{
-    $usertypes = UserType::withoutAdmin()->get(['id', 'name']);
-    return response()->json(['usertypes' => $usertypes]);
-}
+    {
+        $usertypes = UserType::withoutAdmin()->get(['id', 'name']);
+        return response()->json(['usertypes' => $usertypes]);
+    }
 
     /**
      * Get authenticated user details
@@ -175,6 +175,21 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Password updated successfully'
+        ]);
+    }
+
+    /**
+     * Get all users (admin only)
+     */
+    public function getAllUsers()
+    {
+        $users = User::with('userType')
+            ->where('user_type_id', '!=', 1) // Exclude admin users
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
+
+        return response()->json([
+            'users' => $users
         ]);
     }
 }
