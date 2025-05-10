@@ -1,5 +1,5 @@
 <template>
-    <div v-if="show" class="loading-overlay">
+    <div v-if="show" class="loading-overlay" :class="{ 'full-page': fullPage }">
         <div class="loading-spinner">
             <i class="fas fa-spinner fa-spin"></i>
             <span>{{ message }}</span>
@@ -16,13 +16,17 @@ defineProps({
     message: {
         type: String,
         default: 'Loading...'
+    },
+    fullPage: {
+        type: Boolean,
+        default: false
     }
 })
 </script>
 
 <style scoped>
 .loading-overlay {
-    position: fixed;
+    position: absolute;
     top: 0;
     left: 0;
     right: 0;
@@ -31,6 +35,11 @@ defineProps({
     display: flex;
     justify-content: center;
     align-items: center;
+    z-index: 100;
+}
+
+.loading-overlay.full-page {
+    position: fixed;
     z-index: 1000;
 }
 

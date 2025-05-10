@@ -1,202 +1,203 @@
 <template>
   <div class="users-container">
-    <!-- Header Section -->
-    <div class="header mb-4">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <div>
-          <h2 class="mb-1">User Management</h2>
-          <p class="text-muted mb-0">Manage and monitor user accounts</p>
-        </div>
-        <div class="d-flex gap-2">
-          <div class="input-group">
-            <span class="input-group-text bg-white">
-              <i class="fas fa-search text-muted"></i>
-            </span>
-            <input 
-              type="text" 
-              class="form-control border-start-0" 
-              placeholder="Search users..." 
-              v-model="searchQuery"
-              @input="handleSearch"
-            >
-          </div>
-          <select class="form-select" v-model="roleFilter" @change="handleFilter">
-            <option value="">All Roles</option>
-            <option v-for="type in userTypes" :key="type.id" :value="type.id">
-              {{ type.name }}
-            </option>
-          </select>
-        </div>
-      </div>
+    <div class="dashboard-content" :class="{ 'loading': userStore.isLoading }">
+      <!-- Loading State -->
+      <BaseLoading 
+        :show="userStore.isLoading" 
+        message="Loading users..."
+      />
 
-      <!-- Stats Cards -->
-      <div class="row g-3 mb-4">
-        <div class="col-md-3">
-          <div class="card bg-primary text-white">
-            <div class="card-body">
-              <div class="d-flex justify-content-between align-items-center">
-                <div>
-                  <h6 class="card-title mb-0">Total Users</h6>
-                  <h3 class="mb-0 mt-2">{{ userStore.getPagination.total }}</h3>
-                </div>
-                <i class="fas fa-users fa-2x opacity-50"></i>
-              </div>
+      <!-- Header Section -->
+      <div class="header mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div>
+            <h2 class="mb-1">User Management</h2>
+            <p class="text-muted mb-0">Manage and monitor user accounts</p>
+          </div>
+          <div class="d-flex gap-2">
+            <div class="input-group">
+              <span class="input-group-text bg-white">
+                <i class="fas fa-search text-muted"></i>
+              </span>
+              <input 
+                type="text" 
+                class="form-control border-start-0" 
+                placeholder="Search users..." 
+                v-model="searchQuery"
+                @input="handleSearch"
+              >
             </div>
+            <select class="form-select" v-model="roleFilter" @change="handleFilter">
+              <option value="">All Roles</option>
+              <option v-for="type in userTypes" :key="type.id" :value="type.id">
+                {{ type.name }}
+              </option>
+            </select>
           </div>
         </div>
-        <div class="col-md-3">
-          <div class="card bg-success text-white">
-            <div class="card-body">
-              <div class="d-flex justify-content-between align-items-center">
-                <div>
-                  <h6 class="card-title mb-0">Active Users</h6>
-                  <h3 class="mb-0 mt-2">{{ activeUsers }}</h3>
-                </div>
-                <i class="fas fa-user-check fa-2x opacity-50"></i>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-3">
-          <div class="card bg-info text-white">
-            <div class="card-body">
-              <div class="d-flex justify-content-between align-items-center">
-                <div>
-                  <h6 class="card-title mb-0">Organizers</h6>
-                  <h3 class="mb-0 mt-2">{{ organizerCount }}</h3>
-                </div>
-                <i class="fas fa-user-tie fa-2x opacity-50"></i>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-3">
-          <div class="card bg-warning text-white">
-            <div class="card-body">
-              <div class="d-flex justify-content-between align-items-center">
-                <div>
-                  <h6 class="card-title mb-0">Attendees</h6>
-                  <h3 class="mb-0 mt-2">{{ attendeeCount }}</h3>
-                </div>
-                <i class="fas fa-user fa-2x opacity-50"></i>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
 
-    <!-- Loading State -->
-    <div v-if="userStore.isLoading" class="text-center py-5">
-      <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Loading...</span>
-      </div>
-    </div>
-
-    <!-- Error State -->
-    <div v-else-if="userStore.getError" class="alert alert-danger" role="alert">
-      <i class="fas fa-exclamation-circle me-2"></i>
-      {{ userStore.getError }}
-    </div>
-
-    <!-- Users Table -->
-    <div v-else class="card">
-      <div class="table-responsive">
-        <table class="table table-hover mb-0">
-          <thead>
-            <tr>
-              <th>User</th>
-              <th>Role</th>
-              <th>Status</th>
-              <th>Joined</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="user in userStore.getUsers" :key="user.id">
-              <td>
-                <div class="d-flex align-items-center">
-                  <div class="avatar me-3">
-                    <i class="fas fa-user-circle fa-2x" :class="getUserAvatarClass(user)"></i>
-                  </div>
+        <!-- Stats Cards -->
+        <div class="row g-3 mb-4">
+          <div class="col-md-3">
+            <div class="card bg-primary text-white">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
                   <div>
-                    <div class="fw-bold">{{ user.name }}</div>
-                    <div class="text-muted small">{{ user.email }}</div>
-                    <div class="text-muted small">{{ user.phone || 'No phone' }}</div>
+                    <h6 class="card-title mb-0">Total Users</h6>
+                    <h3 class="mb-0 mt-2">{{ userStore.getPagination.total }}</h3>
                   </div>
+                  <i class="fas fa-users fa-2x opacity-50"></i>
                 </div>
-              </td>
-              <td>
-                <span class="badge" :class="getRoleBadgeClass(user.user_type_id)">
-                  {{ user.user_type?.name }}
-                </span>
-              </td>
-              <td>
-                <span class="badge" :class="user.is_active ? 'bg-success' : 'bg-danger'">
-                  {{ user.is_active ? 'Active' : 'Inactive' }}
-                </span>
-              </td>
-              <td>
-                <div class="d-flex flex-column">
-                  <span>{{ formatDate(user.created_at) }}</span>
-                  <small class="text-muted">{{ formatTimeAgo(user.created_at) }}</small>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card bg-success text-white">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 class="card-title mb-0">Active Users</h6>
+                    <h3 class="mb-0 mt-2">{{ activeUsers }}</h3>
+                  </div>
+                  <i class="fas fa-user-check fa-2x opacity-50"></i>
                 </div>
-              </td>
-              <td>
-                <div class="btn-group">
-                  <BaseButton
-                    variant="primary"
-                    size="small"
-                    @click="openUserDetails(user)"
-                    title="View Details"
-                  >
-                    <i class="fas fa-eye"></i>
-                  </BaseButton>
-                  <BaseButton
-                    variant="secondary"
-                    size="small"
-                    @click="openEditUser(user)"
-                    title="Edit User"
-                  >
-                    <i class="fas fa-edit"></i>
-                  </BaseButton>
-                  <BaseButton
-                    :variant="user.is_active ? 'danger' : 'success'"
-                    size="small"
-                    @click="toggleUserStatus(user)"
-                    :title="user.is_active ? 'Deactivate User' : 'Activate User'"
-                  >
-                    <i :class="user.is_active ? 'fas fa-ban' : 'fas fa-check'"></i>
-                  </BaseButton>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card bg-info text-white">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 class="card-title mb-0">Organizers</h6>
+                    <h3 class="mb-0 mt-2">{{ organizerCount }}</h3>
+                  </div>
+                  <i class="fas fa-user-tie fa-2x opacity-50"></i>
                 </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card bg-warning text-white">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 class="card-title mb-0">Attendees</h6>
+                    <h3 class="mb-0 mt-2">{{ attendeeCount }}</h3>
+                  </div>
+                  <i class="fas fa-user fa-2x opacity-50"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <!-- Pagination -->
-      <div class="card-footer d-flex justify-content-between align-items-center">
-        <div class="text-muted">
-          Showing {{ paginationInfo.from }} to {{ paginationInfo.to }} of {{ paginationInfo.total }} entries
+      <!-- Error State -->
+      <div v-if="userStore.getError" class="alert alert-danger" role="alert">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        {{ userStore.getError }}
+      </div>
+
+      <!-- Users Table -->
+      <div v-else class="card">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Joined</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="user in userStore.getUsers" :key="user.id">
+                <td>
+                  <div class="d-flex align-items-center">
+                    <div class="avatar me-3">
+                      <i class="fas fa-user-circle fa-2x" :class="getUserAvatarClass(user)"></i>
+                    </div>
+                    <div>
+                      <div class="fw-bold">{{ user.name }}</div>
+                      <div class="text-muted small">{{ user.email }}</div>
+                      <div class="text-muted small">{{ user.phone || 'No phone' }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="badge" :class="getRoleBadgeClass(user.user_type_id)">
+                    {{ user.user_type?.name }}
+                  </span>
+                </td>
+                <td>
+                  <span class="badge" :class="user.is_active ? 'bg-success' : 'bg-danger'">
+                    {{ user.is_active ? 'Active' : 'Inactive' }}
+                  </span>
+                </td>
+                <td>
+                  <div class="d-flex flex-column">
+                    <span>{{ formatDate(user.created_at) }}</span>
+                    <small class="text-muted">{{ formatTimeAgo(user.created_at) }}</small>
+                  </div>
+                </td>
+                <td>
+                  <div class="btn-group">
+                    <BaseButton
+                      variant="primary"
+                      size="small"
+                      @click="openUserDetails(user)"
+                      title="View Details"
+                    >
+                      <i class="fas fa-eye"></i>
+                    </BaseButton>
+                    <BaseButton
+                      variant="secondary"
+                      size="small"
+                      @click="openEditUser(user)"
+                      title="Edit User"
+                    >
+                      <i class="fas fa-edit"></i>
+                    </BaseButton>
+                    <BaseButton
+                      :variant="user.is_active ? 'danger' : 'success'"
+                      size="small"
+                      @click="toggleUserStatus(user)"
+                      :title="user.is_active ? 'Deactivate User' : 'Activate User'"
+                    >
+                      <i :class="user.is_active ? 'fas fa-ban' : 'fas fa-check'"></i>
+                    </BaseButton>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-        <nav>
-          <ul class="pagination mb-0">
-            <li class="page-item" :class="{ disabled: currentPage === 1 }">
-              <a class="page-link" href="#" @click.prevent="changePage(currentPage - 1)">
-                <i class="fas fa-chevron-left"></i>
-              </a>
-            </li>
-            <li v-for="page in totalPages" :key="page" class="page-item" :class="{ active: currentPage === page }">
-              <a class="page-link" href="#" @click.prevent="changePage(page)">{{ page }}</a>
-            </li>
-            <li class="page-item" :class="{ disabled: currentPage === totalPages }">
-              <a class="page-link" href="#" @click.prevent="changePage(currentPage + 1)">
-                <i class="fas fa-chevron-right"></i>
-              </a>
-            </li>
-          </ul>
-        </nav>
+
+        <!-- Pagination -->
+        <div class="card-footer d-flex justify-content-between align-items-center">
+          <div class="text-muted">
+            Showing {{ paginationInfo.from }} to {{ paginationInfo.to }} of {{ paginationInfo.total }} entries
+          </div>
+          <nav>
+            <ul class="pagination mb-0">
+              <li class="page-item" :class="{ disabled: currentPage === 1 }">
+                <a class="page-link" href="#" @click.prevent="changePage(currentPage - 1)">
+                  <i class="fas fa-chevron-left"></i>
+                </a>
+              </li>
+              <li v-for="page in totalPages" :key="page" class="page-item" :class="{ active: currentPage === page }">
+                <a class="page-link" href="#" @click.prevent="changePage(page)">{{ page }}</a>
+              </li>
+              <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+                <a class="page-link" href="#" @click.prevent="changePage(currentPage + 1)">
+                  <i class="fas fa-chevron-right"></i>
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </div>
       </div>
     </div>
 
@@ -259,6 +260,7 @@ import { onMounted, computed, ref } from 'vue'
 import { useUserStore } from '@/stores/user'
 import BaseModal from '@/components/Base/BaseModal.vue'
 import BaseButton from '@/components/Base/BaseButton.vue'
+import BaseLoading from '@/components/Base/BaseLoading.vue'
 import { formatDate, formatTimeAgo } from '@/utils/formatters'
 import api from '@/services/api'
 
@@ -370,6 +372,15 @@ onMounted(async () => {
 <style scoped>
 .users-container {
   padding: 1rem;
+}
+
+.dashboard-content {
+  position: relative;
+  min-height: 400px;
+}
+
+.dashboard-content.loading {
+  pointer-events: none;
 }
 
 .table th {

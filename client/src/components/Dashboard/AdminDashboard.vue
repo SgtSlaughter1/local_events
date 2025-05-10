@@ -1,172 +1,159 @@
 <template>
   <div class="admin-dashboard">
-    <!-- Loading State -->
-    <BaseLoading 
-      :show="loading" 
-      message="Loading dashboard data..."
-    />
+    <div class="dashboard-content" :class="{ 'loading': loading }">
+      <!-- Loading State -->
+      <BaseLoading 
+        :show="loading" 
+        message="Loading dashboard data..."
+      />
 
-    <!-- Welcome Section -->
-    <div class="welcome-section">
-      <h1>Welcome, {{ auth.user?.name }}</h1>
-      <p class="text-muted">Here's what's happening in your event management system</p>
-    </div>
+      <!-- Welcome Section -->
+      <div class="welcome-section">
+        <h1>Welcome, {{ auth.user?.name }}</h1>
+        <p class="text-muted">Here's what's happening in your event management system</p>
+      </div>
 
-    <!-- Statistics Cards -->
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-icon">
-          <i class="fas fa-calendar-check"></i>
+      <!-- Statistics Cards -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-calendar-check"></i>
+          </div>
+          <div class="stat-content">
+            <h3 class="stat-value">{{ stats.totalEvents || 0 }}</h3>
+            <p class="stat-label">Total Events</p>
+          </div>
         </div>
-        <div class="stat-content">
-          <h3 class="stat-value">{{ stats.totalEvents || 0 }}</h3>
-          <p class="stat-label">Total Events</p>
+
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-users"></i>
+          </div>
+          <div class="stat-content">
+            <h3 class="stat-value">{{ stats.totalUsers || 0 }}</h3>
+            <p class="stat-label">Total Users</p>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-ticket-alt"></i>
+          </div>
+          <div class="stat-content">
+            <h3 class="stat-value">{{ stats.totalTickets || 0 }}</h3>
+            <p class="stat-label">Total Tickets</p>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-money-bill-wave"></i>
+          </div>
+          <div class="stat-content">
+            <h3 class="stat-value">{{ formatPrice(stats.totalRevenue || 0) }}</h3>
+            <p class="stat-label">Total Revenue</p>
+          </div>
         </div>
       </div>
 
-      <div class="stat-card">
-        <div class="stat-icon">
-          <i class="fas fa-users"></i>
-        </div>
-        <div class="stat-content">
-          <h3 class="stat-value">{{ stats.totalUsers || 0 }}</h3>
-          <p class="stat-label">Total Users</p>
-        </div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-icon">
-          <i class="fas fa-ticket-alt"></i>
-        </div>
-        <div class="stat-content">
-          <h3 class="stat-value">{{ stats.totalTickets || 0 }}</h3>
-          <p class="stat-label">Total Tickets</p>
-        </div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-icon">
-          <i class="fas fa-money-bill-wave"></i>
-        </div>
-        <div class="stat-content">
-          <h3 class="stat-value">{{ formatPrice(stats.totalRevenue || 0) }}</h3>
-          <p class="stat-label">Total Revenue</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Main Content Grid -->
-    <div class="dashboard-grid">
-      <!-- Recent Events -->
-      <div class="dashboard-card">
-        <div class="card-header">
-          <h3>Recent Events</h3>
-          <BaseButton variant="secondary" size="small" @click="viewAllEvents">
-            View All
-          </BaseButton>
-        </div>
-        <div class="card-content">
-          <div v-if="loading" class="loading-spinner">
-            <div class="spinner-border text-primary" role="status">
-              <span class="visually-hidden">Loading...</span>
+      <!-- Main Content Grid -->
+      <div class="dashboard-grid">
+        <!-- Recent Events -->
+        <div class="dashboard-card">
+          <div class="card-header">
+            <h3>Recent Events</h3>
+            <BaseButton variant="secondary" size="small" @click="viewAllEvents">
+              View All
+            </BaseButton>
+          </div>
+          <div class="card-content">
+            <div v-if="recentEvents.length === 0" class="no-data">
+              No events found
             </div>
-          </div>
-          <div v-else-if="recentEvents.length === 0" class="no-data">
-            No events found
-          </div>
-          <div v-else class="event-list">
-            <div v-for="event in recentEvents" :key="event.id" class="event-item">
-              <img :src="event.image_url" :alt="event.title" class="event-image" />
-              <div class="event-details">
-                <h4>{{ event.title }}</h4>
-                <p class="text-muted">{{ formatDate(event.start_date) }}</p>
-                <div class="event-stats">
-                  <span><i class="fas fa-users"></i> {{ event.attendees_count }}</span>
-                  <span><i class="fas fa-ticket-alt"></i> {{ event.tickets_sold }}</span>
+            <div v-else class="event-list">
+              <div v-for="event in recentEvents" :key="event.id" class="event-item">
+                <img :src="event.image_url" :alt="event.title" class="event-image" />
+                <div class="event-details">
+                  <h4>{{ event.title }}</h4>
+                  <p class="text-muted">{{ formatDate(event.start_date) }}</p>
+                  <div class="event-stats">
+                    <span><i class="fas fa-users"></i> {{ event.attendees_count }}</span>
+                    <span><i class="fas fa-ticket-alt"></i> {{ event.tickets_sold }}</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- User Management -->
-      <div class="dashboard-card">
-        <div class="card-header">
-          <h3>User Management</h3>
-          <BaseButton variant="secondary" size="small" @click="viewAllUsers">
-            View All
-          </BaseButton>
-        </div>
-        <div class="card-content">
-          <div v-if="loading" class="loading-spinner">
-            <div class="spinner-border text-primary" role="status">
-              <span class="visually-hidden">Loading...</span>
+        <!-- User Management -->
+        <div class="dashboard-card">
+          <div class="card-header">
+            <h3>User Management</h3>
+            <BaseButton variant="secondary" size="small" @click="viewAllUsers">
+              View All
+            </BaseButton>
+          </div>
+          <div class="card-content">
+            <div v-if="recentUsers.length === 0" class="no-data">
+              No users found
             </div>
-          </div>
-          <div v-else-if="recentUsers.length === 0" class="no-data">
-            No users found
-          </div>
-          <div v-else class="user-list">
-            <div v-for="user in recentUsers" :key="user.id" class="user-item">
-              <img :src="user.avatar" :alt="user.name" class="user-avatar" />
-              <div class="user-details">
-                <h4>{{ user.name }}</h4>
-                <p class="text-muted">{{ user.email }}</p>
-                <span class="user-role">{{ user.role }}</span>
+            <div v-else class="user-list">
+              <div v-for="user in recentUsers" :key="user.id" class="user-item">
+                <img :src="user.avatar" :alt="user.name" class="user-avatar" />
+                <div class="user-details">
+                  <h4>{{ user.name }}</h4>
+                  <p class="text-muted">{{ user.email }}</p>
+                  <span class="user-role">{{ user.role }}</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Recent Activities -->
-      <div class="dashboard-card">
-        <div class="card-header">
-          <h3>Recent Activities</h3>
-        </div>
-        <div class="card-content">
-          <div v-if="loading" class="loading-spinner">
-            <div class="spinner-border text-primary" role="status">
-              <span class="visually-hidden">Loading...</span>
+        <!-- Recent Activities -->
+        <div class="dashboard-card">
+          <div class="card-header">
+            <h3>Recent Activities</h3>
+          </div>
+          <div class="card-content">
+            <div v-if="activities.length === 0" class="no-data">
+              No activities found
             </div>
-          </div>
-          <div v-else-if="activities.length === 0" class="no-data">
-            No activities found
-          </div>
-          <div v-else class="activity-list">
-            <div v-for="activity in activities" :key="activity.id" class="activity-item">
-              <div class="activity-icon" :class="activity.type">
-                <i :class="getActivityIcon(activity.type)"></i>
-              </div>
-              <div class="activity-details">
-                <p>{{ activity.description }}</p>
-                <span class="activity-time">{{ formatTimeAgo(activity.created_at) }}</span>
+            <div v-else class="activity-list">
+              <div v-for="activity in activities" :key="activity.id" class="activity-item">
+                <div class="activity-icon" :class="activity.type">
+                  <i :class="getActivityIcon(activity.type)"></i>
+                </div>
+                <div class="activity-details">
+                  <p>{{ activity.description }}</p>
+                  <span class="activity-time">{{ formatTimeAgo(activity.created_at) }}</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Quick Actions -->
-      <div class="dashboard-card">
-        <div class="card-header">
-          <h3>Quick Actions</h3>
-        </div>
-        <div class="card-content">
-          <div class="quick-actions">
-            <BaseButton variant="primary" @click="createNewEvent">
-              <i class="fas fa-plus"></i> Create Event
-            </BaseButton>
-            <BaseButton variant="secondary" @click="manageUsers">
-              <i class="fas fa-users-cog"></i> Manage Users
-            </BaseButton>
-            <BaseButton variant="secondary" @click="viewReports">
-              <i class="fas fa-chart-bar"></i> View Reports
-            </BaseButton>
-            <BaseButton variant="secondary" @click="manageSettings">
-              <i class="fas fa-cog"></i> System Settings
-            </BaseButton>
+        <!-- Quick Actions -->
+        <div class="dashboard-card">
+          <div class="card-header">
+            <h3>Quick Actions</h3>
+          </div>
+          <div class="card-content">
+            <div class="quick-actions">
+              <BaseButton variant="primary" @click="createNewEvent">
+                <i class="fas fa-plus"></i> Create Event
+              </BaseButton>
+              <BaseButton variant="secondary" @click="manageUsers">
+                <i class="fas fa-users-cog"></i> Manage Users
+              </BaseButton>
+              <BaseButton variant="secondary" @click="viewReports">
+                <i class="fas fa-chart-bar"></i> View Reports
+              </BaseButton>
+              <BaseButton variant="secondary" @click="manageSettings">
+                <i class="fas fa-cog"></i> System Settings
+              </BaseButton>
+            </div>
           </div>
         </div>
       </div>
@@ -382,10 +369,6 @@ onMounted(() => {
   padding: 1rem;
 }
 
-.loading-spinner {
-  display: none;
-}
-
 .no-data {
   text-align: center;
   padding: 2rem;
@@ -563,5 +546,14 @@ onMounted(() => {
   .quick-actions {
     grid-template-columns: 1fr;
   }
+}
+
+.dashboard-content {
+  position: relative;
+  min-height: 400px;
+}
+
+.dashboard-content.loading {
+  pointer-events: none;
 }
 </style>
