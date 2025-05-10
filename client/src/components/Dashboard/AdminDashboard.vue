@@ -210,7 +210,7 @@ const fetchDashboardData = async () => {
     const usersResponse = await userStore.fetchUsers({ page: 1 })
     if (usersResponse.success) {
       stats.value.totalUsers = userStore.getPagination.total
-      recentUsers.value = userStore.getUsers.slice(0, 5).map(user => ({
+      recentUsers.value = userStore.getUsers.slice(0, 2).map(user => ({
         id: user.id,
         name: user.name,
         email: user.email,
