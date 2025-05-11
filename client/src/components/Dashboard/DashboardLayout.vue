@@ -34,9 +34,12 @@
         <!-- Sidebar -->
         <div class="dashboard-sidebar" :class="{ 'collapsed': isSidebarCollapsed }">
             <div class="sidebar-header">
-                <h2 class="brand-name" :class="{ 'collapsed': isSidebarCollapsed }">Event Management</h2>
+                <h2 class="brand-name d-flex align-items-center">
+                    <i class="fas fa-calendar-alt me-2"></i>
+                    <span :class="{ 'collapsed': isSidebarCollapsed }">Event Management</span>
+                </h2>
             </div>
-            
+
             <!-- User Info in Sidebar -->
             <!-- <div class="sidebar-user-info" :class="{ 'collapsed': isSidebarCollapsed }">
                 <img :src="userAvatar" alt="User Avatar" class="sidebar-avatar" />
@@ -67,11 +70,13 @@
                         <i class="fas fa-calendar-alt"></i>
                         <span>Manage Events</span>
                     </router-link>
-                    <router-link to="/dashboard/categories" class="nav-item" :class="{ active: currentView === 'categories' }">
+                    <router-link to="/dashboard/categories" class="nav-item"
+                        :class="{ active: currentView === 'categories' }">
                         <i class="fas fa-tags"></i>
                         <span>Categories</span>
                     </router-link>
-                    <router-link to="/dashboard/analytics" class="nav-item" :class="{ active: currentView === 'analytics' }">
+                    <router-link to="/dashboard/analytics" class="nav-item"
+                        :class="{ active: currentView === 'analytics' }">
                         <i class="fas fa-chart-bar"></i>
                         <span>Analytics</span>
                     </router-link>
@@ -83,15 +88,18 @@
                         <i class="fas fa-tachometer-alt"></i>
                         <span>Dashboard</span>
                     </router-link>
-                    <router-link to="/dashboard/my-events" class="nav-item" :class="{ active: currentView === 'my-events' }">
+                    <router-link to="/dashboard/my-events" class="nav-item"
+                        :class="{ active: currentView === 'my-events' }">
                         <i class="fas fa-calendar-alt"></i>
                         <span>My Events</span>
                     </router-link>
-                    <router-link to="/dashboard/create-event" class="nav-item" :class="{ active: currentView === 'create-event' }">
+                    <router-link to="/dashboard/create-event" class="nav-item"
+                        :class="{ active: currentView === 'create-event' }">
                         <i class="fas fa-plus-circle"></i>
                         <span>Create Event</span>
                     </router-link>
-                    <router-link to="/dashboard/my-bookings" class="nav-item" :class="{ active: currentView === 'my-bookings' }">
+                    <router-link to="/dashboard/my-bookings" class="nav-item"
+                        :class="{ active: currentView === 'my-bookings' }">
                         <i class="fas fa-ticket-alt"></i>
                         <span>Bookings</span>
                     </router-link>
@@ -351,6 +359,14 @@ export default {
     overflow: hidden;
 }
 
+.brand-name span.collapsed {
+    opacity: 0;
+    width: 0;
+    overflow: hidden;
+    display: inline-block;
+    transition: opacity 0.3s, width 0.3s;
+}
+
 .sidebar-nav {
     display: flex;
     flex-direction: column;
@@ -425,14 +441,17 @@ export default {
     .dashboard-sidebar {
         left: -250px;
     }
+
     .dashboard-sidebar.collapsed {
         left: 0;
         width: 250px;
     }
+
     .dashboard-content,
     .dashboard-content.expanded {
         margin-left: 0;
     }
+
     .username {
         display: none;
     }
