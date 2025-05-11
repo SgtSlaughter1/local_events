@@ -209,12 +209,7 @@ export default {
 
 <style scoped>
 .dashboard-layout {
-    display: grid;
-    grid-template-areas:
-        "topbar topbar"
-        "sidebar content";
-    grid-template-columns: 250px 1fr;
-    grid-template-rows: 60px 1fr;
+    display: block;
     min-height: 100vh;
 }
 
@@ -324,17 +319,16 @@ export default {
 }
 
 .dashboard-sidebar {
-    grid-area: sidebar;
-    background: var(--primary-color);
-    color: var(--white-color);
-    padding: 1.5rem;
     position: fixed;
     top: 60px;
     left: 0;
     bottom: 0;
     width: 250px;
-    transition: all 0.3s ease;
+    transition: width 0.3s, left 0.3s;
     z-index: 900;
+    background: var(--primary-color);
+    color: var(--white-color);
+    padding: 1.5rem;
 }
 
 .sidebar-header {
@@ -394,13 +388,16 @@ export default {
 }
 
 .dashboard-content {
-    grid-area: content;
+    margin-left: 250px;
     padding: 1rem;
     transition: margin-left 0.3s ease;
+    min-height: calc(100vh - 60px);
+    margin-top: 60px;
 }
 
 .dashboard-content.expanded {
     margin-left: 80px;
+    margin-top: 60px;
 }
 
 /* Collapsed Sidebar Styles */
@@ -425,27 +422,17 @@ export default {
 
 /* Responsive Styles */
 @media (max-width: 768px) {
-    .dashboard-layout {
-        grid-template-columns: 1fr;
-    }
-
     .dashboard-sidebar {
-        transform: translateX(-250px);
+        left: -250px;
     }
-
     .dashboard-sidebar.collapsed {
-        transform: translateX(0);
+        left: 0;
         width: 250px;
     }
-
-    .dashboard-content {
-        margin-left: 0;
-    }
-
+    .dashboard-content,
     .dashboard-content.expanded {
         margin-left: 0;
     }
-
     .username {
         display: none;
     }
