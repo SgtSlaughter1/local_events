@@ -336,14 +336,16 @@ export default {
     z-index: 900;
     background: var(--primary-color);
     color: var(--white-color);
-    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
 }
 
 .sidebar-header {
     display: flex;
     align-items: center;
     gap: 1rem;
-    margin-bottom: 2rem;
+    padding: 1.5rem;
+    flex-shrink: 0;
 }
 
 .brand-name {
@@ -371,6 +373,28 @@ export default {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    padding: 0 1.5rem 1.5rem 1.5rem;
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+/* Add custom scrollbar styles */
+.sidebar-nav::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar-nav::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
 }
 
 .nav-item {
@@ -419,7 +443,14 @@ export default {
 /* Collapsed Sidebar Styles */
 .dashboard-sidebar.collapsed {
     width: 80px;
+}
+
+.dashboard-sidebar.collapsed .sidebar-header {
     padding: 1.5rem 0.75rem;
+}
+
+.dashboard-sidebar.collapsed .sidebar-nav {
+    padding: 0 0.75rem 1.5rem 0.75rem;
 }
 
 .dashboard-sidebar.collapsed .nav-item {
@@ -445,6 +476,23 @@ export default {
     .dashboard-sidebar.collapsed {
         left: 0;
         width: 250px;
+    }
+
+    .dashboard-sidebar.collapsed .sidebar-header {
+        padding: 1.5rem;
+    }
+
+    .dashboard-sidebar.collapsed .sidebar-nav {
+        padding: 0 1.5rem 1.5rem 1.5rem;
+    }
+
+    .dashboard-sidebar.collapsed .nav-item {
+        justify-content: flex-start;
+        padding: 0.75rem 1rem;
+    }
+
+    .dashboard-sidebar.collapsed .nav-item span {
+        display: inline;
     }
 
     .dashboard-content,
