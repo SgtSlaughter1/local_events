@@ -189,8 +189,65 @@ export default {
     }
 
     const handleGoogleLogin = async () => {
-      const toast = useToast()
-      toast.info('Coming soon!')
+      try {
+        loading.google = true
+        error.value = null
+
+        // Load the Google API client
+        await new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+          script.src = 'https://accounts.google.com/gsi/client'
+          script.onload = resolve
+          script.onerror = reject
+          document.head.appendChild(script)
+        })
+
+        // Initialize Google Sign-In
+        const client = google.accounts.oauth2.initTokenClient({
+          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+          scope: 'email profile',
+          callback: async (response) => {
+            if (response.error) {
+              throw new Error(response.error)
+            }
+
+            // Get user info from Google
+            const userInfo = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+              headers: { Authorization: `Bearer ${response.access_token}` }
+            }).then(res => res.json())
+
+            // Send to our backend
+            const auth = useAuthStore()
+            const result = await auth.googleAuth({
+              google_id: userInfo.sub,
+              name: userInfo.name,
+              email: userInfo.email,
+              user_type_id: 3, // Default to attendee role
+              google_token: response.access_token,
+              google_refresh_token: response.refresh_token
+            })
+
+            if (result.success) {
+              const toast = useToast()
+              toast.success('Login successful!')
+              router.push('/dashboard')
+            } else {
+              error.value = result.error
+              const toast = useToast()
+              toast.error(result.error)
+            }
+          }
+        })
+
+        // Trigger Google Sign-In
+        client.requestAccessToken()
+      } catch (err) {
+        error.value = 'Google sign-in failed. Please try again.'
+        const toast = useToast()
+        toast.error(error.value)
+      } finally {
+        loading.google = false
+      }
     }
     const handleFacebookLogin = async () => {
       const toast = useToast()

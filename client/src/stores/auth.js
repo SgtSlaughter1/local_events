@@ -150,6 +150,36 @@ export const useAuthStore = defineStore('auth', {
       } finally {
         this.loading = false
       }
+    },
+
+    async googleAuth(googleData) {
+      this.loading = true
+      this.error = null
+      try {
+        const response = await api.post('/api/google-auth', googleData)
+        
+        if (!response.data || !response.data.token) {
+          throw new Error('Invalid response from server')
+        }
+
+        // Set token and user data
+        this.token = response.data.token
+        this.user = response.data.user
+
+        // Store in localStorage
+        localStorage.setItem('token', this.token)
+        localStorage.setItem('user', JSON.stringify(this.user))
+
+        // Set the token in axios defaults for future requests
+        api.defaults.headers.common['Authorization'] = `Bearer ${this.token}`
+
+        return { success: true, data: response.data }
+      } catch (error) {
+        this.error = error.response?.data?.message || 'An error occurred during Google authentication'
+        return { success: false, error: this.error }
+      } finally {
+        this.loading = false
+      }
     }
   },
 })
