@@ -35,6 +35,7 @@ Route::get('/test', function () {
 // Public routes
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/google-auth', [AuthController::class, 'handleGoogleAuth']);
 
 // Geocoding endpoint
 Route::get('/geocode', function (Request $request) {

@@ -25,6 +25,10 @@ class User extends Authenticatable
         'user_type_id',
         'phone',
         'address',
+        'google_id',
+        'is_google_user',
+        'google_token',
+        'google_refresh_token',
     ];
 
     /**
@@ -35,6 +39,8 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'google_token',
+        'google_refresh_token',
     ];
 
     /**
@@ -44,6 +50,7 @@ class User extends Authenticatable
      */
     protected $casts = [
         'password' => 'hashed',
+        'is_google_user' => 'boolean',
     ];
 
     /**
@@ -52,5 +59,13 @@ class User extends Authenticatable
     public function userType()
     {
         return $this->belongsTo(UserType::class);
+    }
+
+    /**
+     * Find a user by their Google ID
+     */
+    public static function findByGoogleId($googleId)
+    {
+        return static::where('google_id', $googleId)->first();
     }
 }

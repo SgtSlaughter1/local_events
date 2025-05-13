@@ -116,6 +116,47 @@
         </div>
       </div>
     </div>
+
+    <!-- Role Selection Modal -->
+    <div v-if="showRoleModal" class="modal-overlay">
+      <div class="modal-content">
+        <h3>Select Your Role</h3>
+        <p>Please choose how you'll use Eventify:</p>
+        <div class="role-options">
+          <div 
+            v-for="type in usertypeOptions" 
+            :key="type.value"
+            class="role-option"
+            :class="{ selected: selectedRole === type.value }"
+            @click="selectedRole = type.value"
+          >
+            <div class="role-icon">
+              <i :class="getRoleIcon(type.value)"></i>
+            </div>
+            <div class="role-info">
+              <h4>{{ type.label }}</h4>
+              <p>{{ getRoleDescription(type.value) }}</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <BaseButton
+            variant="secondary"
+            @click="cancelGoogleSignup"
+          >
+            Cancel
+          </BaseButton>
+          <BaseButton
+            variant="primary"
+            :disabled="!selectedRole"
+            :loading="loading.google"
+            @click="completeGoogleSignup"
+          >
+            Continue
+          </BaseButton>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -129,6 +170,9 @@ import BaseSelect from '@/components/Base/BaseSelect.vue'
 import api from '@/services/api'
 import { useRouter } from 'vue-router'
 
+// Add Google OAuth client ID
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID
+
 export default {
   name: 'Signup',
   components: {
@@ -137,6 +181,7 @@ export default {
     BaseSelect
   },
   setup() {
+    const router = useRouter()
     const name = ref('')
     const email = ref('')
     const password = ref('')
@@ -155,6 +200,9 @@ export default {
       usertype: '',
     })
     const error = ref(null)
+    const showRoleModal = ref(false)
+    const selectedRole = ref(null)
+    const googleUserData = ref(null)
 
     const isValid = computed(() =>
       name.value &&
@@ -166,8 +214,6 @@ export default {
       !errors.password &&
       !errors.usertype
     )
-
-    const router = useRouter()
 
     onMounted(async () => {
       try {
@@ -256,10 +302,120 @@ export default {
       }
     }
 
-    const handleGoogleSignup = async () => {
-      const toast = useToast()
-      toast.info('Coming soon!')
+    const getRoleIcon = (roleId) => {
+      const icons = {
+        2: 'fas fa-calendar-check', // Organizer
+        3: 'fas fa-ticket-alt'      // Attendee
+      }
+      return icons[roleId] || 'fas fa-user'
     }
+
+    const getRoleDescription = (roleId) => {
+      const descriptions = {
+        2: 'Create and manage events, handle registrations, and track attendance.',
+        3: 'Discover and register for events, manage your bookings, and leave reviews.'
+      }
+      return descriptions[roleId] || ''
+    }
+
+    const handleGoogleSignup = async () => {
+      try {
+        loading.google = true
+        error.value = null
+
+        // Load the Google API client
+        await new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+          script.src = 'https://accounts.google.com/gsi/client'
+          script.onload = resolve
+          script.onerror = reject
+          document.head.appendChild(script)
+        })
+
+        // Initialize Google Sign-In
+        const client = google.accounts.oauth2.initTokenClient({
+          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+          scope: 'email profile',
+          callback: async (response) => {
+            if (response.error) {
+              throw new Error(response.error)
+            }
+
+            try {
+              // Get user info from Google
+              const userInfo = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                headers: { Authorization: `Bearer ${response.access_token}` }
+              }).then(res => res.json())
+
+              // Store the Google user data
+              googleUserData.value = {
+                google_id: userInfo.sub,
+                name: userInfo.name,
+                email: userInfo.email,
+                google_token: response.access_token,
+                google_refresh_token: response.refresh_token
+              }
+
+              // Show role selection modal
+              showRoleModal.value = true
+            } catch (err) {
+              error.value = 'Failed to get user information from Google'
+              const toast = useToast()
+              toast.error(error.value)
+            }
+          }
+        })
+
+        // Trigger Google Sign-In
+        client.requestAccessToken()
+      } catch (err) {
+        error.value = 'Failed to initialize Google Sign-In'
+        const toast = useToast()
+        toast.error(error.value)
+      } finally {
+        loading.google = false
+      }
+    }
+
+    const completeGoogleSignup = async () => {
+      if (!selectedRole.value || !googleUserData.value) return
+
+      try {
+        loading.google = true
+        error.value = null
+
+        const result = await api.post('/api/google-auth', {
+          ...googleUserData.value,
+          user_type_id: selectedRole.value
+        })
+
+        if (result.data) {
+          // Store the token and user data
+          localStorage.setItem('token', result.data.token)
+          localStorage.setItem('user', JSON.stringify(result.data.user))
+
+          const toast = useToast()
+          toast.success('Registration successful!')
+          router.push('/dashboard')
+        }
+      } catch (err) {
+        error.value = err.response?.data?.message || 'Google signup failed'
+        const toast = useToast()
+        toast.error(error.value)
+      } finally {
+        loading.google = false
+        showRoleModal.value = false
+        googleUserData.value = null
+        selectedRole.value = null
+      }
+    }
+
+    const cancelGoogleSignup = () => {
+      showRoleModal.value = false
+      googleUserData.value = null
+      selectedRole.value = null
+    }
+
     const handleFacebookSignup = async () => {
       const toast = useToast()
       toast.info('Coming soon!')
@@ -283,6 +439,12 @@ export default {
       handleSubmit,
       handleGoogleSignup,
       handleFacebookSignup,
+      showRoleModal,
+      selectedRole,
+      getRoleIcon,
+      getRoleDescription,
+      completeGoogleSignup,
+      cancelGoogleSignup
     }
   }
 }
@@ -455,5 +617,103 @@ export default {
 
 .auth-switch a:hover {
   text-decoration: underline;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 2.5rem;
+  border-radius: 1rem;
+  width: 90%;
+  max-width: 600px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.modal-content h3 {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-color);
+  font-size: 1.5rem;
+}
+
+.modal-content p {
+  margin: 0 0 1.5rem 0;
+  color: #666;
+}
+
+.role-options {
+  display: grid;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.role-option {
+  padding: 1.5rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.role-icon {
+  font-size: 1.5rem;
+  color: var(--primary-color);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 224, 71, 0.1);
+  border-radius: 50%;
+}
+
+.role-info {
+  flex: 1;
+}
+
+.role-info h4 {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-color);
+  font-size: 1.1rem;
+}
+
+.role-info p {
+  margin: 0;
+  color: #666;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.role-option:hover {
+  border-color: var(--primary-color);
+  background-color: rgba(255, 224, 71, 0.05);
+}
+
+.role-option.selected {
+  border-color: var(--primary-color);
+  background-color: rgba(255, 224, 71, 0.1);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e0e0e0;
 }
 </style>

@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
 use App\Models\UserType;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -191,5 +192,71 @@ class AuthController extends Controller
         return response()->json([
             'users' => $users
         ]);
+    }
+
+    /**
+     * Handle Google authentication
+     */
+    public function handleGoogleAuth(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'google_id' => 'required|string',
+            'name' => 'required|string',
+            'email' => 'required|email',
+            'user_type_id' => 'required|exists:user_types,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            // Check if user exists with this Google ID
+            $user = User::findByGoogleId($request->google_id);
+
+            if (!$user) {
+                // Check if user exists with this email
+                $user = User::where('email', $request->email)->first();
+
+                if ($user) {
+                    // Update existing user with Google info
+                    $user->update([
+                        'google_id' => $request->google_id,
+                        'is_google_user' => true,
+                        'google_token' => $request->google_token ?? null,
+                        'google_refresh_token' => $request->google_refresh_token ?? null,
+                    ]);
+                } else {
+                    // Create new user
+                    $user = User::create([
+                        'name' => $request->name,
+                        'email' => $request->email,
+                        'password' => bcrypt(Str::random(16)), // Random password for Google users
+                        'user_type_id' => $request->user_type_id,
+                        'google_id' => $request->google_id,
+                        'is_google_user' => true,
+                        'google_token' => $request->google_token ?? null,
+                        'google_refresh_token' => $request->google_refresh_token ?? null,
+                    ]);
+                }
+            }
+
+            // Generate token
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+            return response()->json([
+                'message' => 'Authentication successful',
+                'user' => $user,
+                'token' => $token,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Authentication failed',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }
