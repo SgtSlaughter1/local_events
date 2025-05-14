@@ -105,6 +105,7 @@ class Event extends Model
         return $this->reviews()->avg('rating') ?? 0;
     }
 
+    //Accessors Methods (automatically called when accessing the attribute to transform the model attribute)
     public function getImageUrlAttribute()
     {
         if (!$this->image) {
